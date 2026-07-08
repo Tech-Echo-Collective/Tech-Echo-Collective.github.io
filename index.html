@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Tech Echo Collaborative</title>
+
+  <style>
+    :root {
+      --bg: #020604;
+      --bg-soft: #07110c;
+      --panel: rgba(7, 20, 13, 0.82);
+      --panel-strong: rgba(10, 31, 20, 0.92);
+      --green: #39ff88;
+      --green-soft: #9cffc4;
+      --cyan: #5efcff;
+      --text: #e8fff1;
+      --muted: #8fbfa1;
+      --border: rgba(57, 255, 136, 0.28);
+      --shadow: rgba(57, 255, 136, 0.18);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family:
+        ui-monospace,
+        SFMono-Regular,
+        Menlo,
+        Monaco,
+        Consolas,
+        "Liberation Mono",
+        monospace;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 18% 12%, rgba(57, 255, 136, 0.12), transparent 32%),
+        radial-gradient(circle at 82% 30%, rgba(94, 252, 255, 0.08), transparent 30%),
+        linear-gradient(180deg, #020604 0%, #030805 48%, #010302 100%);
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(rgba(57, 255, 136, 0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(57, 255, 136, 0.025) 1px, transparent 1px);
+      background-size: 42px 42px;
+      mask-image: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent 88%);
+      z-index: -2;
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background: repeating-linear-gradient(
+        to bottom,
+        rgba(255, 255, 255, 0.018),
+        rgba(255, 255, 255, 0.018) 1px,
+        transparent 1px,
+        transparent 4px
+      );
+      opacity: 0.35;
+      z-index: -1;
+    }
+
+    a {
+      color: var(--green);
+      text-decoration: none;
+    }
+
+    a:hover {
+      color: var(--cyan);
+    }
+
+    .page {
+      width: min(1120px, calc(100% - 40px));
+      margin: 0 auto;
+    }
+
+    header {
+      padding: 28px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .brand {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .brand-mark {
+      color: var(--green);
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .brand-sub {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    nav {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      font-size: 14px;
+    }
+
+    nav a {
+      color: var(--muted);
+    }
+
+    .hero {
+      padding: 110px 0 86px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      color: var(--green-soft);
+      background: rgba(7, 20, 13, 0.55);
+      box-shadow: 0 0 32px var(--shadow);
+      font-size: 13px;
+    }
+
+    .pulse {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--green);
+      box-shadow: 0 0 12px var(--green);
+    }
+
+    h1 {
+      max-width: 940px;
+      margin: 26px 0 22px;
+      font-size: clamp(44px, 8vw, 96px);
+      line-height: 0.96;
+      letter-spacing: -0.07em;
+    }
+
+    .accent {
+      color: var(--green);
+      text-shadow: 0 0 24px rgba(57, 255, 136, 0.35);
+    }
+
+    .hero-text {
+      max-width: 730px;
+      color: var(--muted);
+      font-size: clamp(16px, 2vw, 20px);
+      line-height: 1.75;
+    }
+
+    .hero-actions {
+      margin-top: 34px;
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 46px;
+      padding: 0 18px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(7, 20, 13, 0.7);
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    .button.primary {
+      background: var(--green);
+      color: #020604;
+      border-color: var(--green);
+      box-shadow: 0 0 32px rgba(57, 255, 136, 0.22);
+    }
+
+    .button:hover {
+      transform: translateY(-1px);
+    }
+
+    section {
+      padding: 74px 0;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 26px;
+      color: var(--green);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .section-title::before {
+      content: "";
+      width: 36px;
+      height: 1px;
+      background: var(--green);
+      box-shadow: 0 0 10px var(--green);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+
+    .card {
+      min-height: 220px;
+      padding: 24px;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      background:
+        linear-gradient(180deg, rgba(57, 255, 136, 0.045), transparent 50%),
+        var(--panel);
+      box-shadow: 0 0 40px rgba(0, 0, 0, 0.25);
+    }
+
+    .card h3 {
+      margin: 0 0 14px;
+      font-size: 20px;
+      color: var(--text);
+    }
+
+    .card p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.7;
+      font-size: 15px;
+    }
+
+    .split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 26px;
+      align-items: stretch;
+    }
+
+    .terminal {
+      padding: 24px;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      background: var(--panel-strong);
+      box-shadow: inset 0 0 42px rgba(57, 255, 136, 0.04);
+      overflow: hidden;
+    }
+
+    .terminal-top {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: var(--green);
+      opacity: 0.75;
+    }
+
+    .terminal pre {
+      margin: 0;
+      color: var(--green-soft);
+      white-space: pre-wrap;
+      line-height: 1.75;
+      font-size: 14px;
+    }
+
+    .about-text {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.8;
+      font-size: 17px;
+    }
+
+    .motto {
+      margin-top: 22px;
+      padding: 18px 20px;
+      border-left: 3px solid var(--green);
+      background: rgba(57, 255, 136, 0.055);
+      color: var(--green-soft);
+      line-height: 1.7;
+    }
+
+    footer {
+      padding: 32px 0 42px;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 13px;
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
+
+    @media (max-width: 820px) {
+      header {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      nav {
+        justify-content: flex-start;
+      }
+
+      .hero {
+        padding-top: 70px;
+      }
+
+      .grid,
+      .split {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="page">
+    <header>
+      <div class="brand">
+        <div class="brand-mark">Tech Echo Collaborative</div>
+        <div class="brand-sub">small games / strange systems / practical tools</div>
+      </div>
+
+      <nav>
+        <a href="#projects">Projects</a>
+        <a href="#principles">Principles</a>
+        <a href="#about">About</a>
+        <a href="https://github.com/tech-echo-collective">GitHub</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="status">
+          <span class="pulse"></span>
+          <span>INITIALIZING PUBLIC NODE</span>
+        </div>
+
+        <h1>
+          Building <span class="accent">small games</span><br />
+          with technical memory.
+        </h1>
+
+        <p class="hero-text">
+          Tech Echo Collaborative is a lightweight creative technology group for
+          independent games, experimental interaction, development logs, and
+          AI-assisted production workflows.
+        </p>
+
+        <div class="hero-actions">
+          <a class="button primary" href="#projects">View Projects</a>
+          <a class="button" href="https://github.com/tech-echo-collective">Open GitHub</a>
+        </div>
+      </section>
+
+      <section id="projects">
+        <div class="section-title">Projects</div>
+
+        <div class="grid">
+          <article class="card">
+            <h3>Independent Games</h3>
+            <p>
+              Small-scale game projects focused on atmosphere, systems, and
+              coherent creative direction rather than inflated scope.
+            </p>
+          </article>
+
+          <article class="card">
+            <h3>Creative Technology</h3>
+            <p>
+              Experiments in interaction, tooling, interface design, and
+              technical storytelling.
+            </p>
+          </article>
+
+          <article class="card">
+            <h3>Development Logs</h3>
+            <p>
+              Public notes on design decisions, implementation problems,
+              prototypes, and project milestones.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section id="principles">
+        <div class="section-title">Principles</div>
+
+        <div class="split">
+          <div>
+            <p class="about-text">
+              The collective is built around a simple idea: creative work should
+              remain technically grounded, emotionally precise, and small enough
+              to finish. We use code, design, writing, and AI tools as production
+              instruments rather than decoration.
+            </p>
+
+            <div class="motto">
+              Humiles, etiam e pulvere stellarum.<br />
+              <span style="color: var(--muted);">
+                Be humble, even if you are made of stardust.
+              </span>
+            </div>
+          </div>
+
+          <div class="terminal">
+            <div class="terminal-top">
+              <span class="dot"></span>
+              <span class="dot"></span>
+              <span class="dot"></span>
+            </div>
+
+<pre>$ tech-echo status
+
+identity:    creative-technology collective
+focus:       indie games / systems / devlogs
+method:      ai-assisted, human-directed
+scope:       small enough to ship
+aesthetic:   black-green signal layer
+
+$ output
+ready.</pre>
+          </div>
+        </div>
+      </section>
+
+      <section id="about">
+        <div class="section-title">About</div>
+
+        <div class="terminal">
+<pre>Tech Echo Collaborative exists as a public home for small creative projects.
+
+It is not a large studio.
+It is not a fake corporation.
+It is a compact structure for building, documenting, and releasing work with a clear technical and artistic identity.</pre>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div>© 2026 Tech Echo Collaborative</div>
+      <div>Independent games · Creative technology · AI-assisted development</div>
+    </footer>
+  </div>
+</body>
+</html>

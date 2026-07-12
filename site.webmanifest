@@ -1,0 +1,13 @@
+{
+  "id": "/",
+  "name": "Tech Echo Collective",
+  "short_name": "Tech Echo",
+  "description": "A public science and engineering collective for open technical and creative work.",
+  "lang": "en",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#020604",
+  "theme_color": "#020604",
+  "categories": ["education", "science", "technology"]
+}

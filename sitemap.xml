@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset
+  xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url>
+    <loc>https://tech-echo-collective.github.io/</loc>
+    <lastmod>2026-07-11</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://tech-echo-collective.github.io/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tech-echo-collective.github.io/zh/" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://tech-echo-collective.github.io/fr/" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://tech-echo-collective.github.io/es/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tech-echo-collective.github.io/" />
+  </url>
+  <url>
+    <loc>https://tech-echo-collective.github.io/zh/</loc>
+    <lastmod>2026-07-11</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://tech-echo-collective.github.io/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tech-echo-collective.github.io/zh/" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://tech-echo-collective.github.io/fr/" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://tech-echo-collective.github.io/es/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tech-echo-collective.github.io/" />
+  </url>
+  <url>
+    <loc>https://tech-echo-collective.github.io/fr/</loc>
+    <lastmod>2026-07-11</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://tech-echo-collective.github.io/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tech-echo-collective.github.io/zh/" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://tech-echo-collective.github.io/fr/" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://tech-echo-collective.github.io/es/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tech-echo-collective.github.io/" />
+  </url>
+  <url>
+    <loc>https://tech-echo-collective.github.io/es/</loc>
+    <lastmod>2026-07-11</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://tech-echo-collective.github.io/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tech-echo-collective.github.io/zh/" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://tech-echo-collective.github.io/fr/" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://tech-echo-collective.github.io/es/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tech-echo-collective.github.io/" />
+  </url>
+</urlset>

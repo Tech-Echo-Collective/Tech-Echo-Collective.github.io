@@ -344,6 +344,29 @@ section {
   font-size: 15px;
 }
 
+.card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 18px;
+  margin-top: 20px;
+}
+
+.card-action {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  border-bottom: 1px solid rgba(168, 199, 255, 0.35);
+  color: var(--blue-soft);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.card-action:hover,
+.card-action:focus-visible {
+  border-bottom-color: var(--cyan);
+  color: var(--cyan);
+}
+
 .split {
   display: grid;
   grid-template-columns: 1fr 1fr;

@@ -368,6 +368,23 @@ section {
   color: var(--text);
 }
 
+.project-card-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.project-card-header h3 {
+  margin: 0;
+}
+
+.project-mark {
+  width: 48px;
+  height: 48px;
+  flex: 0 0 48px;
+}
+
 .card p {
   margin: 0;
   color: var(--muted);

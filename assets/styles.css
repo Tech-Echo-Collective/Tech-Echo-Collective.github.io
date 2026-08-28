@@ -1,15 +1,15 @@
 :root {
-  --bg: #020604;
-  --bg-soft: #07110c;
-  --panel: rgba(7, 20, 13, 0.84);
-  --panel-strong: rgba(10, 31, 20, 0.94);
-  --green: #39ff88;
-  --green-soft: #9cffc4;
-  --cyan: #5efcff;
-  --text: #e8fff1;
-  --muted: #8fbfa1;
-  --border: rgba(57, 255, 136, 0.28);
-  --shadow: rgba(57, 255, 136, 0.18);
+  --bg: #01040a;
+  --bg-soft: #06101f;
+  --panel: rgba(5, 15, 32, 0.86);
+  --panel-strong: rgba(7, 20, 43, 0.95);
+  --blue: #4f8cff;
+  --blue-soft: #a8c7ff;
+  --cyan: #67e8f9;
+  --text: #edf6ff;
+  --muted: #94a9c4;
+  --border: rgba(79, 140, 255, 0.3);
+  --shadow: rgba(37, 99, 235, 0.22);
 }
 
 * {
@@ -36,9 +36,9 @@ body {
     monospace;
   color: var(--text);
   background:
-    radial-gradient(circle at 18% 12%, rgba(57, 255, 136, 0.12), transparent 32%),
-    radial-gradient(circle at 82% 30%, rgba(94, 252, 255, 0.08), transparent 30%),
-    linear-gradient(180deg, #020604 0%, #030805 48%, #010302 100%);
+    radial-gradient(circle at 18% 12%, rgba(37, 99, 235, 0.2), transparent 34%),
+    radial-gradient(circle at 82% 30%, rgba(56, 189, 248, 0.1), transparent 30%),
+    linear-gradient(180deg, #01040a 0%, #020817 48%, #01030a 100%);
   overflow-x: hidden;
 }
 
@@ -48,8 +48,8 @@ body::before {
   inset: 0;
   pointer-events: none;
   background:
-    linear-gradient(rgba(57, 255, 136, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(57, 255, 136, 0.025) 1px, transparent 1px);
+    linear-gradient(rgba(79, 140, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(79, 140, 255, 0.03) 1px, transparent 1px);
   background-size: 42px 42px;
   -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.8), transparent 88%);
   mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.8), transparent 88%);
@@ -73,7 +73,7 @@ body::after {
 }
 
 a {
-  color: var(--green);
+  color: var(--blue);
   text-decoration: none;
 }
 
@@ -97,7 +97,7 @@ code {
   left: 12px;
   z-index: 10;
   padding: 10px 14px;
-  border: 1px solid var(--green);
+  border: 1px solid var(--blue);
   border-radius: 8px;
   background: var(--bg);
   color: var(--text);
@@ -126,19 +126,23 @@ header {
   display: flex;
   flex-shrink: 0;
   flex-direction: column;
-  gap: 4px;
+  gap: 7px;
 }
 
-.brand-mark {
-  color: var(--green);
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+.brand-logo {
+  display: block;
+  width: clamp(250px, 29vw, 360px);
+  height: auto;
 }
 
-.brand-sub {
+.brand-motto {
+  max-width: 370px;
   color: var(--muted);
-  font-size: 12px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 11px;
+  font-style: italic;
+  letter-spacing: 0.025em;
+  line-height: 1.45;
 }
 
 .header-tools {
@@ -188,8 +192,8 @@ header {
 .language-switcher a:hover,
 .language-switcher a:focus-visible,
 .language-switcher a[aria-current="page"] {
-  color: var(--green-soft);
-  border-bottom-color: var(--green);
+  color: var(--blue-soft);
+  border-bottom-color: var(--blue);
 }
 
 .hero {
@@ -205,8 +209,8 @@ header {
   padding: 8px 12px;
   border: 1px solid var(--border);
   border-radius: 999px;
-  color: var(--green-soft);
-  background: rgba(7, 20, 13, 0.55);
+  color: var(--blue-soft);
+  background: rgba(5, 15, 32, 0.7);
   box-shadow: 0 0 32px var(--shadow);
   font-size: 13px;
   line-height: 1.45;
@@ -216,8 +220,8 @@ header {
   width: 8px;
   height: 8px;
   border-radius: 999px;
-  background: var(--green);
-  box-shadow: 0 0 12px var(--green);
+  background: var(--blue);
+  box-shadow: 0 0 12px var(--blue);
 }
 
 h1 {
@@ -236,8 +240,8 @@ h1 {
 }
 
 .accent {
-  color: var(--green);
-  text-shadow: 0 0 24px rgba(57, 255, 136, 0.35);
+  color: var(--blue);
+  text-shadow: 0 0 24px rgba(79, 140, 255, 0.38);
 }
 
 .hero-text {
@@ -262,7 +266,7 @@ h1 {
   padding: 0 18px;
   border: 1px solid var(--border);
   border-radius: 12px;
-  background: rgba(7, 20, 13, 0.7);
+  background: rgba(5, 15, 32, 0.78);
   color: var(--text);
   font-weight: 700;
 }
@@ -272,16 +276,16 @@ h1 {
 }
 
 .button.primary {
-  background: var(--green);
-  color: #020604;
-  border-color: var(--green);
-  box-shadow: 0 0 32px rgba(57, 255, 136, 0.22);
+  background: var(--blue);
+  color: #01040a;
+  border-color: var(--blue);
+  box-shadow: 0 0 32px rgba(37, 99, 235, 0.3);
 }
 
 .button.primary:hover,
 .button.primary:focus-visible {
   background: var(--cyan);
-  color: #020604;
+  color: #01040a;
   border-color: var(--cyan);
 }
 
@@ -295,7 +299,7 @@ section {
   align-items: center;
   gap: 12px;
   margin: 0 0 26px;
-  color: var(--green);
+  color: var(--blue);
   text-transform: uppercase;
   letter-spacing: 0.12em;
   font-size: 14px;
@@ -306,8 +310,8 @@ section {
   content: "";
   width: 36px;
   height: 1px;
-  background: var(--green);
-  box-shadow: 0 0 10px var(--green);
+  background: var(--blue);
+  box-shadow: 0 0 10px var(--blue);
 }
 
 .grid {
@@ -322,7 +326,7 @@ section {
   border: 1px solid var(--border);
   border-radius: 20px;
   background:
-    linear-gradient(180deg, rgba(57, 255, 136, 0.045), transparent 50%),
+    linear-gradient(180deg, rgba(79, 140, 255, 0.07), transparent 52%),
     var(--panel);
   box-shadow: 0 0 40px rgba(0, 0, 0, 0.25);
 }
@@ -352,7 +356,7 @@ section {
   border: 1px solid var(--border);
   border-radius: 20px;
   background: var(--panel-strong);
-  box-shadow: inset 0 0 42px rgba(57, 255, 136, 0.04);
+  box-shadow: inset 0 0 42px rgba(37, 99, 235, 0.08);
   overflow: hidden;
 }
 
@@ -366,13 +370,13 @@ section {
   width: 10px;
   height: 10px;
   border-radius: 999px;
-  background: var(--green);
+  background: var(--blue);
   opacity: 0.75;
 }
 
 .terminal pre {
   margin: 0;
-  color: var(--green-soft);
+  color: var(--blue-soft);
   white-space: pre-wrap;
   overflow-wrap: anywhere;
   line-height: 1.75;
@@ -389,9 +393,9 @@ section {
 .motto {
   margin-top: 22px;
   padding: 18px 20px;
-  border-left: 3px solid var(--green);
-  background: rgba(57, 255, 136, 0.055);
-  color: var(--green-soft);
+  border-left: 3px solid var(--blue);
+  background: rgba(79, 140, 255, 0.075);
+  color: var(--blue-soft);
   line-height: 1.7;
 }
 

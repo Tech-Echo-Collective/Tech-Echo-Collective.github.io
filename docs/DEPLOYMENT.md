@@ -120,19 +120,24 @@ to classic `repo` or `public_repo` scopes.
 
 ## 6. Domain and GitHub Pages transition
 
-The old site was GitHub Pages at
-`https://tech-echo-collective.github.io/`. Authentication now requires a trusted
-server runtime, so production must use the Sites deployment or an equivalent
-Cloudflare Worker-compatible host.
+The public website remains on GitHub Pages and moves from
+`https://tech-echo-collective.github.io/` to `https://techecho.org/`.
+The authenticated account and forum service runs separately at
+`https://forum.techecho.org/`. Physics Atlas inherits the organization Pages
+domain at `https://techecho.org/Physics-Atlas-Web/`.
 
-After selecting the final domain:
+For a safe production cutover:
 
-1. Attach the domain to the Sites deployment and enforce HTTPS.
-2. Set `APP_ORIGIN` to that exact origin.
-3. Update the GitHub App homepage and callback URLs.
-4. Redeploy and repeat the callback test.
-5. Point DNS to the new deployment.
-6. Disable the old GitHub Pages deployment only after the new origin works.
+1. Attach `forum.techecho.org` to the Sites deployment and wait for HTTPS.
+2. Add `https://forum.techecho.org/auth/callback` to the GitHub App while
+   preserving the previous callback during verification.
+3. Set `APP_ORIGIN=https://forum.techecho.org` and redeploy.
+4. Verify a real OAuth sign-in, authenticated routing, and forum access on the
+   new hostname, then remove the previous callback.
+5. Point `techecho.org` and `www.techecho.org` to GitHub Pages, set the GitHub
+   App homepage to `https://techecho.org/`, and enforce HTTPS after the
+   certificate is ready.
+6. Keep the original GitHub Pages URL available as GitHub's automatic redirect.
 7. Add the new URL-prefix property in Google Search Console and submit
    `/sitemap.xml`.
 8. Preserve `public/googlee054abfb1b2b52cf.html` until Search Console ownership

@@ -9,11 +9,11 @@ const defaults = {
 
 export function getPublicOrigin(): string {
   const configured = env.APP_ORIGIN?.trim();
-  if (!configured) return 'https://tech-echo-collective.github.io';
+  if (!configured) return 'https://forum.techecho.org';
   try {
     return new URL(configured).origin;
   } catch {
-    return 'https://tech-echo-collective.github.io';
+    return 'https://forum.techecho.org';
   }
 }
 

@@ -113,7 +113,7 @@ signal established.`}</pre>
               <span>SCIENCE / ATLAS</span>
               <h3>{dictionary['project.physics']}</h3>
               <p>{dictionary['project.physicsText']}</p>
-              <a href="https://tech-echo-collective.github.io/Physics-Atlas-Web/">
+              <a href="https://techecho.org/Physics-Atlas-Web/">
                 {dictionary['project.view']} ↗
               </a>
             </div>

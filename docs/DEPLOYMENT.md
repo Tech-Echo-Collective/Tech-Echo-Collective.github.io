@@ -61,6 +61,7 @@ secret-variable facility.
 | `APP_ORIGIN`                       |     No | `https://techecho.org` (compatibility) |
 | `GITHUB_CLIENT_ID`                 |     No | GitHub App Client ID                   |
 | `GITHUB_CLIENT_SECRET`             |    Yes | GitHub App Client Secret               |
+| `GITHUB_PUBLIC_READ_TOKEN`         |    Yes | Fine-grained project Metadata read     |
 | `SESSION_SECRET`                   |    Yes | At least 32 random bytes, base64url    |
 | `TOKEN_ENCRYPTION_KEY`             |    Yes | Exactly 32 random bytes, base64        |
 | `GITHUB_DISCUSSIONS_OWNER`         |     No | `Tech-Echo-Collective`                 |

@@ -184,18 +184,22 @@ function responseRetryDelay(response: Response, fallback: number): number {
 
 async function fetchPublicGitHubPage(
   url: URL,
+  accessToken?: string,
 ): Promise<{ response: Response; body: unknown }> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+  const headers: Record<string, string> = {
+    Accept: 'application/vnd.github+json',
+    'User-Agent': 'Tech-Echo-Collective',
+    'X-GitHub-Api-Version': '2022-11-28',
+  };
+  if (accessToken) headers.Authorization = `Bearer ${accessToken}`;
 
   try {
     const response = await fetch(url, {
       signal: controller.signal,
-      headers: {
-        Accept: 'application/vnd.github+json',
-        'User-Agent': 'Tech-Echo-Collective',
-        'X-GitHub-Api-Version': '2022-11-28',
-      },
+      redirect: 'error',
+      headers,
     });
     if (response.status !== 200) return { response, body: null };
     try {
@@ -226,6 +230,7 @@ async function fetchPublicGitHubPage(
 
 export async function fetchPublicRepositoryContributors(
   repository: ProjectRepository,
+  accessToken?: string,
 ): Promise<ContributorPayload> {
   const contributors: PublicGitHubContributor[] = [];
   let truncated = false;
@@ -235,7 +240,7 @@ export async function fetchPublicRepositoryContributors(
     );
     url.searchParams.set('per_page', '100');
     url.searchParams.set('page', String(page));
-    const { response, body } = await fetchPublicGitHubPage(url);
+    const { response, body } = await fetchPublicGitHubPage(url, accessToken);
     if (response.status === 204) return { contributors: [], truncated: false };
     if (response.status === 202) {
       throw new PublicGitHubError(
@@ -272,6 +277,7 @@ export async function fetchPublicRepositoryContributors(
 
 export async function listPublicRepositoryContributors(
   repository: ProjectRepository,
+  accessToken?: string,
 ): Promise<RepositoryContributorResult> {
   let cachedRow: ContributorCacheRow | null = null;
   try {
@@ -301,7 +307,7 @@ export async function listPublicRepositoryContributors(
   }
 
   try {
-    const result = await fetchPublicRepositoryContributors(repository);
+    const result = await fetchPublicRepositoryContributors(repository, accessToken);
     try {
       await writeContributorCache(repository, result);
     } catch {
@@ -334,9 +340,12 @@ export async function listPublicRepositoryContributors(
 
 export async function loadProjectContributorSources(
   project: ProjectDefinition,
+  accessToken?: string,
 ): Promise<{ results: RepositoryContributorResult[]; partial: boolean }> {
   const settled = await Promise.allSettled(
-    project.repositories.map(listPublicRepositoryContributors),
+    project.repositories.map((repository) =>
+      listPublicRepositoryContributors(repository, accessToken),
+    ),
   );
   const results = settled.flatMap((result) =>
     result.status === 'fulfilled' ? [result.value] : [],

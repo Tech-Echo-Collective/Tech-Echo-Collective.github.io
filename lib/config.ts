@@ -66,6 +66,15 @@ export function getFounderGithubUserId(): string {
   return env.FOUNDER_GITHUB_USER_ID || defaults.founderGithubUserId;
 }
 
+export function getPublicGitHubReadToken(): string | undefined {
+  const token = env.GITHUB_PUBLIC_READ_TOKEN?.trim();
+  if (!token) return undefined;
+  if (token.length < 20 || token.length > 512 || /[\r\n]/.test(token)) {
+    throw new Error('GITHUB_PUBLIC_READ_TOKEN has an invalid format.');
+  }
+  return token;
+}
+
 export function getAuthConfig() {
   const { accountOrigin, forumOrigin } = getOriginConfig();
   const sessionSecret = required(env.SESSION_SECRET, 'SESSION_SECRET');

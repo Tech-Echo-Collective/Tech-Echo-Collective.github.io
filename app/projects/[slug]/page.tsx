@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { AppShell } from '@/components/app-shell';
 import { findMembersByGithubUserIds, requireMember } from '@/lib/auth';
+import { getPublicGitHubReadToken } from '@/lib/config';
 import {
   loadProjectContributorSources,
   mergeRepositoryContributors,
@@ -38,7 +39,10 @@ export default async function ProjectDetailPage({
     [];
 
   try {
-    const sourceData = await loadProjectContributorSources(project);
+    const sourceData = await loadProjectContributorSources(
+      project,
+      getPublicGitHubReadToken(),
+    );
     sourceResults = sourceData.results;
     historyPartial = sourceData.partial;
     historyStale = sourceData.results.some((result) => result.stale);

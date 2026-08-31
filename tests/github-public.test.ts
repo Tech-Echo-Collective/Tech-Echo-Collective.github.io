@@ -47,6 +47,24 @@ describe('public GitHub contributor reader', () => {
     );
   });
 
+  it('uses an explicit server-only token without changing the endpoint', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify([contributor(1)]), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      }),
+    );
+    vi.stubGlobal('fetch', fetchMock);
+
+    await fetchPublicRepositoryContributors(repository, 'github_pat_test_value_12345');
+
+    const [, init] = fetchMock.mock.calls[0];
+    expect(new Headers(init?.headers).get('Authorization')).toBe(
+      'Bearer github_pat_test_value_12345',
+    );
+    expect(init?.redirect).toBe('error');
+  });
+
   it('marks a ten-page response as truncated when GitHub still has a next page', async () => {
     const page = Array.from({ length: 100 }, (_, index) => contributor(index + 1));
     const fetchMock = vi.fn().mockImplementation(() =>

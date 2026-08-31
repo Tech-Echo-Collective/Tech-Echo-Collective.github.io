@@ -6,6 +6,7 @@ declare namespace Cloudflare {
     FORUM_ORIGIN?: string;
     GITHUB_CLIENT_ID?: string;
     GITHUB_CLIENT_SECRET?: string;
+    GITHUB_PUBLIC_READ_TOKEN?: string;
     SESSION_SECRET?: string;
     TOKEN_ENCRYPTION_KEY?: string;
     GITHUB_DISCUSSIONS_OWNER?: string;

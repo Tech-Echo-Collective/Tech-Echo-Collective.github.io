@@ -62,7 +62,24 @@ describe('public GitHub contributor reader', () => {
     expect(new Headers(init?.headers).get('Authorization')).toBe(
       'Bearer github_pat_test_value_12345',
     );
+    expect(init?.cache).toBe('no-store');
     expect(init?.redirect).toBe('manual');
+  });
+
+  it('rejects redirects without forwarding credentials', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(
+        new Response(null, {
+          status: 302,
+          headers: { Location: 'https://example.com/' },
+        }),
+      ),
+    );
+
+    await expect(
+      fetchPublicRepositoryContributors(repository, 'github_pat_test_value_12345'),
+    ).rejects.toMatchObject({ code: 'redirect' });
   });
 
   it('marks a ten-page response as truncated when GitHub still has a next page', async () => {
@@ -104,12 +121,27 @@ describe('public GitHub contributor reader', () => {
     });
   });
 
-  it('normalizes network failures without leaking upstream error details', async () => {
+  it('normalizes fetch failures without leaking upstream error details', async () => {
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('socket detail')));
 
     await expect(fetchPublicRepositoryContributors(repository)).rejects.toMatchObject({
-      code: 'network',
+      code: 'network_fetch',
       message: 'GitHub contributor request could not reach GitHub.',
+    });
+  });
+
+  it('normalizes response body failures without leaking upstream details', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        status: 200,
+        text: () => Promise.reject(new Error('stream detail')),
+      }),
+    );
+
+    await expect(fetchPublicRepositoryContributors(repository)).rejects.toMatchObject({
+      code: 'network_body',
+      message: 'GitHub contributor response could not be read.',
     });
   });
 
@@ -120,7 +152,7 @@ describe('public GitHub contributor reader', () => {
       vi.fn().mockImplementation((_url: URL, init?: RequestInit) =>
         Promise.resolve({
           status: 200,
-          json: () =>
+          text: () =>
             new Promise((_resolve, reject) => {
               init?.signal?.addEventListener('abort', () =>
                 reject(new DOMException('Aborted', 'AbortError')),

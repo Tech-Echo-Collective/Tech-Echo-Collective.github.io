@@ -196,35 +196,49 @@ async function fetchPublicGitHubPage(
   if (accessToken) headers.Authorization = `Bearer ${accessToken}`;
 
   try {
-    const response = await fetch(url, {
-      signal: controller.signal,
-      // Keep credentials on api.github.com while letting Workers expose any
-      // unexpected redirect as a response we can reject without following it.
-      redirect: 'manual',
-      headers,
-    });
-    if (response.status !== 200) return { response, body: null };
+    let response: Response;
     try {
-      return { response, body: await response.json() };
-    } catch (error) {
-      if (controller.signal.aborted) throw error;
-      if (!(error instanceof SyntaxError)) {
-        throw new PublicGitHubError(
-          'GitHub contributor response could not be read.',
-          'network',
-        );
+      response = await fetch(url, {
+        signal: controller.signal,
+        cache: 'no-store',
+        // Keep credentials on api.github.com while letting Workers expose any
+        // unexpected redirect as a response we can reject without following it.
+        redirect: 'manual',
+        headers,
+      });
+    } catch {
+      if (controller.signal.aborted) {
+        throw new PublicGitHubError('GitHub contributor request timed out.', 'timeout');
       }
+      throw new PublicGitHubError(
+        'GitHub contributor request could not reach GitHub.',
+        'network_fetch',
+      );
+    }
+
+    if (response.status >= 300 && response.status < 400) {
+      throw new PublicGitHubError('GitHub contributor redirect was rejected.', 'redirect');
+    }
+    if (response.status !== 200) return { response, body: null };
+
+    let responseText: string;
+    try {
+      responseText = await response.text();
+    } catch {
+      if (controller.signal.aborted) {
+        throw new PublicGitHubError('GitHub contributor request timed out.', 'timeout');
+      }
+      throw new PublicGitHubError(
+        'GitHub contributor response could not be read.',
+        'network_body',
+      );
+    }
+
+    try {
+      return { response, body: JSON.parse(responseText) as unknown };
+    } catch {
       throw new PublicGitHubError('GitHub returned invalid contributor data.', 'invalid');
     }
-  } catch (error) {
-    if (error instanceof PublicGitHubError) throw error;
-    if (controller.signal.aborted) {
-      throw new PublicGitHubError('GitHub contributor request timed out.', 'timeout');
-    }
-    throw new PublicGitHubError(
-      'GitHub contributor request could not reach GitHub.',
-      'network',
-    );
   } finally {
     clearTimeout(timeout);
   }

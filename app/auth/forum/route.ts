@@ -53,7 +53,9 @@ export async function GET(request: NextRequest) {
       'Cache-Control': 'no-store, max-age=0',
       'Content-Type': 'text/html; charset=utf-8',
       'Content-Security-Policy': `default-src 'none'; script-src 'nonce-${nonce}'; form-action ${forumOrigin}; base-uri 'none'; frame-ancestors 'none'`,
-      'Referrer-Policy': 'no-referrer',
+      // A cross-origin form POST needs a non-null Origin for the forum's exact
+      // source check. Send only the account origin, never the handoff path.
+      'Referrer-Policy': 'origin',
       'X-Content-Type-Options': 'nosniff',
     },
   });

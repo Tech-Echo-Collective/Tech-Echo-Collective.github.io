@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { AppShell } from '@/components/app-shell';
 import { requireMember } from '@/lib/auth';
+import { AUTHENTICATED_HOME_HERO } from '@/lib/branding';
 import { forumEntryUrl } from '@/lib/config';
 import { listForum, type DiscussionSummary } from '@/lib/github';
 import { formatRelativeTime } from '@/lib/i18n';
@@ -36,10 +37,9 @@ export default async function HomePage() {
               <span className="dashboard-signal">
                 <i /> TEC / MEMBER {formatMemberNumber(member.memberNumber)}
               </span>
-              <h1 id="dashboard-title">
-                <span>{copy.home.build}</span>
-                <span className="dashboard-hero__accent">{copy.home.explore}</span>
-                <span>{copy.home.share}</span>
+              <h1 id="dashboard-title" lang="la" aria-label={AUTHENTICATED_HOME_HERO}>
+                <span>Sapere </span>
+                <span className="dashboard-hero__accent">Aude.</span>
               </h1>
               <p>{copy.home.intro}</p>
               <div className="button-row">

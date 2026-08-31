@@ -1782,12 +1782,6 @@ a {
 }
 
 /* v0.2 authenticated dashboard */
-.app-brand small {
-  max-width: 290px;
-  color: rgba(181, 204, 255, 0.7);
-  font: 0.55rem/1.25 var(--font-ui);
-  letter-spacing: 0.015em;
-}
 .app-footer nav {
   display: flex;
   align-items: center;
@@ -2165,8 +2159,7 @@ a {
 }
 
 @media (max-width: 1120px) {
-  .app-shell--dashboard .app-brand__motto,
-  .app-shell--dashboard .app-brand small {
+  .app-shell--dashboard .app-brand__motto {
     display: none;
   }
   .dashboard-hero {
@@ -2208,9 +2201,6 @@ a {
 }
 
 @media (max-width: 720px) {
-  .app-brand small {
-    display: none;
-  }
   .app-shell--dashboard .app-header {
     min-height: 86px;
   }

@@ -17,11 +17,7 @@ interface V02Copy {
     about: string;
     github: string;
   };
-  brandSupport: string;
   home: {
-    build: string;
-    explore: string;
-    share: string;
     intro: string;
     enterForum: string;
     exploreProjects: string;
@@ -100,11 +96,7 @@ const en: V02Copy = {
     about: 'About',
     github: 'GitHub',
   },
-  brandSupport: 'Remember humility, even when born from stardust.',
   home: {
-    build: 'Build.',
-    explore: 'Explore.',
-    share: 'Share.',
     intro:
       'Science, engineering, open-source projects, games, and long-form technical discussion.',
     enterForum: 'Enter Forum',
@@ -222,11 +214,7 @@ const zh: V02Copy = {
     about: '关于',
     github: 'GitHub',
   },
-  brandSupport: '纵然生于星尘，也请常怀谦卑。',
   home: {
-    build: '构建。',
-    explore: '探索。',
-    share: '分享。',
     intro: '科学、工程、开源项目、游戏，以及长期技术讨论。',
     enterForum: '进入论坛',
     exploreProjects: '探索项目',
@@ -335,11 +323,7 @@ const fr: V02Copy = {
     about: 'À propos',
     github: 'GitHub',
   },
-  brandSupport: 'Restons humbles, même nés de la poussière d’étoiles.',
   home: {
-    build: 'Construire.',
-    explore: 'Explorer.',
-    share: 'Partager.',
     intro:
       'Science, ingénierie, projets open source, jeux et discussions techniques approfondies.',
     enterForum: 'Entrer dans le forum',
@@ -458,11 +442,7 @@ const es: V02Copy = {
     about: 'Acerca de',
     github: 'GitHub',
   },
-  brandSupport: 'Recordemos la humildad, aun nacidos del polvo de estrellas.',
   home: {
-    build: 'Construir.',
-    explore: 'Explorar.',
-    share: 'Compartir.',
     intro:
       'Ciencia, ingeniería, proyectos de código abierto, juegos y debate técnico en profundidad.',
     enterForum: 'Entrar al foro',

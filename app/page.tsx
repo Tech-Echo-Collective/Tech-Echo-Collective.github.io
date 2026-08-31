@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { ErrorNotice } from '@/components/error-notice';
 import { LocaleSwitcher } from '@/components/locale-switcher';
 import { getCurrentMember } from '@/lib/auth';
+import { CANONICAL_LATIN_MOTTO } from '@/lib/branding';
 import { forumEntryUrl } from '@/lib/config';
 import { getCookieLocale, getDictionary } from '@/lib/i18n';
 import { normalizeLocale, safeForumReturnPath } from '@/lib/validation';
@@ -44,7 +45,7 @@ export default async function GatewayPage({
       <section className="gateway-identity" aria-labelledby="gateway-title">
         <div className="gateway-brand">
           <img src="/assets/tech-echo-logo.svg" alt="Tech Echo Collective" />
-          <p lang="la">Mementote humilitatis, etiam ex pulvere stellarum nati.</p>
+          <p lang="la">{CANONICAL_LATIN_MOTTO}</p>
         </div>
 
         <div className="gateway-statement">

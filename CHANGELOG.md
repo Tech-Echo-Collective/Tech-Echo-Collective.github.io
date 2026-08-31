@@ -2,7 +2,8 @@
 
 ## v0.2.0 — 2026-08-31
 
-- Replaced the long authenticated landing page with a single-screen Home dashboard.
+- Replaced the long authenticated landing page with a single-screen Home dashboard headed by the fixed Latin statement “Sapere Aude.”
+- Kept the canonical Tech Echo motto in Latin and removed localized brand-area translations.
 - Added independent Projects, Project Detail, Members, and README-backed About pages.
 - Added explicit Tech Echo Project, Member Project, and Collaboration classifications.
 - Identified Physics Atlas as Noah #001’s independently created and maintained Member Project.

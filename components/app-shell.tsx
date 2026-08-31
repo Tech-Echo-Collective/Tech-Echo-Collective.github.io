@@ -1,5 +1,6 @@
 import { LocaleSwitcher } from './locale-switcher';
 import { getCsrfToken, getRequestAudience } from '@/lib/auth';
+import { CANONICAL_LATIN_MOTTO } from '@/lib/branding';
 import { forumEntryUrl, getOriginConfig } from '@/lib/config';
 import { getDictionary } from '@/lib/i18n';
 import { formatMemberNumber } from '@/lib/member-number';
@@ -70,9 +71,8 @@ export async function AppShell({
         >
           <img src="/assets/tech-echo-logo.svg" alt="Tech Echo Collective" />
           <span className="app-brand__motto" lang="la">
-            Mementote humilitatis, etiam ex pulvere stellarum nati.
+            {CANONICAL_LATIN_MOTTO}
           </span>
-          <small>{copy.brandSupport}</small>
         </a>
 
         <nav className="desktop-nav" aria-label={dictionary['nav.primaryLabel']}>

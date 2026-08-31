@@ -63,8 +63,30 @@ export class PublicGitHubError extends Error {
   }
 }
 
+type ContributorLogStage =
+  | 'cache_read'
+  | 'cache_write'
+  | 'cache_delete'
+  | 'cache_defer'
+  | 'fetch'
+  | 'refresh';
+
 function repositoryKey(repository: ProjectRepository): string {
   return `${repository.owner}/${repository.name}`;
+}
+
+function logContributorIssue(
+  repository: ProjectRepository,
+  stage: ContributorLogStage,
+  code: string,
+  staleServed = false,
+): void {
+  console.warn('[tech-echo:contributors] GitHub source unavailable', {
+    repository: repositoryKey(repository),
+    stage,
+    code,
+    staleServed,
+  });
 }
 
 function parseCachedContributors(
@@ -160,6 +182,48 @@ function responseRetryDelay(response: Response, fallback: number): number {
   return fallback;
 }
 
+async function fetchPublicGitHubPage(
+  url: URL,
+): Promise<{ response: Response; body: unknown }> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+
+  try {
+    const response = await fetch(url, {
+      signal: controller.signal,
+      headers: {
+        Accept: 'application/vnd.github+json',
+        'User-Agent': 'Tech-Echo-Collective',
+        'X-GitHub-Api-Version': '2022-11-28',
+      },
+    });
+    if (response.status !== 200) return { response, body: null };
+    try {
+      return { response, body: await response.json() };
+    } catch (error) {
+      if (controller.signal.aborted) throw error;
+      if (!(error instanceof SyntaxError)) {
+        throw new PublicGitHubError(
+          'GitHub contributor response could not be read.',
+          'network',
+        );
+      }
+      throw new PublicGitHubError('GitHub returned invalid contributor data.', 'invalid');
+    }
+  } catch (error) {
+    if (error instanceof PublicGitHubError) throw error;
+    if (controller.signal.aborted) {
+      throw new PublicGitHubError('GitHub contributor request timed out.', 'timeout');
+    }
+    throw new PublicGitHubError(
+      'GitHub contributor request could not reach GitHub.',
+      'network',
+    );
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
 export async function fetchPublicRepositoryContributors(
   repository: ProjectRepository,
 ): Promise<ContributorPayload> {
@@ -171,14 +235,7 @@ export async function fetchPublicRepositoryContributors(
     );
     url.searchParams.set('per_page', '100');
     url.searchParams.set('page', String(page));
-    const response = await fetch(url, {
-      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
-      headers: {
-        Accept: 'application/vnd.github+json',
-        'User-Agent': 'Tech-Echo-Collective',
-        'X-GitHub-Api-Version': '2022-11-28',
-      },
-    });
+    const { response, body } = await fetchPublicGitHubPage(url);
     if (response.status === 204) return { contributors: [], truncated: false };
     if (response.status === 202) {
       throw new PublicGitHubError(
@@ -201,7 +258,7 @@ export async function fetchPublicRepositoryContributors(
         response.status === 404 ? 60 * 60 * 1000 : DEFAULT_RETRY_MS,
       );
     }
-    const parsed = contributorListSchema.safeParse(await response.json());
+    const parsed = contributorListSchema.safeParse(body);
     if (!parsed.success) {
       throw new PublicGitHubError('GitHub returned invalid contributor data.', 'invalid');
     }
@@ -216,7 +273,12 @@ export async function fetchPublicRepositoryContributors(
 export async function listPublicRepositoryContributors(
   repository: ProjectRepository,
 ): Promise<RepositoryContributorResult> {
-  const cachedRow = await readContributorCache(repository);
+  let cachedRow: ContributorCacheRow | null = null;
+  try {
+    cachedRow = await readContributorCache(repository);
+  } catch {
+    logContributorIssue(repository, 'cache_read', 'storage');
+  }
   const cached = parseCachedContributors(cachedRow);
   const now = Date.now();
   const fetchedAt = cachedRow ? Date.parse(cachedRow.fetched_at) : Number.NaN;
@@ -231,7 +293,11 @@ export async function listPublicRepositoryContributors(
       return { repository, ...cached, stale: true };
     }
   } else if (cachedRow) {
-    await deleteContributorCache(repository);
+    try {
+      await deleteContributorCache(repository);
+    } catch {
+      logContributorIssue(repository, 'cache_delete', 'storage');
+    }
   }
 
   try {
@@ -240,10 +306,17 @@ export async function listPublicRepositoryContributors(
       await writeContributorCache(repository, result);
     } catch {
       // Fresh public data remains useful even if the short-lived cache cannot write.
+      logContributorIssue(repository, 'cache_write', 'storage');
     }
     return { repository, ...result, stale: false };
   } catch (error) {
     if (cached && withinStaleWindow) {
+      logContributorIssue(
+        repository,
+        'refresh',
+        error instanceof PublicGitHubError ? error.code : 'unknown',
+        true,
+      );
       try {
         await deferContributorRefresh(
           repository,
@@ -251,6 +324,7 @@ export async function listPublicRepositoryContributors(
         );
       } catch {
         // Serving bounded stale data is still safer than failing the full page.
+        logContributorIssue(repository, 'cache_defer', 'storage', true);
       }
       return { repository, ...cached, stale: true };
     }
@@ -267,6 +341,15 @@ export async function loadProjectContributorSources(
   const results = settled.flatMap((result) =>
     result.status === 'fulfilled' ? [result.value] : [],
   );
+  settled.forEach((result, index) => {
+    if (result.status === 'rejected') {
+      logContributorIssue(
+        project.repositories[index],
+        'fetch',
+        result.reason instanceof PublicGitHubError ? result.reason.code : 'unknown',
+      );
+    }
+  });
   if (results.length === 0 && settled.length > 0) {
     throw new PublicGitHubError('Project contributor data is unavailable.', 'unavailable');
   }

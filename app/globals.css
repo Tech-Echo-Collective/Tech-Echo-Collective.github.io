@@ -413,6 +413,7 @@ a {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 8px;
   border: 1px solid var(--border-strong);
   color: var(--text);
   background: rgba(7, 18, 38, 0.76);

@@ -22,6 +22,7 @@ function contributor(id: number) {
 }
 
 afterEach(() => {
+  vi.useRealTimers();
   vi.unstubAllGlobals();
 });
 
@@ -83,6 +84,39 @@ describe('public GitHub contributor reader', () => {
       code: 'rate_limit',
       retryAfterMs: 120_000,
     });
+  });
+
+  it('normalizes network failures without leaking upstream error details', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('socket detail')));
+
+    await expect(fetchPublicRepositoryContributors(repository)).rejects.toMatchObject({
+      code: 'network',
+      message: 'GitHub contributor request could not reach GitHub.',
+    });
+  });
+
+  it('times out a stalled response body', async () => {
+    vi.useFakeTimers();
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockImplementation((_url: URL, init?: RequestInit) =>
+        Promise.resolve({
+          status: 200,
+          json: () =>
+            new Promise((_resolve, reject) => {
+              init?.signal?.addEventListener('abort', () =>
+                reject(new DOMException('Aborted', 'AbortError')),
+              );
+            }),
+        }),
+      ),
+    );
+
+    const pending = fetchPublicRepositoryContributors(repository);
+    const rejection = expect(pending).rejects.toMatchObject({ code: 'timeout' });
+    await vi.advanceTimersByTimeAsync(8_000);
+
+    await rejection;
   });
 
   it('rejects contributor profile links outside GitHub', async () => {

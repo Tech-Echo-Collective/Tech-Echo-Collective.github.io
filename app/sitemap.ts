@@ -3,7 +3,7 @@ import { getPublicOrigin } from '@/lib/config';
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const origin = getPublicOrigin();
-  const lastModified = new Date('2026-08-30T00:00:00Z');
+  const lastModified = new Date('2026-08-31T00:00:00Z');
   return [
     { url: `${origin}/`, lastModified, changeFrequency: 'monthly', priority: 1 },
     { url: `${origin}/privacy`, lastModified, changeFrequency: 'yearly', priority: 0.2 },

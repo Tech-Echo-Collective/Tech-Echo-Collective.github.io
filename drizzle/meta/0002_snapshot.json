@@ -1,9 +1,54 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "759263f3-a16b-4e6d-86b3-0443b0777dd1",
-  "prevId": "324b3550-83ab-4ccc-8feb-093d18e218f5",
+  "id": "b57d43e9-930f-48c1-a8f2-0ebe9e478eeb",
+  "prevId": "759263f3-a16b-4e6d-86b3-0443b0777dd1",
   "tables": {
+    "github_contributor_cache": {
+      "name": "github_contributor_cache",
+      "columns": {
+        "repository_key": {
+          "name": "repository_key",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "payload_json": {
+          "name": "payload_json",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "fetched_at": {
+          "name": "fetched_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "next_retry_at": {
+          "name": "next_retry_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
     "github_credentials": {
       "name": "github_credentials",
       "columns": {

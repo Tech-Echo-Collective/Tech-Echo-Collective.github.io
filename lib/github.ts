@@ -162,10 +162,7 @@ async function refreshAccessToken(memberId: string, row: CredentialRow): Promise
     try {
       const raced = await credentialRow(memberId);
       if (raced && raced.access_token_encrypted !== oldAccessCiphertext) {
-        return await decryptSecret(
-          raced.access_token_encrypted,
-          config.tokenEncryptionKey,
-        );
+        return await decryptSecret(raced.access_token_encrypted, config.tokenEncryptionKey);
       }
     } catch {
       // The stable public result below intentionally hides credential material.

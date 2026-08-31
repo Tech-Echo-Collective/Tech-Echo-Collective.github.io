@@ -154,3 +154,11 @@ export const rateLimits = sqliteTable(
   },
   (table) => [index('idx_rate_limits_reset_at').on(table.resetAt)],
 );
+
+export const githubContributorCache = sqliteTable('github_contributor_cache', {
+  repositoryKey: text('repository_key').primaryKey(),
+  payloadJson: text('payload_json').notNull(),
+  fetchedAt: text('fetched_at').notNull(),
+  expiresAt: text('expires_at').notNull(),
+  nextRetryAt: text('next_retry_at'),
+});

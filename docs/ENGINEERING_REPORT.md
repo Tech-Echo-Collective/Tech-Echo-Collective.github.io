@@ -1,4 +1,34 @@
-# Tech Echo account and forum v0.1 — engineering report
+# Tech Echo account and forum — engineering report
+
+## v0.2 dashboard, projects, contributors, and About
+
+The v0.2 release keeps the v0.1 authentication, permanent Member Number,
+two-domain session, and GitHub Discussions architecture intact. It adds:
+
+- a restrained single-screen authenticated Home dashboard;
+- independent Projects, Project Detail, Members, and About destinations;
+- explicit Tech Echo Project, Member Project, and Collaboration classifications;
+- a clear Physics Atlas attribution to Noah `#001` as an independently created
+  and maintained Member Project;
+- separate global community roles and project-specific recognition roles;
+- text-only contributor history loaded from GitHub's public Contributors API;
+- stable numeric GitHub ID matching from contributors to Tech Echo members;
+- a six-hour D1 freshness window, retry backoff, and 48-hour maximum stale
+  retention for public contributor metadata;
+- a four-language About presentation derived from the canonical organization
+  README at `Tech-Echo-Collective/.github/profile/README.md`.
+
+The About derivatives are pinned to canonical revision
+`0df73c22dbcd7a81a3e0ed7834fd2f460b4dbfb1` and expose a link to that source.
+The project contributor reader deliberately sends no forum credential and does
+not expand the GitHub App beyond `Tech-Echo-Discussion`. Contributor identity,
+project recognition, global Tech Echo authority, and repository permissions
+remain four separate concerns.
+
+Migration `0002_cute_kingpin.sql` adds only the public contributor cache. It does
+not alter members, Member Numbers, credentials, sessions, forum content, or
+permissions. Package and release version are `0.2.0`; the production tag is only
+created after production verification.
 
 ## Outcome
 
@@ -201,18 +231,28 @@ failure, input limits, and Markdown script/URL safety.
 
 ## Known limitations
 
-- Real GitHub writes cannot be claimed as verified until an organization
-  administrator creates/installs the GitHub App and supplies credentials.
+- Production GitHub write acceptance must be repeated after any OAuth, GitHub
+  App permission, or forum-mutation change; credentials remain outside source.
 - The forum repository is public. Tech Echo authentication controls this website,
   not direct public participation on GitHub.
 - Direct GitHub participants who have not joined Tech Echo have no Member Number.
+- GitHub's Contributors API reports linked GitHub accounts rather than anonymous
+  commits. The website caps a repository response at 1,000 accounts and marks a
+  result partial when GitHub indicates another page.
+- Physics Atlas is classified as Noah `#001`'s Member Project by explicit project
+  direction for this release. Its own README/CITATION metadata should be aligned
+  with that attribution so every canonical surface says the same thing.
+- The organization README remains canonical for collective identity and
+  philosophy, but parts of its status section lag the live website. The About
+  page labels current project and permission material separately as website
+  policy instead of attributing it to the pinned README revision.
 - The first 50 comments and 25 discussions per page are loaded in v0.1;
   the feed supports cursor pagination.
 - Nested replies, editing, deletion, moderation tooling, and search are deferred.
 - Privacy and terms copy are a technically accurate launch draft and require the
   organization's legal review.
 
-## Intentionally deferred to v0.2
+## Intentionally deferred beyond v0.2
 
 - optional Translate / Show Original;
 - discussion language labels;

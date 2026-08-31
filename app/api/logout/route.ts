@@ -1,9 +1,5 @@
 import { NextResponse } from 'next/server';
-import {
-  deleteSessionFamily,
-  requireFormSession,
-  sessionCookieName,
-} from '@/lib/auth';
+import { deleteSessionFamily, requireFormSession, sessionCookieName } from '@/lib/auth';
 import { getOriginConfig } from '@/lib/config';
 import { assertFormContentLength } from '@/lib/validation';
 

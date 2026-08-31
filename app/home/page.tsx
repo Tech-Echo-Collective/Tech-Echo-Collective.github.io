@@ -2,7 +2,11 @@ import type { Metadata } from 'next';
 import { AppShell } from '@/components/app-shell';
 import { requireMember } from '@/lib/auth';
 import { forumEntryUrl } from '@/lib/config';
-import { getDictionary } from '@/lib/i18n';
+import { listForum, type DiscussionSummary } from '@/lib/github';
+import { formatRelativeTime } from '@/lib/i18n';
+import { formatMemberNumber } from '@/lib/member-number';
+import { projects } from '@/lib/projects';
+import { getV02Copy } from '@/lib/v02-copy';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = {
@@ -12,136 +16,139 @@ export const metadata: Metadata = {
 
 export default async function HomePage() {
   const member = await requireMember({ audience: 'account' });
-  const dictionary = getDictionary(member.preferredLocale);
-  const domains = [
-    ['science', 'domain.science', 'domain.scienceText'],
-    ['engineering', 'domain.engineering', 'domain.engineeringText'],
-    ['ai', 'domain.ai', 'domain.aiText'],
-    ['open-source', 'domain.openSource', 'domain.openSourceText'],
-    ['games', 'domain.games', 'domain.gamesText'],
-    ['forum', 'domain.forum', 'domain.forumText'],
-  ] as const;
+  const copy = getV02Copy(member.preferredLocale);
+  let discussions: DiscussionSummary[] = [];
+  let activityUnavailable = false;
+
+  try {
+    const forum = await listForum(member.id);
+    discussions = forum.discussions.nodes.slice(0, 4);
+  } catch {
+    activityUnavailable = true;
+  }
 
   return (
-    <AppShell member={member} active="home" returnTo="/home">
-      <section className="home-hero">
-        <span className="live-indicator home-hero__status">
-          <i /> {dictionary['status.online']}
-        </span>
-        <h1>
-          {dictionary['home.heroBefore']}
-          <span>{dictionary['home.heroAccent']}</span>
-          {dictionary['home.heroAfter']}
-        </h1>
-        <p>{dictionary['home.heroText']}</p>
-        <div className="button-row">
-          <a className="button button--primary" href={forumEntryUrl('/')}>
-            {dictionary['home.enterForum']}
-          </a>
-          <a className="button" href="https://github.com/Tech-Echo-Collective">
-            {dictionary['home.openGithub']}
-          </a>
-        </div>
-        <div className="home-hero__telemetry" aria-hidden="true">
-          <span>NODE / TEC-{String(member.memberNumber).padStart(3, '0')}</span>
-          <span>STATUS / AUTHENTICATED</span>
-          <span>FORUM / GITHUB DISCUSSIONS</span>
-        </div>
-      </section>
-
-      <section id="about" className="content-section two-column-section">
-        <div>
-          <span className="section-kicker">01 / {dictionary['home.aboutTitle']}</span>
-          <h2>{dictionary['home.aboutTitle']}</h2>
-          <p className="large-copy">{dictionary['home.aboutText']}</p>
-          <blockquote>{dictionary['home.motto']}</blockquote>
-        </div>
-        <div className="terminal-panel" aria-label="Tech Echo identity summary">
-          <div className="terminal-panel__top">
-            <span />
-            <span />
-            <span />
-          </div>
-          <pre>{`$ tech-echo identity
-
-Type:        loose technical collective
-Fields:      Science / Engineering / AI / Games
-Method:      Open-source, Discussion-driven
-Structure:   Lightweight, Public, Extensible
-Community:   One Forum / Four UI Languages
-
-$ output
-signal established.`}</pre>
-        </div>
-      </section>
-
-      <section id="domains" className="content-section">
-        <span className="section-kicker">02 / {dictionary['home.domainsTitle']}</span>
-        <div className="section-heading-row">
-          <h2>{dictionary['home.domainsTitle']}</h2>
-          <span>06 ACTIVE FIELDS</span>
-        </div>
-        <div className="domain-grid">
-          {domains.map(([slug, title, body], index) => (
-            <article className="domain-card" key={slug}>
-              <span className="domain-card__index">0{index + 1}</span>
-              <h3>{dictionary[title]}</h3>
-              <p>{dictionary[body]}</p>
-              <span className="domain-card__line" aria-hidden="true" />
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section id="projects" className="content-section">
-        <span className="section-kicker">03 / {dictionary['home.projectsTitle']}</span>
-        <h2>{dictionary['home.projectsTitle']}</h2>
-        <div className="project-grid">
-          <article className="project-card project-card--featured">
-            <img src="/assets/projects/cradles-of-civilization-mark.svg" alt="" />
-            <div>
-              <span>GAME STUDIO / ACTIVE</span>
-              <h3>{dictionary['project.cradles']}</h3>
-              <p>{dictionary['project.cradlesText']}</p>
-              <a href="https://github.com/Tech-Echo-Collective/cradles-of-civilization">
-                {dictionary['project.view']} ↗
-              </a>
+    <AppShell member={member} active="home" returnTo="/home" layout="dashboard">
+      <div className="home-dashboard">
+        <div className="dashboard-primary">
+          <section className="dashboard-hero" aria-labelledby="dashboard-title">
+            <div className="dashboard-hero__copy">
+              <span className="dashboard-signal">
+                <i /> TEC / MEMBER {formatMemberNumber(member.memberNumber)}
+              </span>
+              <h1 id="dashboard-title">
+                <span>{copy.home.build}</span>
+                <span className="dashboard-hero__accent">{copy.home.explore}</span>
+                <span>{copy.home.share}</span>
+              </h1>
+              <p>{copy.home.intro}</p>
+              <div className="button-row">
+                <a className="button button--primary" href={forumEntryUrl('/forum')}>
+                  <span aria-hidden="true">▣</span> {copy.home.enterForum}
+                </a>
+                <a className="button" href="/projects">
+                  <span aria-hidden="true">◇</span> {copy.home.exploreProjects}
+                </a>
+              </div>
             </div>
-          </article>
-          <article className="project-card">
-            <img src="/assets/projects/physics-atlas-mark.svg" alt="" />
-            <div>
-              <span>SCIENCE / ATLAS</span>
-              <h3>{dictionary['project.physics']}</h3>
-              <p>{dictionary['project.physicsText']}</p>
-              <a href="https://atlas.techecho.org/">
-                {dictionary['project.view']} ↗
-              </a>
-            </div>
-          </article>
-          <article className="project-card">
-            <div className="project-placeholder" aria-hidden="true">
-              LAB
-            </div>
-            <div>
-              <span>RESEARCH / FUTURE</span>
-              <h3>{dictionary['project.labs']}</h3>
-              <p>{dictionary['project.labsText']}</p>
-            </div>
-          </article>
-        </div>
-      </section>
 
-      <section className="community-band">
-        <div>
-          <span className="section-kicker">04 / {dictionary['home.communityTitle']}</span>
-          <h2>{dictionary['home.communityTitle']}</h2>
-          <p>{dictionary['home.communityText']}</p>
+            <div className="echo-orbit" aria-hidden="true">
+              <div className="echo-orbit__ring echo-orbit__ring--outer" />
+              <div className="echo-orbit__ring echo-orbit__ring--middle" />
+              <div className="echo-orbit__ring echo-orbit__ring--inner" />
+              <div className="echo-orbit__core">
+                <img src="/assets/tech-echo-mark.svg" alt="" />
+              </div>
+              <span className="echo-orbit__node echo-orbit__node--science">△</span>
+              <span className="echo-orbit__node echo-orbit__node--code">&lt;/&gt;</span>
+              <span className="echo-orbit__node echo-orbit__node--games">◇</span>
+              <span className="echo-orbit__node echo-orbit__node--systems">⬡</span>
+            </div>
+          </section>
+
+          <section className="featured-projects" aria-labelledby="featured-title">
+            <header className="dashboard-section-heading">
+              <h2 id="featured-title">◇ {copy.home.featuredProjects}</h2>
+              <a href="/projects">{copy.home.viewAllProjects} →</a>
+            </header>
+            <div className="featured-projects__grid">
+              {projects
+                .filter((project) => project.featured)
+                .map((project) => {
+                  const projectCopy = copy.projects[project.slug];
+                  return (
+                    <article className="dashboard-project-card" key={project.slug}>
+                      <img src={project.mark} alt="" />
+                      <div>
+                        <span className="project-type-label">
+                          {copy.classifications[project.classification]}
+                        </span>
+                        <h3>
+                          <a href={`/projects/${project.slug}`}>{projectCopy.name}</a>
+                        </h3>
+                        <p>{projectCopy.summary}</p>
+                        <small>{projectCopy.ownership}</small>
+                      </div>
+                    </article>
+                  );
+                })}
+            </div>
+          </section>
         </div>
-        <a className="button button--primary" href={forumEntryUrl('/')}>
-          {dictionary['home.enterForum']} →
-        </a>
-      </section>
+
+        <aside className="dashboard-sidebar" aria-label={copy.home.latestActivity}>
+          <section className="dashboard-panel activity-panel">
+            <header className="dashboard-section-heading">
+              <div>
+                <h2>∿ {copy.home.latestActivity}</h2>
+                <p>{copy.home.latestDiscussions}</p>
+              </div>
+              <a href={forumEntryUrl('/forum')}>{copy.nav.forum} →</a>
+            </header>
+
+            <div className="activity-list">
+              {activityUnavailable ? (
+                <p className="dashboard-empty">{copy.home.activityUnavailable}</p>
+              ) : discussions.length === 0 ? (
+                <p className="dashboard-empty">{copy.home.noActivity}</p>
+              ) : (
+                discussions.map((discussion) => (
+                  <a
+                    className="activity-item"
+                    href={forumEntryUrl(`/forum/${discussion.number}`)}
+                    key={discussion.id}
+                  >
+                    <span className="activity-item__icon" aria-hidden="true">
+                      ▣
+                    </span>
+                    <span className="activity-item__copy">
+                      <strong>{discussion.title}</strong>
+                      <small>
+                        {discussion.category.name} ·{' '}
+                        {formatRelativeTime(discussion.updatedAt, member.preferredLocale)}
+                      </small>
+                    </span>
+                  </a>
+                ))
+              )}
+            </div>
+          </section>
+
+          <section className="dashboard-panel quick-links-panel">
+            <header className="dashboard-section-heading">
+              <h2>↗ {copy.home.quickLinks}</h2>
+            </header>
+            <nav>
+              <a href={`/member/${member.memberNumber}`}>○ {copy.common.profile}</a>
+              <a href="/projects">◇ {copy.nav.projects}</a>
+              <a href="/members">◎ {copy.nav.members}</a>
+              <a href="/settings">⌁ {copy.common.settings}</a>
+              <a href="/about">≡ {copy.nav.about}</a>
+              <a href="https://github.com/Tech-Echo-Collective">GH {copy.nav.github}</a>
+            </nav>
+          </section>
+        </aside>
+      </div>
     </AppShell>
   );
 }

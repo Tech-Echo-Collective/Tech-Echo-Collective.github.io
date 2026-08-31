@@ -20,10 +20,7 @@ export async function POST(request: Request) {
     const ticket = String(formData.get('ticket') || '');
     const handoff = await consumeForumHandoff(ticket);
 
-    const response = NextResponse.redirect(
-      new URL(handoff.returnPath, forumOrigin),
-      303,
-    );
+    const response = NextResponse.redirect(new URL(handoff.returnPath, forumOrigin), 303);
     response.cookies.set(
       sessionCookieName('forum'),
       handoff.session.token,
@@ -38,9 +35,6 @@ export async function POST(request: Request) {
     response.headers.set('Referrer-Policy', 'no-referrer');
     return response;
   } catch {
-    return NextResponse.redirect(
-      new URL('/?error=session_required', accountOrigin),
-      303,
-    );
+    return NextResponse.redirect(new URL('/?error=session_required', accountOrigin), 303);
   }
 }

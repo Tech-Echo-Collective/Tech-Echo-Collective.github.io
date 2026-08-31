@@ -27,10 +27,7 @@ export function ForumError({
       <h2>{dictionary['common.error']}</h2>
       <ErrorNotice locale={locale} code={code} />
       {code === 'reauthorize' ? (
-        <a
-          className="button button--primary"
-          href={reconnect.toString()}
-        >
+        <a className="button button--primary" href={reconnect.toString()}>
           {dictionary['forum.reauthorize']}
         </a>
       ) : (

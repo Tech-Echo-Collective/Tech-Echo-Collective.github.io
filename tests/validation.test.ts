@@ -1,9 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  normalizeLocale,
-  safeForumReturnPath,
-  safeInternalPath,
-} from '../lib/validation';
+import { normalizeLocale, safeForumReturnPath, safeInternalPath } from '../lib/validation';
 
 describe('request validation', () => {
   it('only accepts the four supported locales', () => {

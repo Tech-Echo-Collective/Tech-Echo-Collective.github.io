@@ -22,9 +22,7 @@ export default async function GatewayPage({
   const params = await searchParams;
   const forumReturnPath =
     params.next === 'forum'
-      ? safeForumReturnPath(
-          typeof params.returnTo === 'string' ? params.returnTo : null,
-        )
+      ? safeForumReturnPath(typeof params.returnTo === 'string' ? params.returnTo : null)
       : undefined;
   const member = await getCurrentMember('account');
   if (member) {
@@ -94,7 +92,7 @@ export default async function GatewayPage({
           </nav>
 
           <div className="auth-panel__body">
-            <span className="panel-index">TEC / AUTH / 0.1</span>
+            <span className="panel-index">TEC / AUTH / GITHUB</span>
             <h2>
               {mode === 'join' ? dictionary['gateway.join'] : dictionary['gateway.signIn']}
             </h2>

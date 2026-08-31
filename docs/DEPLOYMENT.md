@@ -4,16 +4,15 @@ Nothing in this document should be marked complete until the organization owner
 has performed and verified it. Do not paste secrets into source control or the
 browser.
 
-## 1. Confirm the founder reservation
+## 1. Preserve the founder reservation
 
-Confirm that stable GitHub numeric user ID `267296498` is the intended holder of
-Tech Echo Member `#001`. The currently observed account is
-`noahwalkerror-hash`, but organization ownership/admin rights were not provable
-without authenticated access.
+The organization owner has confirmed that stable GitHub numeric user ID
+`267296498` is the permanent holder of Tech Echo Member `#001`. Production and
+`FOUNDER_GITHUB_USER_ID` must continue to use this value. Do not edit the
+original migration or reassign this reservation after launch.
 
-If the ID is wrong, change both `FOUNDER_GITHUB_USER_ID` and the founder row in
-`drizzle/0000_chilly_black_widow.sql` before the first production migration.
-Do not change it after members have joined.
+Before every release, verify that `members.github_user_id = '267296498'` still
+maps to Member Number `1` and that the immutability triggers remain present.
 
 ## 2. Create the organization GitHub App
 
@@ -28,7 +27,7 @@ Configure:
 - Callback URL: `https://techecho.org/auth/callback`
 - Expire user authorization tokens: enabled
 - Request user authorization during installation: not required
-- Webhook: inactive for v0.1
+- Webhook: not required by the current account/forum flow
 - Repository permissions:
   - Discussions: Read and write
   - Metadata: Read-only (implicit)
@@ -42,7 +41,7 @@ After creation, install it on the `Tech-Echo-Collective` organization and select
 only `Tech-Echo-Discussion`.
 
 Record the Client ID and generate a Client Secret. A private key is not required
-by this v0.1 user-to-server flow.
+by the current user-to-server flow.
 
 Official references:
 
@@ -81,12 +80,16 @@ if present, for `TOKEN_ENCRYPTION_KEY`.
 
 ## 4. Database migration
 
-Deploy both migrations in order to the production D1 binding named `DB` before
-enabling public sign-in. `0001_tricky_captain_cross.sql` adds audience-bound
+Deploy all checked-in migrations in order to the production D1 binding named `DB`.
+`0001_tricky_captain_cross.sql` adds audience-bound
 session contexts and one-time forum handoffs without changing member identities.
 It revokes legacy single-domain sessions because their cookies have no secure
 account/forum audience binding; members sign in once again after this release.
-The Sites build package also includes the Drizzle migration metadata.
+`0002_cute_kingpin.sql` adds only a short-lived cache for public GitHub contributor
+metadata. Fresh data is reused for six hours, failed refreshes use bounded retry
+backoff, and stale rows are removed after 48 hours. It does not change members,
+Member Numbers, sessions, OAuth credentials, forum content, or permissions. The
+Sites build package also includes the Drizzle migration metadata.
 
 Verify:
 
@@ -95,13 +98,15 @@ Verify:
 - the allocation no-delete trigger exists;
 - the member-retention and allocation-assignment immutability triggers exist;
 - foreign keys and unique indexes exist.
+- `github_contributor_cache` exists and contains no secrets.
 
 The application also performs idempotent schema initialization as a startup
 safety net, but the checked-in migration remains the auditable production source.
 
 ## 5. Real GitHub acceptance test
 
-This step is mandatory. It has not been completed without real credentials.
+This step is mandatory for a fresh deployment and should be repeated after any
+OAuth, GitHub App, or forum-write change.
 
 Use a non-founder test GitHub account:
 
@@ -123,6 +128,10 @@ If GraphQL returns a permission error, inspect the App installation and verify
 `Discussions: Read and write` on exactly `Tech-Echo-Discussion`. Do not broaden
 to classic `repo` or `public_repo` scopes.
 
+Project contributor attribution uses GitHub's public, read-only Contributors REST
+endpoint and a bounded D1 cache. It does not reuse the forum user token, remove the
+fixed `repository_id`, or expand the GitHub App installation to project repos.
+
 ## 6. Domain cutover
 
 The dynamic Sites deployment serves the account gateway at `https://techecho.org`,
@@ -141,7 +150,8 @@ For a safe production cutover:
 4. Attach `techecho.org` and `www.techecho.org` to Sites, then replace the old
    GitHub Pages apex DNS only after Sites supplies its exact DNS instructions.
 5. Verify OAuth, `/home`, the cross-domain forum handoff, real GitHub Discussion
-   reads/writes, four languages, logout, mobile layout, and Member `#001`.
+   reads/writes, `/projects`, `/members`, README-backed `/about`, four languages,
+   logout, mobile layout, and Member `#001`.
 6. Confirm old `/Physics-Atlas-Web/...` URLs return permanent redirects to the
    matching `atlas.techecho.org/...` path.
 7. Only after production verification, remove obsolete OAuth callback URLs and

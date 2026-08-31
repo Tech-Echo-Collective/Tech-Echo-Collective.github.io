@@ -188,4 +188,27 @@ describe('member number database invariants', () => {
     });
     expect(consume.get('ticket')).toBeUndefined();
   });
+
+  it('adds the bounded public contributor cache without touching member identity', () => {
+    const database = migratedDatabase();
+    const columns = database
+      .prepare("PRAGMA table_info('github_contributor_cache')")
+      .all() as Array<{ name: string }>;
+
+    expect(columns.map((column) => column.name)).toEqual([
+      'repository_key',
+      'payload_json',
+      'fetched_at',
+      'expires_at',
+      'next_retry_at',
+    ]);
+    expect(
+      database
+        .prepare(
+          `SELECT reserved_github_user_id FROM member_number_allocations
+           WHERE member_number = 1`,
+        )
+        .get(),
+    ).toEqual({ reserved_github_user_id: '267296498' });
+  });
 });

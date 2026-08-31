@@ -17,10 +17,7 @@ const SESSION_MAX_AGE_SECONDS = 60 * 60 * 24 * 30;
 
 export type SessionAudience = 'account' | 'forum';
 
-const SESSION_COOKIES: Record<
-  SessionAudience,
-  { insecure: string; secure: string }
-> = {
+const SESSION_COOKIES: Record<SessionAudience, { insecure: string; secure: string }> = {
   account: {
     insecure: 'tec_account_session',
     secure: '__Host-tec_account_session',
@@ -108,6 +105,37 @@ export async function findMembersByGithubNodeIds(
     .bind(...uniqueIds)
     .all<MemberRow>();
   return new Map((rows.results || []).map((row) => [row.github_node_id, mapMember(row)]));
+}
+
+export async function findMembersByGithubUserIds(
+  githubUserIds: string[],
+): Promise<Map<string, Member>> {
+  await ensureDatabase();
+  const uniqueIds = [...new Set(githubUserIds.filter(Boolean))];
+  const memberMap = new Map<string, Member>();
+  for (let index = 0; index < uniqueIds.length; index += 80) {
+    const chunk = uniqueIds.slice(index, index + 80);
+    const placeholders = chunk.map(() => '?').join(',');
+    const rows = await getD1()
+      .prepare(
+        `SELECT ${memberColumns} FROM members m
+         WHERE m.github_user_id IN (${placeholders})`,
+      )
+      .bind(...chunk)
+      .all<MemberRow>();
+    for (const row of rows.results || []) {
+      memberMap.set(row.github_user_id, mapMember(row));
+    }
+  }
+  return memberMap;
+}
+
+export async function listMembers(): Promise<Member[]> {
+  await ensureDatabase();
+  const rows = await getD1()
+    .prepare(`SELECT ${memberColumns} FROM members m ORDER BY m.member_number ASC`)
+    .all<MemberRow>();
+  return (rows.results || []).map(mapMember);
 }
 
 export async function findMemberByNumber(memberNumber: number): Promise<Member | null> {
@@ -304,9 +332,8 @@ export async function createSession(
 
 export function sessionCookieOptions(audience: SessionAudience, expiresAt: Date) {
   const origins = getOriginConfig();
-  const secure = (audience === 'account'
-    ? origins.accountOrigin
-    : origins.forumOrigin
+  const secure = (
+    audience === 'account' ? origins.accountOrigin : origins.forumOrigin
   ).startsWith('https://');
   return {
     httpOnly: true,
@@ -398,9 +425,7 @@ export async function getCurrentSession(
   );
 }
 
-export async function getCurrentMember(
-  audience?: SessionAudience,
-): Promise<Member | null> {
+export async function getCurrentMember(audience?: SessionAudience): Promise<Member | null> {
   return (await getCurrentSession(audience))?.member || null;
 }
 

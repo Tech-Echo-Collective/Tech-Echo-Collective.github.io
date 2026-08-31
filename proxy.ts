@@ -25,17 +25,14 @@ export function proxy(request: NextRequest) {
 
   if (hostname === ACCOUNT_HOST) {
     if (pathname === '/googlee054abfb1b2b52cf.html') {
-      return new NextResponse(
-        'google-site-verification: googlee054abfb1b2b52cf.html\n',
-        {
-          status: 200,
-          headers: {
-            'Cache-Control': 'public, max-age=3600',
-            'Content-Type': 'text/plain; charset=utf-8',
-            'X-Content-Type-Options': 'nosniff',
-          },
+      return new NextResponse('google-site-verification: googlee054abfb1b2b52cf.html\n', {
+        status: 200,
+        headers: {
+          'Cache-Control': 'public, max-age=3600',
+          'Content-Type': 'text/plain; charset=utf-8',
+          'X-Content-Type-Options': 'nosniff',
         },
-      );
+      });
     }
 
     if (pathname === '/Physics-Atlas-Web' || pathname.startsWith('/Physics-Atlas-Web/')) {
@@ -82,6 +79,10 @@ export function proxy(request: NextRequest) {
       pathname === '/home' ||
       pathname === '/onboarding' ||
       pathname === '/settings' ||
+      pathname === '/projects' ||
+      pathname.startsWith('/projects/') ||
+      pathname === '/members' ||
+      pathname === '/about' ||
       pathname === '/privacy' ||
       pathname === '/terms' ||
       pathname === '/zh' ||

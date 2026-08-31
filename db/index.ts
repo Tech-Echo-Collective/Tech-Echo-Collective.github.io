@@ -83,6 +83,13 @@ const schemaStatements = [
     count INTEGER NOT NULL,
     reset_at INTEGER NOT NULL
   )`,
+  `CREATE TABLE IF NOT EXISTS github_contributor_cache (
+    repository_key TEXT PRIMARY KEY,
+    payload_json TEXT NOT NULL,
+    fetched_at TEXT NOT NULL,
+    expires_at TEXT NOT NULL,
+    next_retry_at TEXT
+  )`,
   'CREATE INDEX IF NOT EXISTS idx_sessions_member_id ON sessions(member_id)',
   'CREATE INDEX IF NOT EXISTS idx_sessions_expires_at ON sessions(expires_at)',
   'CREATE INDEX IF NOT EXISTS idx_session_contexts_family ON session_contexts(family_id)',
@@ -148,6 +155,10 @@ export async function ensureDatabase(): Promise<void> {
          WHERE member_number = 1 AND member_id IS NULL`,
       )
       .bind(founderId)
+      .run();
+    await d1
+      .prepare('DELETE FROM github_contributor_cache WHERE fetched_at < ?')
+      .bind(new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString())
       .run();
     await d1.prepare('PRAGMA optimize').run();
   })();

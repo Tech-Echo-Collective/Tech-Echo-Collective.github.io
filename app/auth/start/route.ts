@@ -3,7 +3,7 @@ import { oauthStateCookieName } from '@/lib/auth';
 import { getAuthConfig, isAuthConfigured } from '@/lib/config';
 import { createOAuthTransaction } from '@/lib/oauth';
 import { anonymizedIp, enforceRateLimit, RateLimitError } from '@/lib/rate-limit';
-import { normalizeLocale } from '@/lib/validation';
+import { normalizeLocale, safeForumReturnPath } from '@/lib/validation';
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
@@ -17,13 +17,20 @@ export async function GET(request: Request) {
   }
 
   try {
-    await enforceRateLimit(await anonymizedIp(request), 'oauth', 20, 10 * 60);
-    const transaction = await createOAuthTransaction(intent, locale);
-    const response = NextResponse.redirect(transaction.authorizeUrl, 302);
     const config = getAuthConfig();
+    if (url.origin !== config.accountOrigin) {
+      return new NextResponse('Misdirected request', { status: 421 });
+    }
+    await enforceRateLimit(await anonymizedIp(request), 'oauth', 20, 10 * 60);
+    const forumReturnPath =
+      url.searchParams.get('next') === 'forum'
+        ? safeForumReturnPath(url.searchParams.get('returnTo'))
+        : undefined;
+    const transaction = await createOAuthTransaction(intent, locale, forumReturnPath);
+    const response = NextResponse.redirect(transaction.authorizeUrl, 302);
     response.cookies.set(oauthStateCookieName(), transaction.state, {
       httpOnly: true,
-      secure: config.appOrigin.startsWith('https://'),
+      secure: config.accountOrigin.startsWith('https://'),
       sameSite: 'lax',
       path: '/',
       maxAge: 10 * 60,

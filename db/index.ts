@@ -44,11 +44,37 @@ const schemaStatements = [
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (member_id) REFERENCES members(id) ON DELETE CASCADE
   )`,
+  `CREATE TABLE IF NOT EXISTS session_contexts (
+    token_hash TEXT PRIMARY KEY,
+    audience TEXT NOT NULL CHECK (audience IN ('account','forum')),
+    family_id TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (token_hash) REFERENCES sessions(token_hash) ON DELETE CASCADE,
+    UNIQUE (family_id, audience)
+  )`,
+  `CREATE TABLE IF NOT EXISTS sso_handoffs (
+    token_hash TEXT PRIMARY KEY,
+    member_id TEXT NOT NULL,
+    family_id TEXT NOT NULL,
+    source_session_hash TEXT NOT NULL,
+    target_audience TEXT NOT NULL CHECK (target_audience = 'forum'),
+    return_path TEXT NOT NULL,
+    expires_at TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (member_id) REFERENCES members(id) ON DELETE CASCADE,
+    FOREIGN KEY (source_session_hash) REFERENCES sessions(token_hash) ON DELETE CASCADE
+  )`,
   `CREATE TABLE IF NOT EXISTS oauth_states (
     state_hash TEXT PRIMARY KEY,
     verifier_encrypted TEXT NOT NULL,
     intent TEXT NOT NULL CHECK (intent IN ('signin','join')),
     locale TEXT NOT NULL CHECK (locale IN ('en','zh','fr','es')),
+    expires_at TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+  )`,
+  `CREATE TABLE IF NOT EXISTS oauth_return_targets (
+    state_hash TEXT PRIMARY KEY,
+    return_path TEXT NOT NULL,
     expires_at TEXT NOT NULL,
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
   )`,
@@ -59,7 +85,12 @@ const schemaStatements = [
   )`,
   'CREATE INDEX IF NOT EXISTS idx_sessions_member_id ON sessions(member_id)',
   'CREATE INDEX IF NOT EXISTS idx_sessions_expires_at ON sessions(expires_at)',
+  'CREATE INDEX IF NOT EXISTS idx_session_contexts_family ON session_contexts(family_id)',
+  'CREATE UNIQUE INDEX IF NOT EXISTS idx_session_contexts_family_audience ON session_contexts(family_id, audience)',
+  'CREATE INDEX IF NOT EXISTS idx_sso_handoffs_expires_at ON sso_handoffs(expires_at)',
+  'CREATE UNIQUE INDEX IF NOT EXISTS idx_sso_handoffs_family ON sso_handoffs(family_id)',
   'CREATE INDEX IF NOT EXISTS idx_oauth_states_expires_at ON oauth_states(expires_at)',
+  'CREATE INDEX IF NOT EXISTS idx_oauth_return_targets_expires_at ON oauth_return_targets(expires_at)',
   'CREATE INDEX IF NOT EXISTS idx_rate_limits_reset_at ON rate_limits(reset_at)',
   `CREATE TRIGGER IF NOT EXISTS members_member_number_immutable
    BEFORE UPDATE OF member_number ON members
@@ -92,6 +123,16 @@ export async function ensureDatabase(): Promise<void> {
   databaseReady ??= (async () => {
     const d1 = getD1();
     await d1.batch(schemaStatements.map((statement) => d1.prepare(statement)));
+
+    // The legacy single-domain cookie has a different name and cannot safely
+    // participate in the new audience-bound session model. Revoke those
+    // orphaned sessions so every usable token has an explicit audience.
+    await d1
+      .prepare(
+        `DELETE FROM sessions
+         WHERE token_hash NOT IN (SELECT token_hash FROM session_contexts)`,
+      )
+      .run();
 
     const founderId = env.FOUNDER_GITHUB_USER_ID || DEFAULT_FOUNDER_GITHUB_USER_ID;
     await d1

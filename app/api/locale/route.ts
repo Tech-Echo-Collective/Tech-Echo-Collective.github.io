@@ -6,8 +6,14 @@ import { assertFormContentLength, localeSchema, safeInternalPath } from '@/lib/v
 
 export async function POST(request: Request) {
   const requestOrigin = new URL(request.url).origin;
-  const expectedOrigin = isAuthConfigured() ? getAuthConfig().appOrigin : requestOrigin;
-  if (request.headers.get('Origin') !== expectedOrigin) {
+  const config = isAuthConfigured() ? getAuthConfig() : null;
+  const audience =
+    !config || requestOrigin === config.accountOrigin
+      ? 'account'
+      : requestOrigin === config.forumOrigin
+        ? 'forum'
+        : null;
+  if (!audience || request.headers.get('Origin') !== requestOrigin) {
     return new NextResponse('Invalid origin', { status: 403 });
   }
   assertFormContentLength(request, 8 * 1024);
@@ -17,20 +23,23 @@ export async function POST(request: Request) {
   if (!locale.success) return new NextResponse('Invalid locale', { status: 400 });
 
   const cookieHeader = request.headers.get('Cookie') || '';
-  const sessionCookie = sessionCookieName();
+  const sessionCookie = sessionCookieName(audience);
   const rawSession = cookieHeader
     .split(';')
     .map((part) => part.trim())
     .find((part) => part.startsWith(`${sessionCookie}=`))
     ?.slice(sessionCookie.length + 1);
-  const member = await memberFromSessionToken(rawSession && decodeURIComponent(rawSession));
+  const member = await memberFromSessionToken(
+    rawSession && decodeURIComponent(rawSession),
+    audience,
+  );
   if (member) await updateSettings(member.id, member.displayName, locale.data);
 
   const response = NextResponse.redirect(new URL(returnTo, request.url), 303);
   response.cookies.set(
     LOCALE_COOKIE,
     locale.data,
-    localeCookieOptions(expectedOrigin.startsWith('https://')),
+    localeCookieOptions(requestOrigin.startsWith('https://')),
   );
   return response;
 }

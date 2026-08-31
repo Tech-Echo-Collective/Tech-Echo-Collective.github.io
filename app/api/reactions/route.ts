@@ -13,7 +13,7 @@ export async function POST(request: Request) {
   try {
     assertFormContentLength(request, 8 * 1024);
     const formData = await request.formData();
-    const member = await requireFormMember(request, formData);
+    const member = await requireFormMember(request, formData, 'forum');
     const input = reactionSchema.parse(Object.fromEntries(formData));
     returnTo = safeInternalPath(input.returnTo, '/forum');
     await enforceRateLimit(member.id, 'reaction', 60, 60 * 60);

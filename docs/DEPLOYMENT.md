@@ -24,8 +24,8 @@ GitHub organization Settings -> Developer settings -> GitHub Apps -> New GitHub 
 Configure:
 
 - Name: a unique name such as `Tech Echo Community`
-- Homepage URL: the final HTTPS `APP_ORIGIN`
-- Callback URL: `APP_ORIGIN/auth/callback`
+- Homepage URL: `https://techecho.org/`
+- Callback URL: `https://techecho.org/auth/callback`
 - Expire user authorization tokens: enabled
 - Request user authorization during installation: not required
 - Webhook: inactive for v0.1
@@ -57,7 +57,9 @@ secret-variable facility.
 
 | Variable                           | Secret | Production value                       |
 | ---------------------------------- | -----: | -------------------------------------- |
-| `APP_ORIGIN`                       |     No | Final origin, HTTPS, no trailing slash |
+| `ACCOUNT_ORIGIN`                   |     No | `https://techecho.org`                 |
+| `FORUM_ORIGIN`                     |     No | `https://forum.techecho.org`           |
+| `APP_ORIGIN`                       |     No | `https://techecho.org` (compatibility) |
 | `GITHUB_CLIENT_ID`                 |     No | GitHub App Client ID                   |
 | `GITHUB_CLIENT_SECRET`             |    Yes | GitHub App Client Secret               |
 | `SESSION_SECRET`                   |    Yes | At least 32 random bytes, base64url    |
@@ -79,9 +81,12 @@ if present, for `TOKEN_ENCRYPTION_KEY`.
 
 ## 4. Database migration
 
-Deploy the migration in `drizzle/0000_chilly_black_widow.sql` to the production
-D1 binding named `DB` before enabling public sign-in. The Sites build package
-also includes the Drizzle migration metadata.
+Deploy both migrations in order to the production D1 binding named `DB` before
+enabling public sign-in. `0001_tricky_captain_cross.sql` adds audience-bound
+session contexts and one-time forum handoffs without changing member identities.
+It revokes legacy single-domain sessions because their cookies have no secure
+account/forum audience binding; members sign in once again after this release.
+The Sites build package also includes the Drizzle migration metadata.
 
 Verify:
 
@@ -118,28 +123,29 @@ If GraphQL returns a permission error, inspect the App installation and verify
 `Discussions: Read and write` on exactly `Tech-Echo-Discussion`. Do not broaden
 to classic `repo` or `public_repo` scopes.
 
-## 6. Domain and GitHub Pages transition
+## 6. Domain cutover
 
-The public website remains on GitHub Pages and moves from
-`https://tech-echo-collective.github.io/` to `https://techecho.org/`.
-The authenticated account and forum service runs separately at
-`https://forum.techecho.org/`. Physics Atlas inherits the organization Pages
-domain at `https://techecho.org/Physics-Atlas-Web/`.
+The dynamic Sites deployment serves the account gateway at `https://techecho.org`,
+the member home at `https://techecho.org/home`, and the forum at
+`https://forum.techecho.org`. Physics Atlas remains on GitHub Pages at
+`https://atlas.techecho.org`.
 
 For a safe production cutover:
 
-1. Attach `forum.techecho.org` to the Sites deployment and wait for HTTPS.
-2. Add `https://forum.techecho.org/auth/callback` to the GitHub App while
-   preserving the previous callback during verification.
-3. Set `APP_ORIGIN=https://forum.techecho.org` and redeploy.
-4. Verify a real OAuth sign-in, authenticated routing, and forum access on the
-   new hostname, then remove the previous callback.
-5. Point `techecho.org` and `www.techecho.org` to GitHub Pages, set the GitHub
-   App homepage to `https://techecho.org/`, and enforce HTTPS after the
-   certificate is ready.
-6. Keep the original GitHub Pages URL available as GitHub's automatic redirect.
-7. Add the new URL-prefix property in Google Search Console and submit
-   `/sitemap.xml`.
+1. Publish Physics Atlas with Vite base `/`, set its Pages custom domain to
+   `atlas.techecho.org`, add the DNS CNAME, and verify HTTPS and API CORS.
+2. Add `https://techecho.org/auth/callback` to the GitHub App while retaining the
+   currently working callback during verification.
+3. Configure `ACCOUNT_ORIGIN`, `FORUM_ORIGIN`, and the compatibility
+   `APP_ORIGIN`; deploy the Sites version and apply `0001`.
+4. Attach `techecho.org` and `www.techecho.org` to Sites, then replace the old
+   GitHub Pages apex DNS only after Sites supplies its exact DNS instructions.
+5. Verify OAuth, `/home`, the cross-domain forum handoff, real GitHub Discussion
+   reads/writes, four languages, logout, mobile layout, and Member `#001`.
+6. Confirm old `/Physics-Atlas-Web/...` URLs return permanent redirects to the
+   matching `atlas.techecho.org/...` path.
+7. Only after production verification, remove obsolete OAuth callback URLs and
+   migrate Google Search Console properties/sitemaps.
 8. Preserve `public/googlee054abfb1b2b52cf.html` until Search Console ownership
    has been migrated.
 

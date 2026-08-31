@@ -14,7 +14,7 @@ export async function POST(
     assertFormContentLength(request, 32 * 1024);
     const formData = await request.formData();
     if (!Number.isSafeInteger(number) || number < 1) throw new Error('Invalid discussion.');
-    const member = await requireFormMember(request, formData);
+    const member = await requireFormMember(request, formData, 'forum');
     const input = commentSchema.parse(Object.fromEntries(formData));
     const ip = await anonymizedIp(request);
     await Promise.all([

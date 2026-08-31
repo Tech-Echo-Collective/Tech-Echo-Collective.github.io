@@ -5,21 +5,53 @@ const defaults = {
   repository: 'Tech-Echo-Discussion',
   repositoryId: '1293776929',
   founderGithubUserId: '267296498',
+  accountOrigin: 'https://techecho.org',
+  forumOrigin: 'https://forum.techecho.org',
 };
 
 export function getPublicOrigin(): string {
-  const configured = env.APP_ORIGIN?.trim();
-  if (!configured) return 'https://forum.techecho.org';
   try {
-    return new URL(configured).origin;
+    return getOriginConfig().accountOrigin;
   } catch {
-    return 'https://forum.techecho.org';
+    return defaults.accountOrigin;
   }
 }
 
 function required(value: string | undefined, name: string): string {
   if (!value?.trim()) throw new Error(`Missing required environment variable: ${name}`);
   return value.trim();
+}
+
+function validatedOrigin(value: string, name: string): string {
+  const normalized = value.trim().replace(/\/$/, '');
+  const origin = new URL(normalized);
+  if (origin.origin !== normalized || !['https:', 'http:'].includes(origin.protocol)) {
+    throw new Error(`${name} must be an origin without a path.`);
+  }
+  const isLocalDevelopment =
+    origin.hostname === 'localhost' ||
+    origin.hostname === '127.0.0.1' ||
+    origin.hostname === '[::1]';
+  if (origin.protocol !== 'https:' && !isLocalDevelopment) {
+    throw new Error(`${name} must use HTTPS outside local development.`);
+  }
+  return origin.origin;
+}
+
+export function getOriginConfig() {
+  const accountValue = env.ACCOUNT_ORIGIN || env.APP_ORIGIN || defaults.accountOrigin;
+  const forumValue = env.FORUM_ORIGIN || defaults.forumOrigin;
+  return {
+    accountOrigin: validatedOrigin(accountValue, 'ACCOUNT_ORIGIN'),
+    forumOrigin: validatedOrigin(forumValue, 'FORUM_ORIGIN'),
+  };
+}
+
+export function forumEntryUrl(returnPath = '/'): string {
+  const { accountOrigin } = getOriginConfig();
+  const url = new URL('/auth/forum', accountOrigin);
+  url.searchParams.set('returnTo', returnPath);
+  return url.toString();
 }
 
 export function getForumConfig() {
@@ -35,25 +67,16 @@ export function getFounderGithubUserId(): string {
 }
 
 export function getAuthConfig() {
-  const appOrigin = required(env.APP_ORIGIN, 'APP_ORIGIN').replace(/\/$/, '');
-  const origin = new URL(appOrigin);
-  if (!['https:', 'http:'].includes(origin.protocol)) {
-    throw new Error('APP_ORIGIN must use http or https.');
-  }
-  const isLocalDevelopment =
-    origin.hostname === 'localhost' ||
-    origin.hostname === '127.0.0.1' ||
-    origin.hostname === '[::1]';
-  if (origin.protocol !== 'https:' && !isLocalDevelopment) {
-    throw new Error('APP_ORIGIN must use HTTPS outside local development.');
-  }
+  const { accountOrigin, forumOrigin } = getOriginConfig();
   const sessionSecret = required(env.SESSION_SECRET, 'SESSION_SECRET');
   if (new TextEncoder().encode(sessionSecret).byteLength < 32) {
     throw new Error('SESSION_SECRET must contain at least 32 bytes.');
   }
 
   return {
-    appOrigin: origin.origin,
+    appOrigin: accountOrigin,
+    accountOrigin,
+    forumOrigin,
     clientId: required(env.GITHUB_CLIENT_ID, 'GITHUB_CLIENT_ID'),
     clientSecret: required(env.GITHUB_CLIENT_SECRET, 'GITHUB_CLIENT_SECRET'),
     sessionSecret,
@@ -64,7 +87,7 @@ export function getAuthConfig() {
 
 export function isAuthConfigured(): boolean {
   return Boolean(
-    env.APP_ORIGIN &&
+    (env.ACCOUNT_ORIGIN || env.APP_ORIGIN) &&
     env.GITHUB_CLIENT_ID &&
     env.GITHUB_CLIENT_SECRET &&
     env.SESSION_SECRET &&

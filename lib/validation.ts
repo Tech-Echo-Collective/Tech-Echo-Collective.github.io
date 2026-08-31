@@ -75,3 +75,41 @@ export function safeInternalPath(value: string | null, fallback = '/home'): stri
     return fallback;
   }
 }
+
+export function safeForumReturnPath(value: string | null, fallback = '/'): string {
+  if (
+    !value ||
+    value.length > 300 ||
+    value.includes('\\') ||
+    value.includes('\r') ||
+    value.includes('\n') ||
+    value.includes('\0')
+  ) {
+    return fallback;
+  }
+  if (!value.startsWith('/') || value.startsWith('//')) return fallback;
+
+  try {
+    const parsed = new URL(value, 'https://forum.techecho.invalid');
+    if (parsed.origin !== 'https://forum.techecho.invalid') return fallback;
+
+    let decodedPath = parsed.pathname;
+    for (let index = 0; index < 2; index += 1) {
+      const decoded = decodeURIComponent(decodedPath);
+      if (decoded === decodedPath) break;
+      decodedPath = decoded;
+    }
+    if (decodedPath.includes('\\') || decodedPath.startsWith('//')) return fallback;
+
+    const allowed =
+      decodedPath === '/' ||
+      decodedPath === '/forum' ||
+      decodedPath === '/forum/new' ||
+      /^\/forum\/[1-9]\d*$/.test(decodedPath);
+    if (!allowed) return fallback;
+
+    return `${parsed.pathname}${parsed.search}${parsed.hash}`;
+  } catch {
+    return fallback;
+  }
+}

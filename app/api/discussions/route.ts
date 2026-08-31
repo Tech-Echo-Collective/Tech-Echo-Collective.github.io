@@ -8,7 +8,7 @@ export async function POST(request: Request) {
   try {
     assertFormContentLength(request, 64 * 1024);
     const formData = await request.formData();
-    const member = await requireFormMember(request, formData);
+    const member = await requireFormMember(request, formData, 'forum');
     const input = discussionSchema.parse(Object.fromEntries(formData));
     const ip = await anonymizedIp(request);
     await Promise.all([

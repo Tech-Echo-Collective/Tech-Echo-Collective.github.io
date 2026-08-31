@@ -75,6 +75,48 @@ export const sessions = sqliteTable(
   ],
 );
 
+export const sessionContexts = sqliteTable(
+  'session_contexts',
+  {
+    tokenHash: text('token_hash')
+      .primaryKey()
+      .references(() => sessions.tokenHash, { onDelete: 'cascade' }),
+    audience: text('audience', { enum: ['account', 'forum'] }).notNull(),
+    familyId: text('family_id').notNull(),
+    createdAt: text('created_at')
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`),
+  },
+  (table) => [
+    index('idx_session_contexts_family').on(table.familyId),
+    uniqueIndex('idx_session_contexts_family_audience').on(table.familyId, table.audience),
+  ],
+);
+
+export const ssoHandoffs = sqliteTable(
+  'sso_handoffs',
+  {
+    tokenHash: text('token_hash').primaryKey(),
+    memberId: text('member_id')
+      .notNull()
+      .references(() => members.id, { onDelete: 'cascade' }),
+    familyId: text('family_id').notNull(),
+    sourceSessionHash: text('source_session_hash')
+      .notNull()
+      .references(() => sessions.tokenHash, { onDelete: 'cascade' }),
+    targetAudience: text('target_audience', { enum: ['forum'] }).notNull(),
+    returnPath: text('return_path').notNull(),
+    expiresAt: text('expires_at').notNull(),
+    createdAt: text('created_at')
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`),
+  },
+  (table) => [
+    index('idx_sso_handoffs_expires_at').on(table.expiresAt),
+    uniqueIndex('idx_sso_handoffs_family').on(table.familyId),
+  ],
+);
+
 export const oauthStates = sqliteTable(
   'oauth_states',
   {
@@ -88,6 +130,19 @@ export const oauthStates = sqliteTable(
       .default(sql`CURRENT_TIMESTAMP`),
   },
   (table) => [index('idx_oauth_states_expires_at').on(table.expiresAt)],
+);
+
+export const oauthReturnTargets = sqliteTable(
+  'oauth_return_targets',
+  {
+    stateHash: text('state_hash').primaryKey(),
+    returnPath: text('return_path').notNull(),
+    expiresAt: text('expires_at').notNull(),
+    createdAt: text('created_at')
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`),
+  },
+  (table) => [index('idx_oauth_return_targets_expires_at').on(table.expiresAt)],
 );
 
 export const rateLimits = sqliteTable(

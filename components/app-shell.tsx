@@ -1,5 +1,6 @@
 import { LocaleSwitcher } from './locale-switcher';
-import { getCsrfToken } from '@/lib/auth';
+import { getCsrfToken, getRequestAudience } from '@/lib/auth';
+import { forumEntryUrl, getOriginConfig } from '@/lib/config';
 import { getDictionary } from '@/lib/i18n';
 import { formatMemberNumber } from '@/lib/member-number';
 import type { Member } from '@/lib/types';
@@ -15,14 +16,17 @@ export async function AppShell({
   returnTo: string;
   children: React.ReactNode;
 }) {
+  const audience = await getRequestAudience();
+  const { accountOrigin, forumOrigin } = getOriginConfig();
   const dictionary = getDictionary(member.preferredLocale);
-  const csrf = await getCsrfToken();
+  const csrf = await getCsrfToken(audience);
+  const forumHref = audience === 'forum' ? forumOrigin : forumEntryUrl('/');
   const nav = (
     <>
-      <a href="/home#about">{dictionary['nav.about']}</a>
-      <a href="/home#domains">{dictionary['nav.domains']}</a>
-      <a href="/home#projects">{dictionary['nav.projects']}</a>
-      <a href="/forum" aria-current={active === 'forum' ? 'page' : undefined}>
+      <a href={`${accountOrigin}/home#about`}>{dictionary['nav.about']}</a>
+      <a href={`${accountOrigin}/home#domains`}>{dictionary['nav.domains']}</a>
+      <a href={`${accountOrigin}/home#projects`}>{dictionary['nav.projects']}</a>
+      <a href={forumHref} aria-current={active === 'forum' ? 'page' : undefined}>
         {dictionary['nav.forum']}
       </a>
       <a href="https://github.com/Tech-Echo-Collective">{dictionary['nav.github']}</a>
@@ -32,7 +36,11 @@ export async function AppShell({
   return (
     <div className="app-shell">
       <header className="app-header">
-        <a className="app-brand" href="/home" aria-label={dictionary['nav.homeLabel']}>
+        <a
+          className="app-brand"
+          href={`${accountOrigin}/home`}
+          aria-label={dictionary['nav.homeLabel']}
+        >
           <img src="/assets/tech-echo-logo.svg" alt="Tech Echo Collective" />
           <span lang="la">Mementote humilitatis, etiam ex pulvere stellarum nati.</span>
         </a>
@@ -54,8 +62,10 @@ export async function AppShell({
               </span>
             </summary>
             <div className="account-menu__panel">
-              <a href={`/member/${member.memberNumber}`}>{dictionary['nav.profile']}</a>
-              <a href="/settings">{dictionary['nav.settings']}</a>
+              <a href={`${accountOrigin}/member/${member.memberNumber}`}>
+                {dictionary['nav.profile']}
+              </a>
+              <a href={`${accountOrigin}/settings`}>{dictionary['nav.settings']}</a>
               <form action="/api/logout" method="post">
                 <input type="hidden" name="csrf" value={csrf} />
                 <button type="submit">{dictionary['nav.signOut']}</button>

@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 };
 
 export default async function MemberPage({ params }: { params: Promise<{ id: string }> }) {
-  const viewer = await requireMember();
+  const viewer = await requireMember({ audience: 'account' });
   const { id } = await params;
   const memberNumber = Number(id.replace(/^#/, ''));
   if (!Number.isSafeInteger(memberNumber) || memberNumber < 1) notFound();

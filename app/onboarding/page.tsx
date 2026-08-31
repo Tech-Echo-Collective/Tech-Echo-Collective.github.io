@@ -4,6 +4,7 @@ import { ErrorNotice } from '@/components/error-notice';
 import { getCsrfToken, requireMember } from '@/lib/auth';
 import { getDictionary } from '@/lib/i18n';
 import { formatMemberNumber } from '@/lib/member-number';
+import { safeForumReturnPath } from '@/lib/validation';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = {
@@ -14,13 +15,15 @@ export const metadata: Metadata = {
 export default async function OnboardingPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; next?: string; returnTo?: string }>;
 }) {
-  const member = await requireMember({ onboardingAllowed: true });
+  const member = await requireMember({ onboardingAllowed: true, audience: 'account' });
   if (member.onboardedAt) redirect('/home');
   const dictionary = getDictionary(member.preferredLocale);
-  const csrf = await getCsrfToken();
-  const { error } = await searchParams;
+  const csrf = await getCsrfToken('account');
+  const { error, next, returnTo } = await searchParams;
+  const forumReturnPath =
+    next === 'forum' ? safeForumReturnPath(returnTo || null) : undefined;
 
   return (
     <main id="main-content" className="onboarding-shell">
@@ -44,6 +47,12 @@ export default async function OnboardingPage({
         <ErrorNotice code={error} locale={member.preferredLocale} />
         <form className="stacked-form" action="/api/onboarding" method="post">
           <input type="hidden" name="csrf" value={csrf} />
+          {forumReturnPath ? (
+            <>
+              <input type="hidden" name="next" value="forum" />
+              <input type="hidden" name="returnTo" value={forumReturnPath} />
+            </>
+          ) : null}
           <label htmlFor="onboarding-locale">{dictionary['onboarding.language']}</label>
           <select
             id="onboarding-locale"

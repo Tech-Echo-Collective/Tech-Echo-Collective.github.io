@@ -2,10 +2,12 @@ import { ensureDatabase, getD1 } from '@/db';
 import { getAuthConfig } from './config';
 import { decryptSecret, encryptSecret, pkceChallenge, randomToken, sha256 } from './crypto';
 import type { Locale } from './types';
+import { safeForumReturnPath } from './validation';
 
 export async function createOAuthTransaction(
   intent: 'signin' | 'join',
   locale: Locale,
+  forumReturnPath?: string,
 ): Promise<{ state: string; authorizeUrl: string }> {
   await ensureDatabase();
   const config = getAuthConfig();
@@ -16,18 +18,33 @@ export async function createOAuthTransaction(
   const verifierEncrypted = await encryptSecret(verifier, config.tokenEncryptionKey);
   const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString();
 
-  await getD1().batch([
-    getD1()
+  const d1 = getD1();
+  const statements = [
+    d1
       .prepare('DELETE FROM oauth_states WHERE expires_at <= ?')
       .bind(new Date().toISOString()),
-    getD1()
+    d1
+      .prepare('DELETE FROM oauth_return_targets WHERE expires_at <= ?')
+      .bind(new Date().toISOString()),
+    d1
       .prepare(
         `INSERT INTO oauth_states
          (state_hash, verifier_encrypted, intent, locale, expires_at)
          VALUES (?, ?, ?, ?, ?)`,
       )
       .bind(stateHash, verifierEncrypted, intent, locale, expiresAt),
-  ]);
+  ];
+  if (forumReturnPath) {
+    statements.push(
+      d1
+        .prepare(
+          `INSERT INTO oauth_return_targets (state_hash, return_path, expires_at)
+           VALUES (?, ?, ?)`,
+        )
+        .bind(stateHash, safeForumReturnPath(forumReturnPath), expiresAt),
+    );
+  }
+  await d1.batch(statements);
 
   const url = new URL('https://github.com/login/oauth/authorize');
   url.searchParams.set('client_id', config.clientId);
@@ -44,6 +61,7 @@ export async function consumeOAuthTransaction(state: string): Promise<{
   verifier: string;
   intent: 'signin' | 'join';
   locale: Locale;
+  forumReturnPath?: string;
 }> {
   await ensureDatabase();
   const stateHash = await sha256(state);
@@ -60,6 +78,14 @@ export async function consumeOAuthTransaction(state: string): Promise<{
     }>();
   if (!row) throw new Error('OAuth transaction is missing, expired, or already used.');
 
+  const returnTarget = await getD1()
+    .prepare(
+      `DELETE FROM oauth_return_targets WHERE state_hash = ? AND expires_at > ?
+       RETURNING return_path`,
+    )
+    .bind(stateHash, new Date().toISOString())
+    .first<{ return_path: string }>();
+
   return {
     verifier: await decryptSecret(
       row.verifier_encrypted,
@@ -67,5 +93,8 @@ export async function consumeOAuthTransaction(state: string): Promise<{
     ),
     intent: row.intent,
     locale: row.locale,
+    forumReturnPath: returnTarget
+      ? safeForumReturnPath(returnTarget.return_path)
+      : undefined,
   };
 }

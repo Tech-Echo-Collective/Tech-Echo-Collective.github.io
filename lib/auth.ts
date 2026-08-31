@@ -1,15 +1,35 @@
-import { cookies } from 'next/headers';
+import { cookies, headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { ensureDatabase, getD1 } from '@/db';
-import { getAuthConfig, getFounderGithubUserId, isAuthConfigured } from './config';
+import {
+  forumEntryUrl,
+  getAuthConfig,
+  getFounderGithubUserId,
+  getOriginConfig,
+  isAuthConfigured,
+} from './config';
 import { encryptSecret, hmac, randomToken, sha256, timingSafeEqual } from './crypto';
 import type { GitHubViewer, Locale, Member, MemberRole } from './types';
 
-export const SESSION_COOKIE = 'tec_session';
 export const OAUTH_STATE_COOKIE = 'tec_oauth_state';
-const SECURE_SESSION_COOKIE = '__Host-tec_session';
 const SECURE_OAUTH_STATE_COOKIE = '__Host-tec_oauth_state';
 const SESSION_MAX_AGE_SECONDS = 60 * 60 * 24 * 30;
+
+export type SessionAudience = 'account' | 'forum';
+
+const SESSION_COOKIES: Record<
+  SessionAudience,
+  { insecure: string; secure: string }
+> = {
+  account: {
+    insecure: 'tec_account_session',
+    secure: '__Host-tec_account_session',
+  },
+  forum: {
+    insecure: 'tec_forum_session',
+    secure: '__Host-tec_forum_session',
+  },
+};
 
 function usesSecureCookies(): boolean {
   if (!isAuthConfigured()) return false;
@@ -20,8 +40,9 @@ function usesSecureCookies(): boolean {
   }
 }
 
-export function sessionCookieName(): string {
-  return usesSecureCookies() ? SECURE_SESSION_COOKIE : SESSION_COOKIE;
+export function sessionCookieName(audience: SessionAudience): string {
+  const names = SESSION_COOKIES[audience];
+  return usesSecureCookies() ? names.secure : names.insecure;
 }
 
 export function oauthStateCookieName(): string {
@@ -236,8 +257,22 @@ export async function saveGitHubCredential(
     .run();
 }
 
-export async function createSession(memberId: string): Promise<{
+export interface AuthenticatedSession {
+  member: Member;
   token: string;
+  tokenHash: string;
+  familyId: string;
+  audience: SessionAudience;
+}
+
+export async function createSession(
+  memberId: string,
+  audience: SessionAudience,
+  familyId = randomToken(24),
+): Promise<{
+  token: string;
+  tokenHash: string;
+  familyId: string;
   expiresAt: Date;
 }> {
   await ensureDatabase();
@@ -248,14 +283,31 @@ export async function createSession(memberId: string): Promise<{
   await d1.batch([
     d1.prepare('DELETE FROM sessions WHERE expires_at <= ?').bind(new Date().toISOString()),
     d1
+      .prepare(
+        `DELETE FROM sessions WHERE token_hash IN (
+          SELECT token_hash FROM session_contexts WHERE family_id = ? AND audience = ?
+        )`,
+      )
+      .bind(familyId, audience),
+    d1
       .prepare('INSERT INTO sessions (token_hash, member_id, expires_at) VALUES (?, ?, ?)')
       .bind(tokenHash, memberId, expiresAt.toISOString()),
+    d1
+      .prepare(
+        `INSERT INTO session_contexts (token_hash, audience, family_id)
+         VALUES (?, ?, ?)`,
+      )
+      .bind(tokenHash, audience, familyId),
   ]);
-  return { token, expiresAt };
+  return { token, tokenHash, familyId, expiresAt };
 }
 
-export function sessionCookieOptions(expiresAt: Date) {
-  const secure = getAuthConfig().appOrigin.startsWith('https://');
+export function sessionCookieOptions(audience: SessionAudience, expiresAt: Date) {
+  const origins = getOriginConfig();
+  const secure = (audience === 'account'
+    ? origins.accountOrigin
+    : origins.forumOrigin
+  ).startsWith('https://');
   return {
     httpOnly: true,
     secure,
@@ -273,30 +325,98 @@ export async function deleteSession(token: string): Promise<void> {
     .run();
 }
 
-export async function memberFromSessionToken(
+export async function deleteSessionFamily(familyId: string): Promise<void> {
+  await ensureDatabase();
+  const d1 = getD1();
+  await d1.batch([
+    d1.prepare('DELETE FROM sso_handoffs WHERE family_id = ?').bind(familyId),
+    d1
+      .prepare(
+        `DELETE FROM sessions WHERE token_hash IN (
+          SELECT token_hash FROM session_contexts WHERE family_id = ?
+        )`,
+      )
+      .bind(familyId),
+  ]);
+}
+
+interface AuthenticatedSessionRow extends MemberRow {
+  token_hash: string;
+  family_id: string;
+  audience: SessionAudience;
+}
+
+export async function sessionFromSessionToken(
   token: string | undefined,
-): Promise<Member | null> {
+  audience: SessionAudience,
+): Promise<AuthenticatedSession | null> {
   if (!token) return null;
   await ensureDatabase();
   const row = await getD1()
     .prepare(
-      `SELECT ${memberColumns} FROM sessions s
+      `SELECT ${memberColumns}, s.token_hash, sc.family_id, sc.audience
+       FROM sessions s
+       JOIN session_contexts sc ON sc.token_hash = s.token_hash
        JOIN members m ON m.id = s.member_id
-       WHERE s.token_hash = ? AND s.expires_at > ?`,
+       WHERE s.token_hash = ? AND sc.audience = ? AND s.expires_at > ?`,
     )
-    .bind(await sha256(token), new Date().toISOString())
-    .first<MemberRow>();
-  return row ? mapMember(row) : null;
+    .bind(await sha256(token), audience, new Date().toISOString())
+    .first<AuthenticatedSessionRow>();
+  return row
+    ? {
+        member: mapMember(row),
+        token,
+        tokenHash: row.token_hash,
+        familyId: row.family_id,
+        audience: row.audience,
+      }
+    : null;
 }
 
-export async function getCurrentMember(): Promise<Member | null> {
+export async function memberFromSessionToken(
+  token: string | undefined,
+  audience: SessionAudience,
+): Promise<Member | null> {
+  return (await sessionFromSessionToken(token, audience))?.member || null;
+}
+
+export async function getRequestAudience(): Promise<SessionAudience> {
+  const requestHeaders = await headers();
+  const host = (requestHeaders.get('host') || '').toLowerCase();
+  const { forumOrigin } = getOriginConfig();
+  return host === new URL(forumOrigin).host.toLowerCase() ? 'forum' : 'account';
+}
+
+export async function getCurrentSession(
+  audience?: SessionAudience,
+): Promise<AuthenticatedSession | null> {
+  const resolvedAudience = audience || (await getRequestAudience());
   const cookieStore = await cookies();
-  return memberFromSessionToken(cookieStore.get(sessionCookieName())?.value);
+  return sessionFromSessionToken(
+    cookieStore.get(sessionCookieName(resolvedAudience))?.value,
+    resolvedAudience,
+  );
 }
 
-export async function requireMember(options: { onboardingAllowed?: boolean } = {}) {
-  const member = await getCurrentMember();
-  if (!member) redirect('/?error=session_required');
+export async function getCurrentMember(
+  audience?: SessionAudience,
+): Promise<Member | null> {
+  return (await getCurrentSession(audience))?.member || null;
+}
+
+export async function requireMember(
+  options: {
+    onboardingAllowed?: boolean;
+    audience?: SessionAudience;
+    returnTo?: string;
+  } = {},
+) {
+  const audience = options.audience || (await getRequestAudience());
+  const member = await getCurrentMember(audience);
+  if (!member) {
+    if (audience === 'forum') redirect(forumEntryUrl(options.returnTo || '/'));
+    redirect('/?error=session_required');
+  }
   if (!options.onboardingAllowed && !member.onboardedAt) redirect('/onboarding');
   return member;
 }
@@ -305,37 +425,60 @@ export async function csrfForSessionToken(token: string): Promise<string> {
   return hmac(`csrf:${token}`, getAuthConfig().sessionSecret);
 }
 
-export async function getCsrfToken(): Promise<string> {
+export async function getCsrfToken(audience?: SessionAudience): Promise<string> {
+  const resolvedAudience = audience || (await getRequestAudience());
   const cookieStore = await cookies();
-  const token = cookieStore.get(sessionCookieName())?.value;
+  const token = cookieStore.get(sessionCookieName(resolvedAudience))?.value;
   if (!token) throw new Error('Missing session cookie.');
   return csrfForSessionToken(token);
 }
 
-export async function requireFormMember(
+export async function requireFormSession(
   request: Request,
   formData: FormData,
-): Promise<Member> {
+  expectedAudience?: SessionAudience,
+): Promise<AuthenticatedSession> {
+  const config = getAuthConfig();
+  const requestOrigin = new URL(request.url).origin;
+  const audience: SessionAudience =
+    requestOrigin === config.accountOrigin
+      ? 'account'
+      : requestOrigin === config.forumOrigin
+        ? 'forum'
+        : (() => {
+            throw new Error('Invalid request host.');
+          })();
+  if (expectedAudience && audience !== expectedAudience) {
+    throw new Error('Invalid session audience.');
+  }
   const origin = request.headers.get('Origin');
-  if (!origin || origin !== getAuthConfig().appOrigin) {
+  if (!origin || origin !== requestOrigin) {
     throw new Error('Invalid request origin.');
   }
 
   const cookieHeader = request.headers.get('Cookie') || '';
-  const sessionCookie = sessionCookieName();
+  const sessionCookie = sessionCookieName(audience);
   const rawSession = cookieHeader
     .split(';')
     .map((part) => part.trim())
     .find((part) => part.startsWith(`${sessionCookie}=`))
     ?.slice(sessionCookie.length + 1);
   const sessionToken = rawSession ? decodeURIComponent(rawSession) : undefined;
-  const member = await memberFromSessionToken(sessionToken);
-  if (!member || !sessionToken) throw new Error('Authentication required.');
+  const session = await sessionFromSessionToken(sessionToken, audience);
+  if (!session || !sessionToken) throw new Error('Authentication required.');
 
   const provided = String(formData.get('csrf') || '');
   const expected = await csrfForSessionToken(sessionToken);
   if (!timingSafeEqual(provided, expected)) throw new Error('Invalid CSRF token.');
-  return member;
+  return session;
+}
+
+export async function requireFormMember(
+  request: Request,
+  formData: FormData,
+  expectedAudience?: SessionAudience,
+): Promise<Member> {
+  return (await requireFormSession(request, formData, expectedAudience)).member;
 }
 
 export async function updateOnboarding(memberId: string, locale: Locale): Promise<void> {

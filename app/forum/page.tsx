@@ -17,7 +17,7 @@ export default async function ForumPage({
 }: {
   searchParams: Promise<{ category?: string; after?: string; error?: string }>;
 }) {
-  const member = await requireMember();
+  const member = await requireMember({ audience: 'forum', returnTo: '/' });
   const dictionary = getDictionary(member.preferredLocale);
   const params = await searchParams;
   let forum;

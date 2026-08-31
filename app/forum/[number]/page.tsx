@@ -23,10 +23,13 @@ export default async function DiscussionPage({
   params: Promise<{ number: string }>;
   searchParams: Promise<{ error?: string }>;
 }) {
-  const viewer = await requireMember();
   const { number: rawNumber } = await params;
   const number = Number(rawNumber);
   if (!Number.isSafeInteger(number) || number < 1) notFound();
+  const viewer = await requireMember({
+    audience: 'forum',
+    returnTo: `/forum/${number}`,
+  });
   const dictionary = getDictionary(viewer.preferredLocale);
   const query = await searchParams;
   let discussion;
@@ -40,7 +43,11 @@ export default async function DiscussionPage({
     return (
       <AppShell member={viewer} active="forum" returnTo={`/forum/${number}`}>
         <div className="forum-page">
-          <ForumError locale={viewer.preferredLocale} code={code} />
+          <ForumError
+            locale={viewer.preferredLocale}
+            code={code}
+            returnTo={`/forum/${number}`}
+          />
         </div>
       </AppShell>
     );
@@ -51,7 +58,7 @@ export default async function DiscussionPage({
     ...discussion.comments.nodes.map((comment) => comment.author?.id),
   ].filter((id): id is string => Boolean(id));
   const memberMap = await findMembersByGithubNodeIds(authorIds);
-  const csrf = await getCsrfToken();
+  const csrf = await getCsrfToken('forum');
   const authorMember = discussion.author?.id
     ? memberMap.get(discussion.author.id)
     : undefined;

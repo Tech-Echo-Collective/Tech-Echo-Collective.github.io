@@ -8,18 +8,26 @@ import {
   sessionCookieOptions,
   updateSettings,
 } from '@/lib/auth';
+import { getAuthConfig } from '@/lib/config';
 import { timingSafeEqual } from '@/lib/crypto';
 import { exchangeOAuthCode, fetchGitHubViewer, GitHubApiError } from '@/lib/github';
 import { consumeOAuthTransaction } from '@/lib/oauth';
 import { LOCALE_COOKIE, localeCookieOptions } from '@/lib/i18n';
 
 function gatewayError(request: Request, code: string) {
-  const response = NextResponse.redirect(new URL(`/?error=${code}`, request.url), 302);
+  const response = NextResponse.redirect(
+    new URL(`/?error=${code}`, getAuthConfig().accountOrigin),
+    302,
+  );
   response.cookies.delete(oauthStateCookieName());
   return response;
 }
 
 export async function GET(request: NextRequest) {
+  const config = getAuthConfig();
+  if (request.nextUrl.origin !== config.accountOrigin) {
+    return new NextResponse('Misdirected request', { status: 421 });
+  }
   const error = request.nextUrl.searchParams.get('error');
   if (error) return gatewayError(request, 'oauth_denied');
 
@@ -46,15 +54,28 @@ export async function GET(request: NextRequest) {
       expiresIn: token.expires_in,
       refreshTokenExpiresIn: token.refresh_token_expires_in,
     });
-    const session = await createSession(member.id);
-    const response = NextResponse.redirect(
-      new URL(member.onboardedAt ? '/home' : '/onboarding', request.url),
-      302,
-    );
+    const session = await createSession(member.id, 'account');
+    const destination = (() => {
+      if (!member.onboardedAt) {
+        const onboarding = new URL('/onboarding', config.accountOrigin);
+        if (transaction.forumReturnPath) {
+          onboarding.searchParams.set('next', 'forum');
+          onboarding.searchParams.set('returnTo', transaction.forumReturnPath);
+        }
+        return onboarding;
+      }
+      if (transaction.forumReturnPath) {
+        const forumHandoff = new URL('/auth/forum', config.accountOrigin);
+        forumHandoff.searchParams.set('returnTo', transaction.forumReturnPath);
+        return forumHandoff;
+      }
+      return new URL('/home', config.accountOrigin);
+    })();
+    const response = NextResponse.redirect(destination, 302);
     response.cookies.set(
-      sessionCookieName(),
+      sessionCookieName('account'),
       session.token,
-      sessionCookieOptions(session.expiresAt),
+      sessionCookieOptions('account', session.expiresAt),
     );
     response.cookies.set(
       LOCALE_COOKIE,

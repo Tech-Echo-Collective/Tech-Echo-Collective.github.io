@@ -17,9 +17,9 @@ export default async function NewDiscussionPage({
 }: {
   searchParams: Promise<{ category?: string; error?: string }>;
 }) {
-  const member = await requireMember();
+  const member = await requireMember({ audience: 'forum', returnTo: '/forum/new' });
   const dictionary = getDictionary(member.preferredLocale);
-  const csrf = await getCsrfToken();
+  const csrf = await getCsrfToken('forum');
   const params = await searchParams;
   let categories;
   try {
@@ -32,7 +32,7 @@ export default async function NewDiscussionPage({
     return (
       <AppShell member={member} active="forum" returnTo="/forum/new">
         <div className="forum-page">
-          <ForumError locale={member.preferredLocale} code={code} />
+          <ForumError locale={member.preferredLocale} code={code} returnTo="/forum/new" />
         </div>
       </AppShell>
     );

@@ -159,11 +159,26 @@ async function refreshAccessToken(memberId: string, row: CredentialRow): Promise
     });
     return refreshed.access_token!;
   } catch (error) {
-    const raced = await credentialRow(memberId);
-    if (raced && raced.access_token_encrypted !== oldAccessCiphertext) {
-      return decryptSecret(raced.access_token_encrypted, config.tokenEncryptionKey);
+    try {
+      const raced = await credentialRow(memberId);
+      if (raced && raced.access_token_encrypted !== oldAccessCiphertext) {
+        return await decryptSecret(
+          raced.access_token_encrypted,
+          config.tokenEncryptionKey,
+        );
+      }
+    } catch {
+      // The stable public result below intentionally hides credential material.
     }
-    throw error;
+    console.warn('GitHub credential refresh requires reauthorization.', {
+      stage: 'refresh',
+      code: error instanceof GitHubApiError ? error.code : 'credential_error',
+    });
+    throw new GitHubApiError(
+      'GitHub authorization needs to be renewed.',
+      'reauthorize',
+      401,
+    );
   }
 }
 
@@ -176,7 +191,19 @@ export async function getUserAccessToken(memberId: string): Promise<string> {
   if (row.expires_at && Date.parse(row.expires_at) <= refreshThreshold) {
     return refreshAccessToken(memberId, row);
   }
-  return decryptSecret(row.access_token_encrypted, config.tokenEncryptionKey);
+  try {
+    return await decryptSecret(row.access_token_encrypted, config.tokenEncryptionKey);
+  } catch {
+    console.warn('GitHub credential could not be decrypted.', {
+      stage: 'access_token',
+      code: 'credential_error',
+    });
+    throw new GitHubApiError(
+      'GitHub authorization needs to be renewed.',
+      'reauthorize',
+      401,
+    );
+  }
 }
 
 interface GraphQLResponse<T> {

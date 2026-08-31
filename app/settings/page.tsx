@@ -16,9 +16,9 @@ export default async function SettingsPage({
 }: {
   searchParams: Promise<{ saved?: string; error?: string }>;
 }) {
-  const member = await requireMember();
+  const member = await requireMember({ audience: 'account' });
   const dictionary = getDictionary(member.preferredLocale);
-  const csrf = await getCsrfToken();
+  const csrf = await getCsrfToken('account');
   const params = await searchParams;
   return (
     <AppShell member={member} active="settings" returnTo="/settings">

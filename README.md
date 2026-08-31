@@ -7,17 +7,19 @@ gateway, the multilingual member site, and one forum backed by the existing
 ## Product flow
 
 ```text
-Tech Echo gateway
+techecho.org gateway
   -> GitHub App user authorization
   -> permanent Tech Echo Member #
-  -> authenticated /home
-  -> one multilingual /forum
+  -> authenticated techecho.org/home
+  -> one multilingual forum.techecho.org forum
   -> GitHub Discussions as the only post/comment source of truth
 ```
 
 There are no Tech Echo passwords and no custom forum-content database. The D1
 database stores only member identity, encrypted GitHub credentials, sessions,
-short-lived OAuth state, and rate-limit counters.
+short-lived OAuth state and one-time cross-domain sign-in handoffs, and rate-limit
+counters. Account and forum sessions use separate host-only cookies and are tied
+to the same device session family for logout.
 
 ## Local development
 
@@ -47,6 +49,7 @@ but GitHub sign-in intentionally stops with a configuration message.
 - [Production deployment checklist](docs/DEPLOYMENT.md)
 - [Environment template](.env.example)
 - [Initial D1 migration](drizzle/0000_chilly_black_widow.sql)
+- [Two-domain session migration](drizzle/0001_tricky_captain_cross.sql)
 
 ## Canonical community backend
 

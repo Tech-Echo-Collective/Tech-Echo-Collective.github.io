@@ -16,7 +16,7 @@ const securityHeaders = [
       "base-uri 'self'",
       "connect-src 'self'",
       "font-src 'self'",
-      "form-action 'self' https://github.com",
+      "form-action 'self' https://github.com https://forum.techecho.org",
       "frame-ancestors 'none'",
       "img-src 'self' data: https://avatars.githubusercontent.com",
       "object-src 'none'",

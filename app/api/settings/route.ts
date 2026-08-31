@@ -9,7 +9,7 @@ export async function POST(request: Request) {
   try {
     assertFormContentLength(request, 8 * 1024);
     const formData = await request.formData();
-    const member = await requireFormMember(request, formData);
+    const member = await requireFormMember(request, formData, 'account');
     const input = settingsSchema.parse(Object.fromEntries(formData));
     await enforceRateLimit(member.id, 'settings', 20, 60 * 60);
     await updateSettings(member.id, input.displayName, input.locale);

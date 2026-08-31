@@ -3,8 +3,9 @@ import { redirect } from 'next/navigation';
 import { ErrorNotice } from '@/components/error-notice';
 import { LocaleSwitcher } from '@/components/locale-switcher';
 import { getCurrentMember } from '@/lib/auth';
+import { forumEntryUrl } from '@/lib/config';
 import { getCookieLocale, getDictionary } from '@/lib/i18n';
-import { normalizeLocale } from '@/lib/validation';
+import { normalizeLocale, safeForumReturnPath } from '@/lib/validation';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,15 +19,27 @@ export default async function GatewayPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const member = await getCurrentMember();
-  if (member) redirect(member.onboardedAt ? '/home' : '/onboarding');
-
   const params = await searchParams;
+  const forumReturnPath =
+    params.next === 'forum'
+      ? safeForumReturnPath(
+          typeof params.returnTo === 'string' ? params.returnTo : null,
+        )
+      : undefined;
+  const member = await getCurrentMember('account');
+  if (member) {
+    if (member.onboardedAt && forumReturnPath) redirect(forumEntryUrl(forumReturnPath));
+    redirect(member.onboardedAt ? '/home' : '/onboarding');
+  }
+
   const cookieLocale = await getCookieLocale();
   const locale = normalizeLocale(params.lang, cookieLocale);
   const dictionary = getDictionary(locale);
   const mode = params.mode === 'join' ? 'join' : 'signin';
   const error = typeof params.error === 'string' ? params.error : undefined;
+  const continuation = forumReturnPath
+    ? `&next=forum&returnTo=${encodeURIComponent(forumReturnPath)}`
+    : '';
 
   return (
     <main id="main-content" className="gateway-shell">
@@ -54,7 +67,11 @@ export default async function GatewayPage({
 
       <section className="gateway-access" aria-label={dictionary['gateway.continue']}>
         <div className="gateway-access__top">
-          <LocaleSwitcher locale={locale} returnTo={`/?mode=${mode}`} compact />
+          <LocaleSwitcher
+            locale={locale}
+            returnTo={`/?mode=${mode}${continuation}`}
+            compact
+          />
           <span className="live-indicator">
             <i /> {dictionary['status.online']}
           </span>
@@ -63,13 +80,13 @@ export default async function GatewayPage({
         <div className="auth-panel">
           <nav className="auth-tabs" aria-label={dictionary['gateway.accountAction']}>
             <a
-              href={`/?mode=signin&lang=${locale}`}
+              href={`/?mode=signin&lang=${locale}${continuation}`}
               aria-current={mode === 'signin' ? 'page' : undefined}
             >
               {dictionary['gateway.signIn']}
             </a>
             <a
-              href={`/?mode=join&lang=${locale}`}
+              href={`/?mode=join&lang=${locale}${continuation}`}
               aria-current={mode === 'join' ? 'page' : undefined}
             >
               {dictionary['gateway.join']}
@@ -91,7 +108,7 @@ export default async function GatewayPage({
 
             <a
               className="github-button"
-              href={`/auth/start?intent=${mode}&locale=${locale}`}
+              href={`/auth/start?intent=${mode}&locale=${locale}${continuation}`}
               rel="nofollow"
             >
               <strong className="github-glyph" aria-hidden="true">

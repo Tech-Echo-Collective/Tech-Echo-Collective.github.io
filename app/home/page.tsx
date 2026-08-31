@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { AppShell } from '@/components/app-shell';
 import { requireMember } from '@/lib/auth';
+import { forumEntryUrl } from '@/lib/config';
 import { getDictionary } from '@/lib/i18n';
 
 export const dynamic = 'force-dynamic';
@@ -10,7 +11,7 @@ export const metadata: Metadata = {
 };
 
 export default async function HomePage() {
-  const member = await requireMember();
+  const member = await requireMember({ audience: 'account' });
   const dictionary = getDictionary(member.preferredLocale);
   const domains = [
     ['science', 'domain.science', 'domain.scienceText'],
@@ -34,7 +35,7 @@ export default async function HomePage() {
         </h1>
         <p>{dictionary['home.heroText']}</p>
         <div className="button-row">
-          <a className="button button--primary" href="/forum">
+          <a className="button button--primary" href={forumEntryUrl('/')}>
             {dictionary['home.enterForum']}
           </a>
           <a className="button" href="https://github.com/Tech-Echo-Collective">
@@ -113,7 +114,7 @@ signal established.`}</pre>
               <span>SCIENCE / ATLAS</span>
               <h3>{dictionary['project.physics']}</h3>
               <p>{dictionary['project.physicsText']}</p>
-              <a href="https://techecho.org/Physics-Atlas-Web/">
+              <a href="https://atlas.techecho.org/">
                 {dictionary['project.view']} ↗
               </a>
             </div>
@@ -137,7 +138,7 @@ signal established.`}</pre>
           <h2>{dictionary['home.communityTitle']}</h2>
           <p>{dictionary['home.communityText']}</p>
         </div>
-        <a className="button button--primary" href="/forum">
+        <a className="button button--primary" href={forumEntryUrl('/')}>
           {dictionary['home.enterForum']} →
         </a>
       </section>

@@ -62,7 +62,7 @@ describe('public GitHub contributor reader', () => {
     expect(new Headers(init?.headers).get('Authorization')).toBe(
       'Bearer github_pat_test_value_12345',
     );
-    expect(init?.redirect).toBe('error');
+    expect(init?.redirect).toBe('manual');
   });
 
   it('marks a ten-page response as truncated when GitHub still has a next page', async () => {

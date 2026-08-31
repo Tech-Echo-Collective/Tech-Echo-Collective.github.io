@@ -198,7 +198,9 @@ async function fetchPublicGitHubPage(
   try {
     const response = await fetch(url, {
       signal: controller.signal,
-      redirect: 'error',
+      // Keep credentials on api.github.com while letting Workers expose any
+      // unexpected redirect as a response we can reject without following it.
+      redirect: 'manual',
       headers,
     });
     if (response.status !== 200) return { response, body: null };

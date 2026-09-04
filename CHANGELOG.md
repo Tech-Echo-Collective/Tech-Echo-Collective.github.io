@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.2.2 — 2026-09-04
+
+- Turned the Home orbit into six real, localized Quick Links for Profile, Projects, Members, Settings, About, and GitHub.
+- Made the orbit and sidebar share one canonical symbol, label, and destination list.
+- Added keyboard focus feedback, accessible names, and mobile-sized link targets without changing the dashboard hierarchy.
+
 ## v0.2.1 — 2026-09-04
 
 - Separated GitHub identity verification from permanent Tech Echo membership creation.

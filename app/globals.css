@@ -2024,25 +2024,47 @@ a {
   height: 68%;
 }
 .echo-orbit__node {
-  width: 14%;
+  width: clamp(44px, 14%, 56px);
   aspect-ratio: 1;
   font: 700 0.8rem/1 var(--font-mono);
+  cursor: pointer;
+  transition:
+    color 160ms ease,
+    border-color 160ms ease,
+    background 160ms ease,
+    box-shadow 160ms ease;
 }
-.echo-orbit__node--science {
+.echo-orbit__node:hover,
+.echo-orbit__node:focus-visible {
+  color: #fff;
+  border-color: var(--cyan);
+  background: #071a3a;
+  box-shadow: 0 0 30px rgba(58, 180, 255, 0.3);
+}
+.echo-orbit__node--profile {
   top: 6%;
   left: 27%;
 }
-.echo-orbit__node--code {
+.echo-orbit__node--projects {
   top: 28%;
   right: -2%;
 }
-.echo-orbit__node--games {
+.echo-orbit__node--members {
   right: 4%;
   bottom: 8%;
 }
-.echo-orbit__node--systems {
+.echo-orbit__node--settings {
   left: 5%;
   bottom: 3%;
+}
+.echo-orbit__node--about {
+  top: 39%;
+  left: -3%;
+}
+.echo-orbit__node--github {
+  top: 1%;
+  right: 20%;
+  font-size: 0.66rem;
 }
 .featured-projects,
 .dashboard-panel {

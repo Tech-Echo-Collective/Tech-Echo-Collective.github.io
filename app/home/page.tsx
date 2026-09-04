@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { AppShell } from '@/components/app-shell';
+import { EchoOrbit, getHomeQuickLinks } from '@/components/echo-orbit';
 import { requireMember } from '@/lib/auth';
 import { AUTHENTICATED_HOME_HERO } from '@/lib/branding';
 import { forumEntryUrl } from '@/lib/config';
@@ -28,6 +29,15 @@ export default async function HomePage() {
     activityUnavailable = true;
   }
 
+  const quickLinks = getHomeQuickLinks(member.memberNumber, {
+    profile: copy.common.profile,
+    projects: copy.nav.projects,
+    members: copy.nav.members,
+    settings: copy.common.settings,
+    about: copy.nav.about,
+    github: copy.nav.github,
+  });
+
   return (
     <AppShell member={member} active="home" returnTo="/home" layout="dashboard">
       <div className="home-dashboard">
@@ -52,18 +62,7 @@ export default async function HomePage() {
               </div>
             </div>
 
-            <div className="echo-orbit" aria-hidden="true">
-              <div className="echo-orbit__ring echo-orbit__ring--outer" />
-              <div className="echo-orbit__ring echo-orbit__ring--middle" />
-              <div className="echo-orbit__ring echo-orbit__ring--inner" />
-              <div className="echo-orbit__core">
-                <img src="/assets/tech-echo-mark.svg" alt="" />
-              </div>
-              <span className="echo-orbit__node echo-orbit__node--science">△</span>
-              <span className="echo-orbit__node echo-orbit__node--code">&lt;/&gt;</span>
-              <span className="echo-orbit__node echo-orbit__node--games">◇</span>
-              <span className="echo-orbit__node echo-orbit__node--systems">⬡</span>
-            </div>
+            <EchoOrbit links={quickLinks} label={copy.home.quickLinks} />
           </section>
 
           <section className="featured-projects" aria-labelledby="featured-title">
@@ -139,12 +138,11 @@ export default async function HomePage() {
               <h2>↗ {copy.home.quickLinks}</h2>
             </header>
             <nav>
-              <a href={`/member/${member.memberNumber}`}>○ {copy.common.profile}</a>
-              <a href="/projects">◇ {copy.nav.projects}</a>
-              <a href="/members">◎ {copy.nav.members}</a>
-              <a href="/settings">⌁ {copy.common.settings}</a>
-              <a href="/about">≡ {copy.nav.about}</a>
-              <a href="https://github.com/Tech-Echo-Collective">GH {copy.nav.github}</a>
+              {quickLinks.map((link) => (
+                <a href={link.href} key={link.id}>
+                  <span aria-hidden="true">{link.symbol}</span> {link.label}
+                </a>
+              ))}
             </nav>
           </section>
         </aside>

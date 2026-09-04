@@ -1,10 +1,10 @@
 import { env } from 'cloudflare:workers';
+import { CANONICAL_FOUNDER_GITHUB_USER_ID } from './identity';
 
 const defaults = {
   owner: 'Tech-Echo-Collective',
   repository: 'Tech-Echo-Discussion',
   repositoryId: '1293776929',
-  founderGithubUserId: '267296498',
   accountOrigin: 'https://techecho.org',
   forumOrigin: 'https://forum.techecho.org',
 };
@@ -63,7 +63,13 @@ export function getForumConfig() {
 }
 
 export function getFounderGithubUserId(): string {
-  return env.FOUNDER_GITHUB_USER_ID || defaults.founderGithubUserId;
+  const configured = env.FOUNDER_GITHUB_USER_ID?.trim();
+  if (configured && configured !== CANONICAL_FOUNDER_GITHUB_USER_ID) {
+    throw new Error(
+      'FOUNDER_GITHUB_USER_ID does not match the permanent founder identity.',
+    );
+  }
+  return CANONICAL_FOUNDER_GITHUB_USER_ID;
 }
 
 export function getPublicGitHubReadToken(): string | undefined {

@@ -381,6 +381,22 @@ a {
   border-color: rgba(255, 122, 144, 0.35);
   background: rgba(255, 122, 144, 0.07);
 }
+.notice--info {
+  color: var(--blue-soft);
+  border-color: rgba(86, 140, 255, 0.38);
+  background: rgba(86, 140, 255, 0.08);
+}
+.notice--info > div {
+  display: grid;
+  gap: 4px;
+}
+.notice--info strong {
+  color: var(--text);
+}
+.notice--info small {
+  color: var(--faint);
+  font: 0.7rem/1.5 var(--font-mono);
+}
 .gateway-footer {
   display: flex;
   flex-wrap: wrap;
@@ -887,10 +903,30 @@ a {
   color: var(--blue-soft);
   font: 700 2rem/1.2 var(--font-mono);
 }
+.identity-card__number span {
+  display: block;
+  max-width: 24ch;
+  color: var(--blue-soft);
+  font: 0.64rem/1.4 var(--font-mono);
+}
 .onboarding-footnote {
   color: var(--faint);
   font: 0.63rem/1.5 var(--font-mono);
   letter-spacing: 0.06em;
+}
+.onboarding-disclosure {
+  margin: 24px 0 10px;
+  color: var(--muted);
+  line-height: 1.65;
+}
+.onboarding-rules {
+  margin: 0;
+  padding-left: 20px;
+  color: var(--faint);
+  line-height: 1.65;
+}
+.onboarding-rules li + li {
+  margin-top: 6px;
 }
 
 .stacked-form {
@@ -913,6 +949,31 @@ a {
   border-radius: 0;
   color: var(--text);
   background: rgba(2, 8, 18, 0.9);
+}
+.stacked-form .consent-control {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  gap: 12px;
+  color: var(--muted);
+  font: inherit;
+  letter-spacing: normal;
+  line-height: 1.55;
+  text-transform: none;
+  cursor: pointer;
+}
+.stacked-form .consent-control input {
+  width: 18px;
+  min-height: 18px;
+  margin: 2px 0 0;
+  accent-color: var(--blue);
+}
+.onboarding-policy-links {
+  display: flex;
+  gap: 10px;
+}
+.onboarding-policy-links a:hover {
+  color: var(--cyan);
 }
 .stacked-form input,
 .stacked-form select {

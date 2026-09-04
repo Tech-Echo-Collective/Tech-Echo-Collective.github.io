@@ -23,6 +23,15 @@ export function proxy(request: NextRequest) {
     return redirectHost(request, ACCOUNT_HOST);
   }
 
+  if (
+    (hostname === ACCOUNT_HOST || hostname === FORUM_HOST) &&
+    pathname === '/favicon.ico'
+  ) {
+    const destination = request.nextUrl.clone();
+    destination.pathname = '/assets/tech-echo-mark.svg';
+    return NextResponse.redirect(destination, 308);
+  }
+
   if (hostname === ACCOUNT_HOST) {
     if (pathname === '/googlee054abfb1b2b52cf.html') {
       return new NextResponse('google-site-verification: googlee054abfb1b2b52cf.html\n', {

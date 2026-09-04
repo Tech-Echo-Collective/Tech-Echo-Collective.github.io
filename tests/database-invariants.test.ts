@@ -41,6 +41,11 @@ describe('member number database invariants', () => {
       database.prepare('UPDATE members SET member_number = 2 WHERE id = ?').run('member-1'),
     ).toThrow(/immutable/);
     expect(() =>
+      database
+        .prepare('UPDATE members SET github_user_id = ? WHERE id = ?')
+        .run('different-github-id', 'member-1'),
+    ).toThrow(/github identity is immutable/);
+    expect(() =>
       database.prepare('DELETE FROM members WHERE id = ?').run('member-1'),
     ).toThrow(/retained/);
     expect(() =>
@@ -55,6 +60,69 @@ describe('member number database invariants', () => {
         .prepare('DELETE FROM member_number_allocations WHERE member_number = 1')
         .run(),
     ).toThrow(/never reused/);
+  });
+
+  it('reserves #001 exclusively for the canonical founder identity', () => {
+    const database = migratedDatabase();
+    expect(() =>
+      database
+        .prepare(
+          `INSERT INTO members
+           (id, member_number, github_user_id, github_node_id, github_username,
+            display_name, avatar_url, role, preferred_locale, onboarded_at)
+           VALUES ('intruder', 1, '222', 'node-222', 'intruder', 'Intruder',
+                   'https://avatars.githubusercontent.com/u/222', 'member', 'en',
+                   CURRENT_TIMESTAMP)`,
+        )
+        .run(),
+    ).toThrow(/reserved github identity does not match/);
+  });
+
+  it('hides an incomplete legacy member and reuses its original number on confirmation', () => {
+    const database = migratedDatabase();
+    database
+      .prepare('INSERT INTO member_number_allocations (member_id) VALUES (?)')
+      .run('legacy-member');
+    const allocation = database
+      .prepare('SELECT member_number FROM member_number_allocations WHERE member_id = ?')
+      .get('legacy-member') as { member_number: number };
+    expect(allocation.member_number).toBe(2);
+    database
+      .prepare(
+        `INSERT INTO members
+         (id, member_number, github_user_id, github_node_id, github_username,
+          display_name, avatar_url, role, preferred_locale)
+         VALUES ('legacy-member', 2, '222', 'node-222', 'legacy', 'Legacy',
+                 'https://avatars.githubusercontent.com/u/222', 'member', 'en')`,
+      )
+      .run();
+
+    expect(
+      database
+        .prepare('SELECT COUNT(*) AS count FROM members WHERE onboarded_at IS NOT NULL')
+        .get(),
+    ).toEqual({ count: 0 });
+
+    database
+      .prepare(
+        `UPDATE members SET onboarded_at = CURRENT_TIMESTAMP, display_name = 'Confirmed'
+         WHERE github_user_id = '222'`,
+      )
+      .run();
+    expect(
+      database
+        .prepare('SELECT member_number FROM members WHERE github_user_id = ?')
+        .get('222'),
+    ).toEqual({ member_number: 2 });
+
+    database
+      .prepare('INSERT INTO member_number_allocations (member_id) VALUES (?)')
+      .run('next-member');
+    expect(
+      database
+        .prepare('SELECT member_number FROM member_number_allocations WHERE member_id = ?')
+        .get('next-member'),
+    ).toEqual({ member_number: 3 });
   });
 
   it('rejects duplicate stable GitHub identities', () => {
@@ -210,5 +278,30 @@ describe('member number database invariants', () => {
         )
         .get(),
     ).toEqual({ reserved_github_user_id: '267296498' });
+  });
+
+  it('stores a pending registration without allocating a Member Number', () => {
+    const database = migratedDatabase();
+    database
+      .prepare(
+        `INSERT INTO pending_registrations
+         (token_hash, github_user_id, payload_encrypted, expires_at)
+         VALUES ('pending-token', '222', 'encrypted-payload', '2099-01-01T00:00:00.000Z')`,
+      )
+      .run();
+
+    expect(database.prepare('SELECT COUNT(*) AS count FROM members').get()).toEqual({
+      count: 0,
+    });
+    expect(
+      database.prepare('SELECT COUNT(*) AS count FROM member_number_allocations').get(),
+    ).toEqual({ count: 1 });
+
+    const consume = database.prepare(
+      `DELETE FROM pending_registrations WHERE token_hash = ?
+       RETURNING github_user_id`,
+    );
+    expect(consume.get('pending-token')).toEqual({ github_user_id: '222' });
+    expect(consume.get('pending-token')).toBeUndefined();
   });
 });

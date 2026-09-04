@@ -1,6 +1,6 @@
 {
   "name": "tech-echo-collective",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "private": true,
   "type": "module",
   "scripts": {
@@ -9,6 +9,11 @@
     "start": "wrangler dev --config dist/server/wrangler.json",
     "lint": "oxlint",
     "format": "oxfmt",
+    "format:check": "oxfmt --check .",
+    "typecheck": "tsc --noEmit",
+    "verify": "npm run format:check && npm run lint && npm run typecheck && npm test && npm run build",
+    "smoke:production": "node scripts/smoke-production.mjs",
+    "backup:verify": "node scripts/verify-d1-export.mjs",
     "db:generate": "drizzle-kit generate",
     "test": "vitest run"
   },

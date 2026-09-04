@@ -5,7 +5,9 @@ export const locales = ['en', 'zh', 'fr', 'es'] as const;
 export const localeSchema = z.enum(locales);
 
 export const onboardingSchema = z.object({
+  displayName: z.string().trim().min(1).max(80),
   locale: localeSchema,
+  confirmMembership: z.literal('yes'),
   csrf: z.string().min(20).max(256),
 });
 

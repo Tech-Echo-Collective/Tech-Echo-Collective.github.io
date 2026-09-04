@@ -10,6 +10,7 @@ GitHub Discussions repository.
 ```text
 techecho.org gateway
   -> GitHub App user authorization
+  -> explicit membership confirmation
   -> permanent Tech Echo Member #
   -> authenticated techecho.org/home
   -> projects, members, and README-backed organization context
@@ -19,8 +20,9 @@ techecho.org gateway
 
 There are no Tech Echo passwords and no custom forum-content database. The D1
 database stores only member identity, encrypted GitHub credentials, sessions,
-short-lived OAuth state and one-time cross-domain sign-in handoffs, and rate-limit
-counters, plus a bounded cache of public GitHub contributor metadata. Account and
+short-lived OAuth and pending-registration state, one-time cross-domain sign-in
+handoffs, and rate-limit counters, plus a bounded cache of public GitHub
+contributor metadata. Account and
 forum sessions use separate host-only cookies and are tied to the same device
 session family for logout.
 
@@ -50,10 +52,12 @@ but GitHub sign-in intentionally stops with a configuration message.
 
 - [Engineering report](docs/ENGINEERING_REPORT.md)
 - [Production deployment checklist](docs/DEPLOYMENT.md)
+- [Production operations and recovery](docs/OPERATIONS.md)
 - [Environment template](.env.example)
 - [Initial D1 migration](drizzle/0000_chilly_black_widow.sql)
 - [Two-domain session migration](drizzle/0001_tricky_captain_cross.sql)
 - [Public contributor-cache migration](drizzle/0002_cute_kingpin.sql)
+- [Pending membership and identity-invariant migration](drizzle/0003_mushy_mantis.sql)
 - [Release changelog](CHANGELOG.md)
 
 ## Canonical community backend

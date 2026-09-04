@@ -1,5 +1,26 @@
 # Tech Echo account and forum — engineering report
 
+## v0.2.1 membership confirmation and operations hardening
+
+GitHub verification no longer creates a Tech Echo membership. An unknown Sign In
+returns to the Join explanation without allocating a number, saving a long-term
+credential, or creating a session. Join stores the verified GitHub identity and
+credential in an encrypted, hashed-cookie-bound, 30-minute pending registration.
+The permanent member row, credential, Member Number, and session are created only
+after the user reviews the disclosure and explicitly confirms membership.
+
+Legacy incomplete member rows remain immutable but are excluded from directories,
+profiles, forum Member attribution, and authenticated routes. Rejoining with the
+same stable GitHub ID resumes that original Member Number instead of allocating a
+new one. Founder GitHub ID `267296498` remains the only identity that can claim
+`#001`.
+
+Operational additions include CI, scheduled no-side-effect production smoke
+checks, a non-disclosing D1 health endpoint, an offline D1 export verifier, and a
+backup/restore runbook. Managed production export remains a manual prerequisite
+until a least-privilege D1 export credential and encrypted destination are
+provided.
+
 ## v0.2 dashboard, projects, contributors, and About
 
 The v0.2 release keeps the v0.1 authentication, permanent Member Number,
@@ -87,7 +108,7 @@ aggregated.
 
 ## Authentication and GitHub authorship
 
-The only v0.1 identity mechanism is an organization-owned public GitHub App:
+The identity mechanism is an organization-owned public GitHub App:
 
 1. The server generates a one-time state and PKCE S256 verifier.
 2. The encrypted verifier is stored in D1 for ten minutes; the browser receives
@@ -95,9 +116,13 @@ The only v0.1 identity mechanism is an organization-owned public GitHub App:
 3. The callback consumes the state exactly once and exchanges the code on the
    server with `repository_id=1293776929`.
 4. `GET /user` supplies the stable numeric GitHub ID and GraphQL node ID.
-5. The app finds or creates the Tech Echo member by numeric ID, never username.
-6. Access and refresh tokens are AES-GCM encrypted at rest.
-7. The browser receives an opaque Tech Echo session; D1 stores only its HMAC.
+5. The app looks up the Tech Echo member by numeric ID, never username. Sign In
+   never creates an unknown member.
+6. Join stores the verified identity and GitHub token in an encrypted, expiring
+   pending record. No Member Number exists until the person explicitly confirms.
+7. Confirmation consumes that record once, creates or completes the member, and
+   stores access and refresh tokens AES-GCM encrypted at rest.
+8. The browser receives an opaque Tech Echo session; D1 stores only its hash.
 
 Discussion and comment mutations use the authenticated member's GitHub App
 user-to-server token. GitHub therefore records the real GitHub user as author;
@@ -119,6 +144,7 @@ Tables:
 - `github_credentials`: encrypted per-user GitHub App tokens;
 - `sessions`: hashed opaque session identifiers;
 - `oauth_states`: expiring, one-use OAuth transactions;
+- `pending_registrations`: encrypted, expiring, one-use Join confirmations;
 - `rate_limits`: member/IP write buckets.
 
 GitHub Discussions remains canonical for titles, bodies, categories, comments,

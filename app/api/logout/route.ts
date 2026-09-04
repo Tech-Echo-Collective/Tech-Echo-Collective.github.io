@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { deleteSessionFamily, requireFormSession, sessionCookieName } from '@/lib/auth';
 import { getOriginConfig } from '@/lib/config';
+import { expiredCookieOptions } from '@/lib/cookies';
 import { assertFormContentLength } from '@/lib/validation';
 
 export async function POST(request: Request) {
@@ -14,9 +15,12 @@ export async function POST(request: Request) {
   } catch {
     return new NextResponse('Invalid logout request.', { status: 403 });
   }
-  const { accountOrigin } = getOriginConfig();
+  const { accountOrigin, forumOrigin } = getOriginConfig();
   const response = NextResponse.redirect(new URL('/', accountOrigin), 303);
-  response.cookies.delete(sessionCookieName(audience));
-  response.cookies.delete('__Host-tec_session');
+  const secure = (audience === 'account' ? accountOrigin : forumOrigin).startsWith(
+    'https://',
+  );
+  response.cookies.set(sessionCookieName(audience), '', expiredCookieOptions(secure));
+  response.cookies.set('__Host-tec_session', '', expiredCookieOptions(secure));
   return response;
 }

@@ -9,6 +9,7 @@ import {
   isAuthConfigured,
 } from './config';
 import { encryptSecret, hmac, randomToken, sha256, timingSafeEqual } from './crypto';
+import { consumePendingRegistration } from './registration';
 import type { GitHubViewer, Locale, Member, MemberRole } from './types';
 
 export const OAUTH_STATE_COOKIE = 'tec_oauth_state';
@@ -100,7 +101,8 @@ export async function findMembersByGithubNodeIds(
   const placeholders = uniqueIds.map(() => '?').join(',');
   const rows = await getD1()
     .prepare(
-      `SELECT ${memberColumns} FROM members m WHERE m.github_node_id IN (${placeholders})`,
+      `SELECT ${memberColumns} FROM members m
+       WHERE m.github_node_id IN (${placeholders}) AND m.onboarded_at IS NOT NULL`,
     )
     .bind(...uniqueIds)
     .all<MemberRow>();
@@ -119,7 +121,7 @@ export async function findMembersByGithubUserIds(
     const rows = await getD1()
       .prepare(
         `SELECT ${memberColumns} FROM members m
-         WHERE m.github_user_id IN (${placeholders})`,
+         WHERE m.github_user_id IN (${placeholders}) AND m.onboarded_at IS NOT NULL`,
       )
       .bind(...chunk)
       .all<MemberRow>();
@@ -133,7 +135,10 @@ export async function findMembersByGithubUserIds(
 export async function listMembers(): Promise<Member[]> {
   await ensureDatabase();
   const rows = await getD1()
-    .prepare(`SELECT ${memberColumns} FROM members m ORDER BY m.member_number ASC`)
+    .prepare(
+      `SELECT ${memberColumns} FROM members m
+       WHERE m.onboarded_at IS NOT NULL ORDER BY m.member_number ASC`,
+    )
     .all<MemberRow>();
   return (rows.results || []).map(mapMember);
 }
@@ -141,108 +146,53 @@ export async function listMembers(): Promise<Member[]> {
 export async function findMemberByNumber(memberNumber: number): Promise<Member | null> {
   await ensureDatabase();
   const row = await getD1()
-    .prepare(`SELECT ${memberColumns} FROM members m WHERE m.member_number = ?`)
+    .prepare(
+      `SELECT ${memberColumns} FROM members m
+       WHERE m.member_number = ? AND m.onboarded_at IS NOT NULL`,
+    )
     .bind(memberNumber)
     .first<MemberRow>();
   return row ? mapMember(row) : null;
 }
 
-export async function createOrUpdateMember(viewer: GitHubViewer): Promise<Member> {
+export async function updateExistingMemberFromGitHub(
+  viewer: GitHubViewer,
+): Promise<Member> {
   const githubUserId = String(viewer.id);
   const existing = await findMemberByGithubUserId(githubUserId);
-  if (existing) {
-    await getD1()
-      .prepare(
-        `UPDATE members SET github_node_id = ?, github_username = ?, avatar_url = ?,
-         updated_at = CURRENT_TIMESTAMP WHERE id = ?`,
-      )
-      .bind(viewer.node_id, viewer.login, viewer.avatar_url, existing.id)
-      .run();
-    return (await findMemberByGithubUserId(githubUserId))!;
-  }
-
-  const d1 = getD1();
-  const memberId = crypto.randomUUID();
-  const displayName = (viewer.name || viewer.login).trim().slice(0, 80);
-  const founder = githubUserId === getFounderGithubUserId();
-  const role: MemberRole = founder ? 'founder' : 'member';
-
-  try {
-    if (founder) {
-      await d1.batch([
-        d1
-          .prepare(
-            `UPDATE member_number_allocations SET member_id = ?
-             WHERE member_number = 1 AND member_id IS NULL AND reserved_github_user_id = ?`,
-          )
-          .bind(memberId, githubUserId),
-        d1
-          .prepare(
-            `INSERT INTO members
-             (id, member_number, github_user_id, github_node_id, github_username,
-              display_name, avatar_url, role, preferred_locale)
-             SELECT ?, member_number, ?, ?, ?, ?, ?, ?, 'en'
-             FROM member_number_allocations WHERE member_id = ?`,
-          )
-          .bind(
-            memberId,
-            githubUserId,
-            viewer.node_id,
-            viewer.login,
-            displayName,
-            viewer.avatar_url,
-            role,
-            memberId,
-          ),
-      ]);
-    } else {
-      await d1.batch([
-        d1
-          .prepare('INSERT INTO member_number_allocations (member_id) VALUES (?)')
-          .bind(memberId),
-        d1
-          .prepare(
-            `INSERT INTO members
-             (id, member_number, github_user_id, github_node_id, github_username,
-              display_name, avatar_url, role, preferred_locale)
-             SELECT ?, member_number, ?, ?, ?, ?, ?, ?, 'en'
-             FROM member_number_allocations WHERE member_id = ?`,
-          )
-          .bind(
-            memberId,
-            githubUserId,
-            viewer.node_id,
-            viewer.login,
-            displayName,
-            viewer.avatar_url,
-            role,
-            memberId,
-          ),
-      ]);
-    }
-  } catch (error) {
-    const racedMember = await findMemberByGithubUserId(githubUserId);
-    if (racedMember) return racedMember;
-    throw error;
-  }
-
-  const created = await findMemberByGithubUserId(githubUserId);
-  if (!created) {
-    throw new Error(
-      founder
-        ? 'Founder Member #001 reservation does not match this GitHub account.'
-        : 'Member profile could not be created.',
-    );
-  }
-  return created;
+  if (!existing) throw new Error('Tech Echo member does not exist.');
+  await getD1()
+    .prepare(
+      `UPDATE members SET github_node_id = ?, github_username = ?, avatar_url = ?,
+       updated_at = CURRENT_TIMESTAMP WHERE id = ?`,
+    )
+    .bind(viewer.node_id, viewer.login, viewer.avatar_url, existing.id)
+    .run();
+  return (await findMemberByGithubUserId(githubUserId))!;
 }
 
-interface GitHubTokenRecord {
+export interface GitHubTokenRecord {
   accessToken: string;
   refreshToken?: string | null;
   tokenType?: string;
   expiresIn?: number | null;
   refreshTokenExpiresIn?: number | null;
+  expiresAt?: string | null;
+  refreshTokenExpiresAt?: string | null;
+}
+
+async function encryptedGitHubCredential(token: GitHubTokenRecord) {
+  const config = getAuthConfig();
+  return {
+    accessEncrypted: await encryptSecret(token.accessToken, config.tokenEncryptionKey),
+    refreshEncrypted: token.refreshToken
+      ? await encryptSecret(token.refreshToken, config.tokenEncryptionKey)
+      : null,
+    tokenType: token.tokenType || 'bearer',
+    expiresAt: token.expiresAt ?? expiryFromNow(token.expiresIn),
+    refreshTokenExpiresAt:
+      token.refreshTokenExpiresAt ?? expiryFromNow(token.refreshTokenExpiresIn),
+  };
 }
 
 function expiryFromNow(seconds: number | null | undefined): string | null {
@@ -254,11 +204,7 @@ export async function saveGitHubCredential(
   token: GitHubTokenRecord,
 ): Promise<void> {
   await ensureDatabase();
-  const config = getAuthConfig();
-  const accessEncrypted = await encryptSecret(token.accessToken, config.tokenEncryptionKey);
-  const refreshEncrypted = token.refreshToken
-    ? await encryptSecret(token.refreshToken, config.tokenEncryptionKey)
-    : null;
+  const credential = await encryptedGitHubCredential(token);
 
   await getD1()
     .prepare(
@@ -276,13 +222,142 @@ export async function saveGitHubCredential(
     )
     .bind(
       memberId,
-      accessEncrypted,
-      refreshEncrypted,
-      token.tokenType || 'bearer',
-      expiryFromNow(token.expiresIn),
-      expiryFromNow(token.refreshTokenExpiresIn),
+      credential.accessEncrypted,
+      credential.refreshEncrypted,
+      credential.tokenType,
+      credential.expiresAt,
+      credential.refreshTokenExpiresAt,
     )
     .run();
+}
+
+export async function completePendingRegistration(
+  rawToken: string,
+  displayName: string,
+  locale: Locale,
+): Promise<{ member: Member; forumReturnPath?: string }> {
+  const registration = await consumePendingRegistration(rawToken);
+  const githubUserId = String(registration.viewer.id);
+  const existing = await findMemberByGithubUserId(githubUserId);
+  const credential = await encryptedGitHubCredential({
+    accessToken: registration.token.accessToken,
+    refreshToken: registration.token.refreshToken,
+    tokenType: registration.token.tokenType,
+    expiresAt: registration.token.accessExpiresAt,
+    refreshTokenExpiresAt: registration.token.refreshTokenExpiresAt,
+  });
+  const d1 = getD1();
+
+  if (existing) {
+    await d1.batch([
+      d1
+        .prepare(
+          `UPDATE members SET github_node_id = ?, github_username = ?, display_name = ?,
+           avatar_url = ?, preferred_locale = ?,
+           onboarded_at = COALESCE(onboarded_at, CURRENT_TIMESTAMP),
+           updated_at = CURRENT_TIMESTAMP WHERE id = ?`,
+        )
+        .bind(
+          registration.viewer.node_id,
+          registration.viewer.login,
+          existing.onboardedAt ? existing.displayName : displayName,
+          registration.viewer.avatar_url,
+          existing.onboardedAt ? existing.preferredLocale : locale,
+          existing.id,
+        ),
+      credentialUpsertStatement(d1, existing.id, credential),
+    ]);
+    const member = await findMemberByGithubUserId(githubUserId);
+    if (!member?.onboardedAt)
+      throw new Error('Member registration could not be completed.');
+    return { member, forumReturnPath: registration.forumReturnPath };
+  }
+
+  const memberId = crypto.randomUUID();
+  const founder = githubUserId === getFounderGithubUserId();
+  const role: MemberRole = founder ? 'founder' : 'member';
+  const allocate = founder
+    ? d1
+        .prepare(
+          `UPDATE member_number_allocations SET member_id = ?
+           WHERE member_number = 1 AND member_id IS NULL AND reserved_github_user_id = ?`,
+        )
+        .bind(memberId, githubUserId)
+    : d1
+        .prepare('INSERT INTO member_number_allocations (member_id) VALUES (?)')
+        .bind(memberId);
+  const createMember = d1
+    .prepare(
+      `INSERT INTO members
+       (id, member_number, github_user_id, github_node_id, github_username,
+        display_name, avatar_url, role, preferred_locale, onboarded_at)
+       SELECT ?, member_number, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP
+       FROM member_number_allocations WHERE member_id = ?`,
+    )
+    .bind(
+      memberId,
+      githubUserId,
+      registration.viewer.node_id,
+      registration.viewer.login,
+      displayName,
+      registration.viewer.avatar_url,
+      role,
+      locale,
+      memberId,
+    );
+
+  try {
+    await d1.batch([
+      allocate,
+      createMember,
+      credentialUpsertStatement(d1, memberId, credential),
+    ]);
+  } catch (error) {
+    const racedMember = await findMemberByGithubUserId(githubUserId);
+    if (racedMember?.onboardedAt) {
+      return { member: racedMember, forumReturnPath: registration.forumReturnPath };
+    }
+    throw error;
+  }
+
+  const member = await findMemberByGithubUserId(githubUserId);
+  if (!member?.onboardedAt) {
+    throw new Error(
+      founder
+        ? 'Founder Member #001 reservation does not match this GitHub account.'
+        : 'Member profile could not be created.',
+    );
+  }
+  return { member, forumReturnPath: registration.forumReturnPath };
+}
+
+function credentialUpsertStatement(
+  d1: D1Database,
+  memberId: string,
+  credential: Awaited<ReturnType<typeof encryptedGitHubCredential>>,
+) {
+  return d1
+    .prepare(
+      `INSERT INTO github_credentials
+       (member_id, access_token_encrypted, refresh_token_encrypted, token_type,
+        expires_at, refresh_token_expires_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+       ON CONFLICT(member_id) DO UPDATE SET
+         access_token_encrypted = excluded.access_token_encrypted,
+         refresh_token_encrypted = excluded.refresh_token_encrypted,
+         token_type = excluded.token_type,
+         expires_at = excluded.expires_at,
+         refresh_token_expires_at = excluded.refresh_token_expires_at,
+         updated_at = CURRENT_TIMESTAMP`,
+    )
+    .bind(
+      memberId,
+      credential.accessEncrypted,
+      credential.refreshEncrypted,
+      credential.tokenType,
+      credential.expiresAt,
+      credential.refreshTokenExpiresAt,
+    );
 }
 
 export interface AuthenticatedSession {
@@ -385,7 +460,8 @@ export async function sessionFromSessionToken(
        FROM sessions s
        JOIN session_contexts sc ON sc.token_hash = s.token_hash
        JOIN members m ON m.id = s.member_id
-       WHERE s.token_hash = ? AND sc.audience = ? AND s.expires_at > ?`,
+       WHERE s.token_hash = ? AND sc.audience = ? AND s.expires_at > ?
+         AND m.onboarded_at IS NOT NULL`,
     )
     .bind(await sha256(token), audience, new Date().toISOString())
     .first<AuthenticatedSessionRow>();
@@ -504,17 +580,6 @@ export async function requireFormMember(
   expectedAudience?: SessionAudience,
 ): Promise<Member> {
   return (await requireFormSession(request, formData, expectedAudience)).member;
-}
-
-export async function updateOnboarding(memberId: string, locale: Locale): Promise<void> {
-  await ensureDatabase();
-  await getD1()
-    .prepare(
-      `UPDATE members SET preferred_locale = ?, onboarded_at = COALESCE(onboarded_at, CURRENT_TIMESTAMP),
-       updated_at = CURRENT_TIMESTAMP WHERE id = ?`,
-    )
-    .bind(locale, memberId)
-    .run();
 }
 
 export async function updateSettings(

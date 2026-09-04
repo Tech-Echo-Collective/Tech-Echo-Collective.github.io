@@ -11,6 +11,8 @@ const errorKeys = {
   rate_limit: 'error.rate_limit',
   validation: 'error.validation',
   github: 'error.github',
+  registration_incomplete: 'error.registration_incomplete',
+  registration_expired: 'error.registration_expired',
 } as const;
 
 export function ErrorNotice({ code, locale }: { code?: string; locale: Locale }) {

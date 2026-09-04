@@ -145,6 +145,20 @@ export const oauthReturnTargets = sqliteTable(
   (table) => [index('idx_oauth_return_targets_expires_at').on(table.expiresAt)],
 );
 
+export const pendingRegistrations = sqliteTable(
+  'pending_registrations',
+  {
+    tokenHash: text('token_hash').primaryKey(),
+    githubUserId: text('github_user_id').notNull().unique(),
+    payloadEncrypted: text('payload_encrypted').notNull(),
+    expiresAt: text('expires_at').notNull(),
+    createdAt: text('created_at')
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`),
+  },
+  (table) => [index('idx_pending_registrations_expires_at').on(table.expiresAt)],
+);
+
 export const rateLimits = sqliteTable(
   'rate_limits',
   {

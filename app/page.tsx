@@ -5,6 +5,7 @@ import { LocaleSwitcher } from '@/components/locale-switcher';
 import { getCurrentMember } from '@/lib/auth';
 import { CANONICAL_LATIN_MOTTO } from '@/lib/branding';
 import { forumEntryUrl } from '@/lib/config';
+import { safeGatewayError, safeGatewayNotice } from '@/lib/gateway-state';
 import { getCookieLocale, getDictionary } from '@/lib/i18n';
 import { normalizeLocale, safeForumReturnPath } from '@/lib/validation';
 import { getV02Copy } from '@/lib/v02-copy';
@@ -37,10 +38,30 @@ export default async function GatewayPage({
   const dictionary = getDictionary(locale);
   const siteCopy = getV02Copy(locale);
   const mode = params.mode === 'join' ? 'join' : 'signin';
-  const error = typeof params.error === 'string' ? params.error : undefined;
+  const error = safeGatewayError(params.error);
+  const notice = safeGatewayNotice(params.notice);
   const continuation = forumReturnPath
     ? `&next=forum&returnTo=${encodeURIComponent(forumReturnPath)}`
     : '';
+  const messageContinuation = notice
+    ? `&notice=${encodeURIComponent(notice)}`
+    : error
+      ? `&error=${encodeURIComponent(error)}`
+      : '';
+  const infoNotice =
+    notice === 'account_not_found'
+      ? {
+          title: dictionary['gateway.joinRequiredTitle'],
+          text: dictionary['gateway.joinRequiredText'],
+          note: dictionary['gateway.joinRequiredNote'],
+        }
+      : notice === 'membership_created'
+        ? {
+            title: dictionary['gateway.membershipCreatedTitle'],
+            text: dictionary['gateway.membershipCreatedText'],
+            note: dictionary['gateway.membershipCreatedNote'],
+          }
+        : null;
 
   return (
     <main id="main-content" className="gateway-shell">
@@ -70,7 +91,7 @@ export default async function GatewayPage({
         <div className="gateway-access__top">
           <LocaleSwitcher
             locale={locale}
-            returnTo={`/?mode=${mode}${continuation}`}
+            returnTo={`/?mode=${mode}${continuation}${messageContinuation}`}
             compact
           />
           <span className="live-indicator">
@@ -104,6 +125,17 @@ export default async function GatewayPage({
                 ? dictionary['gateway.joinText']
                 : dictionary['gateway.signInText']}
             </p>
+
+            {infoNotice ? (
+              <div className="notice notice--info" role="status">
+                <span aria-hidden="true">i</span>
+                <div>
+                  <strong>{infoNotice.title}</strong>
+                  <p>{infoNotice.text}</p>
+                  <small>{infoNotice.note}</small>
+                </div>
+              </div>
+            ) : null}
 
             <ErrorNotice code={error} locale={locale} />
 

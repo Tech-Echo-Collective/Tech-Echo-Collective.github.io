@@ -43,14 +43,34 @@ const en = {
   'gateway.joinText': 'Create a permanent Tech Echo Member identity through GitHub.',
   'gateway.continue': 'Continue with GitHub',
   'gateway.noPassword': 'No separate password. GitHub is the identity provider.',
+  'gateway.joinRequiredTitle': 'No Tech Echo membership found.',
+  'gateway.joinRequiredText':
+    'This GitHub account is not registered with Tech Echo. Continue only if you want to create a permanent Member identity and Member Number.',
+  'gateway.joinRequiredNote': 'Your sign-in attempt did not create an account.',
+  'gateway.membershipCreatedTitle': 'Your membership was created.',
+  'gateway.membershipCreatedText':
+    'The final sign-in step was interrupted after your permanent Member identity was saved.',
+  'gateway.membershipCreatedNote': 'Choose Sign In to continue. Do not join again.',
   'gateway.publicLinks': 'Privacy · Terms · GitHub',
   'gateway.accountAction': 'Account action',
   'status.online': 'LOOSE TECHNICAL COLLECTIVE ONLINE',
-  'onboarding.eyebrow': 'FIRST SIGNAL',
-  'onboarding.title': 'Your Tech Echo identity is ready.',
-  'onboarding.member': 'Permanent member number',
+  'onboarding.eyebrow': 'MEMBERSHIP CONFIRMATION',
+  'onboarding.title': 'Confirm your Tech Echo membership.',
+  'onboarding.member': 'Member number',
+  'onboarding.numberPending': 'Assigned after confirmation',
+  'onboarding.pendingFootnote': 'TECH ECHO IDENTITY / PENDING CONFIRMATION',
+  'onboarding.displayName': 'Display name',
   'onboarding.language': 'Preferred interface language',
   'onboarding.enter': 'Enter Tech Echo',
+  'onboarding.disclosure':
+    'GitHub has verified this identity. No Tech Echo membership has been created yet.',
+  'onboarding.permanentRule':
+    'Confirming creates a permanent Member Number that is never reassigned.',
+  'onboarding.publicRule':
+    'Your display name, GitHub username, Member Number, community role, and join date will be visible to signed-in members.',
+  'onboarding.confirmation':
+    'I want to create this permanent Tech Echo Member identity and accept the Privacy Policy and Terms.',
+  'onboarding.confirmAndJoin': 'Confirm and join Tech Echo',
   'home.heroBefore': 'A loose ',
   'home.heroAccent': 'Science and Engineering',
   'home.heroAfter': ' collective.',
@@ -146,12 +166,12 @@ const en = {
   'role.member': 'Member',
   'legal.privacyTitle': 'Privacy',
   'legal.privacyBody':
-    'Tech Echo stores the minimum account data needed for membership: your stable GitHub identity, current profile details, Member Number, role, language preference, secure session records, and encrypted GitHub App credentials. Your display name, Member Number, GitHub username, global role, and join date appear in the authenticated member directory. Public GitHub contributor metadata is normally refreshed every six hours, may be served stale during an outage, is never served after 48 hours, and is removed during the next cache cleanup. Forum content remains in GitHub Discussions. We do not create Tech Echo passwords or sell member data.',
+    'Tech Echo stores the minimum account data needed for membership: your stable GitHub identity, current profile details, Member Number, role, language preference, secure session records, and encrypted GitHub App credentials. During Join confirmation, verified identity and credential details are encrypted, become unusable after 30 minutes, and are removed after use or during cleanup. Your display name, Member Number, GitHub username, global role, and join date appear in the authenticated member directory. Public GitHub contributor metadata is normally refreshed every six hours, may be served stale during an outage, is never served after 48 hours, and is removed during the next cache cleanup. Forum content remains in GitHub Discussions. We do not create Tech Echo passwords or sell member data.',
   'legal.termsTitle': 'Terms',
   'legal.termsBody':
     'Participate constructively, respect applicable law and intellectual property, and do not abuse the service. Forum content is also governed by GitHub’s terms because GitHub Discussions is the canonical backend. Tech Echo may restrict access when needed to protect the community.',
-  'legal.kicker': 'PUBLIC / POLICY / V0.2',
-  'legal.updated': 'Last updated: 31 August 2026',
+  'legal.kicker': 'PUBLIC / POLICY / V0.2.1',
+  'legal.updated': 'Last updated: 4 September 2026',
   'common.loading': 'Loading…',
   'common.loadingSignal': 'ESTABLISHING SIGNAL…',
   'common.syncingForum': 'SYNCING GITHUB DISCUSSIONS…',
@@ -175,6 +195,10 @@ const en = {
   'error.rate_limit': 'Too many attempts. Please wait and try again.',
   'error.validation': 'Check the highlighted information and try again.',
   'error.github': 'GitHub Discussions is temporarily unavailable.',
+  'error.registration_incomplete':
+    'This membership was not completed. Choose Join Tech Echo to review and confirm it.',
+  'error.registration_expired':
+    'The membership confirmation expired or was already used. Start Join Tech Echo again.',
 } as const;
 
 type DictionaryKey = keyof typeof en;
@@ -208,14 +232,31 @@ const zh: Dictionary = {
   'gateway.joinText': '通过 GitHub 创建永久的 Tech Echo 会员身份。',
   'gateway.continue': '使用 GitHub 继续',
   'gateway.noPassword': '无需单独密码。GitHub 是身份提供方。',
+  'gateway.joinRequiredTitle': '未找到 Tech Echo 会员身份。',
+  'gateway.joinRequiredText':
+    '此 GitHub 账户尚未注册 Tech Echo。仅当你希望创建永久会员身份和会员编号时才继续。',
+  'gateway.joinRequiredNote': '刚才的登录没有创建账户。',
+  'gateway.membershipCreatedTitle': '你的会员身份已创建。',
+  'gateway.membershipCreatedText': '永久会员身份保存后，最后的登录步骤被中断。',
+  'gateway.membershipCreatedNote': '请选择“登录”继续，请勿再次加入。',
   'gateway.publicLinks': '隐私 · 条款 · GitHub',
   'gateway.accountAction': '账户操作',
   'status.online': '松散技术共同体在线',
-  'onboarding.eyebrow': '首次信号',
-  'onboarding.title': '你的 Tech Echo 身份已就绪。',
-  'onboarding.member': '永久会员编号',
+  'onboarding.eyebrow': '入会确认',
+  'onboarding.title': '确认加入 Tech Echo。',
+  'onboarding.member': '会员编号',
+  'onboarding.numberPending': '确认后分配',
+  'onboarding.pendingFootnote': 'TECH ECHO 身份 / 等待确认',
+  'onboarding.displayName': '显示名称',
   'onboarding.language': '首选界面语言',
   'onboarding.enter': '进入 Tech Echo',
+  'onboarding.disclosure': 'GitHub 已验证此身份；目前尚未创建 Tech Echo 会员账户。',
+  'onboarding.permanentRule': '确认后会分配永久会员编号，此编号不会重新分配给他人。',
+  'onboarding.publicRule':
+    '显示名称、GitHub 用户名、会员编号、共同体角色和加入日期将对已登录成员可见。',
+  'onboarding.confirmation':
+    '我确认要创建这个永久的 Tech Echo 会员身份，并接受隐私政策与条款。',
+  'onboarding.confirmAndJoin': '确认并加入 Tech Echo',
   'home.heroBefore': '一个松散的',
   'home.heroAccent': '科学与工程',
   'home.heroAfter': '共同体。',
@@ -301,12 +342,12 @@ const zh: Dictionary = {
   'role.member': '会员',
   'legal.privacyTitle': '隐私',
   'legal.privacyBody':
-    'Tech Echo 仅保存会员功能所需的最少账户数据：稳定的 GitHub 身份、当前资料、会员编号、角色、语言偏好、安全会话记录和加密的 GitHub App 凭证。登录后的成员目录会显示你的显示名称、会员编号、GitHub 用户名、全局角色和加入日期。公开的 GitHub 贡献者元数据通常每六小时刷新一次；GitHub 故障时可能短暂显示旧数据，超过 48 小时后不再显示，并会在下一次缓存清理时移除。论坛内容仍保存在 GitHub Discussions。我们不创建 Tech Echo 密码，也不出售会员数据。',
+    'Tech Echo 仅保存会员功能所需的最少账户数据：稳定的 GitHub 身份、当前资料、会员编号、角色、语言偏好、安全会话记录和加密的 GitHub App 凭证。加入确认期间，已验证的身份和凭证资料会加密保存，30 分钟后即无法使用，并会在使用后或清理时移除。登录后的成员目录会显示你的显示名称、会员编号、GitHub 用户名、全局角色和加入日期。公开的 GitHub 贡献者元数据通常每六小时刷新一次；GitHub 故障时可能短暂显示旧数据，超过 48 小时后不再显示，并会在下一次缓存清理时移除。论坛内容仍保存在 GitHub Discussions。我们不创建 Tech Echo 密码，也不出售会员数据。',
   'legal.termsTitle': '使用条款',
   'legal.termsBody':
     '请建设性参与，遵守适用法律并尊重知识产权，不要滥用服务。由于 GitHub Discussions 是唯一论坛后端，论坛内容同时受 GitHub 条款约束。为保护社区，Tech Echo 可在必要时限制访问。',
-  'legal.kicker': '公开 / 政策 / V0.2',
-  'legal.updated': '最后更新：2026年8月31日',
+  'legal.kicker': '公开 / 政策 / V0.2.1',
+  'legal.updated': '最后更新：2026年9月4日',
   'common.loading': '加载中…',
   'common.loadingSignal': '正在建立信号…',
   'common.syncingForum': '正在同步 GITHUB DISCUSSIONS…',
@@ -329,6 +370,9 @@ const zh: Dictionary = {
   'error.rate_limit': '尝试次数过多，请稍后再试。',
   'error.validation': '请检查填写内容后重试。',
   'error.github': 'GitHub Discussions 暂时不可用。',
+  'error.registration_incomplete':
+    '这个会员身份尚未完成注册。请选择“加入 Tech Echo”查看并确认。',
+  'error.registration_expired': '入会确认已过期或已使用，请重新开始加入 Tech Echo。',
 };
 
 const fr: Dictionary = {
@@ -356,14 +400,35 @@ const fr: Dictionary = {
   'gateway.continue': 'Continuer avec GitHub',
   'gateway.noPassword':
     'Aucun mot de passe distinct. GitHub est le fournisseur d’identité.',
+  'gateway.joinRequiredTitle': 'Aucun profil de membre Tech Echo n’a été trouvé.',
+  'gateway.joinRequiredText':
+    'Ce compte GitHub n’est pas encore inscrit à Tech Echo. Continuez uniquement si vous souhaitez créer une identité et un numéro de membre permanents.',
+  'gateway.joinRequiredNote': 'La tentative de connexion n’a créé aucun compte.',
+  'gateway.membershipCreatedTitle': 'Votre adhésion a été créée.',
+  'gateway.membershipCreatedText':
+    'La dernière étape de connexion a été interrompue après l’enregistrement de votre identité permanente.',
+  'gateway.membershipCreatedNote':
+    'Choisissez Connexion pour continuer. Ne recommencez pas l’inscription.',
   'gateway.publicLinks': 'Confidentialité · Conditions · GitHub',
   'gateway.accountAction': 'Action du compte',
   'status.online': 'COLLECTIF TECHNIQUE INFORMEL EN LIGNE',
-  'onboarding.eyebrow': 'PREMIER SIGNAL',
-  'onboarding.title': 'Votre identité Tech Echo est prête.',
-  'onboarding.member': 'Numéro de membre permanent',
+  'onboarding.eyebrow': 'CONFIRMATION D’ADHÉSION',
+  'onboarding.title': 'Confirmez votre adhésion à Tech Echo.',
+  'onboarding.member': 'Numéro de membre',
+  'onboarding.numberPending': 'Attribué après confirmation',
+  'onboarding.pendingFootnote': 'IDENTITÉ TECH ECHO / CONFIRMATION EN ATTENTE',
+  'onboarding.displayName': 'Nom affiché',
   'onboarding.language': 'Langue préférée de l’interface',
   'onboarding.enter': 'Entrer dans Tech Echo',
+  'onboarding.disclosure':
+    'GitHub a vérifié cette identité. Aucune adhésion Tech Echo n’a encore été créée.',
+  'onboarding.permanentRule':
+    'La confirmation crée un numéro de membre permanent qui ne sera jamais réattribué.',
+  'onboarding.publicRule':
+    'Votre nom affiché, identifiant GitHub, numéro de membre, rôle et date d’adhésion seront visibles par les membres connectés.',
+  'onboarding.confirmation':
+    'Je souhaite créer cette identité permanente de membre Tech Echo et j’accepte la Politique de confidentialité et les Conditions.',
+  'onboarding.confirmAndJoin': 'Confirmer et rejoindre Tech Echo',
   'home.heroBefore': 'Un collectif informel de ',
   'home.heroAccent': 'sciences et d’ingénierie',
   'home.heroAfter': '.',
@@ -457,12 +522,12 @@ const fr: Dictionary = {
   'role.member': 'Membre',
   'legal.privacyTitle': 'Confidentialité',
   'legal.privacyBody':
-    'Tech Echo conserve uniquement les données nécessaires à l’adhésion : identité GitHub stable, profil actuel, numéro de membre, rôle, langue, sessions sécurisées et identifiants GitHub App chiffrés. Le nom affiché, le numéro de membre, le nom GitHub, le rôle global et la date d’inscription apparaissent dans l’annuaire réservé aux membres connectés. Les métadonnées publiques des contributeurs GitHub sont normalement actualisées toutes les six heures ; des données anciennes peuvent être affichées pendant une panne, ne sont jamais affichées après 48 heures et sont retirées lors du nettoyage suivant. Le contenu du forum reste dans GitHub Discussions. Aucun mot de passe Tech Echo n’est créé et les données ne sont pas vendues.',
+    'Tech Echo conserve uniquement les données nécessaires à l’adhésion : identité GitHub stable, profil actuel, numéro de membre, rôle, langue, sessions sécurisées et identifiants GitHub App chiffrés. Pendant la confirmation, l’identité vérifiée et les identifiants sont chiffrés, deviennent inutilisables après 30 minutes, puis sont retirés après utilisation ou lors du nettoyage. Le nom affiché, le numéro de membre, le nom GitHub, le rôle global et la date d’inscription apparaissent dans l’annuaire réservé aux membres connectés. Les métadonnées publiques des contributeurs GitHub sont normalement actualisées toutes les six heures ; des données anciennes peuvent être affichées pendant une panne, ne sont jamais affichées après 48 heures et sont retirées lors du nettoyage suivant. Le contenu du forum reste dans GitHub Discussions. Aucun mot de passe Tech Echo n’est créé et les données ne sont pas vendues.',
   'legal.termsTitle': 'Conditions',
   'legal.termsBody':
     'Participez de manière constructive, respectez la loi et la propriété intellectuelle, et n’abusez pas du service. GitHub Discussions étant la source canonique, son contenu est également soumis aux conditions de GitHub. Tech Echo peut limiter l’accès pour protéger la communauté.',
-  'legal.kicker': 'PUBLIC / POLITIQUE / V0.2',
-  'legal.updated': 'Dernière mise à jour : 31 août 2026',
+  'legal.kicker': 'PUBLIC / POLITIQUE / V0.2.1',
+  'legal.updated': 'Dernière mise à jour : 4 septembre 2026',
   'common.loading': 'Chargement…',
   'common.loadingSignal': 'ÉTABLISSEMENT DU SIGNAL…',
   'common.syncingForum': 'SYNCHRONISATION DES DISCUSSIONS GITHUB…',
@@ -487,6 +552,10 @@ const fr: Dictionary = {
   'error.rate_limit': 'Trop de tentatives. Attendez avant de réessayer.',
   'error.validation': 'Vérifiez les informations et réessayez.',
   'error.github': 'GitHub Discussions est temporairement indisponible.',
+  'error.registration_incomplete':
+    'Cette adhésion n’a pas été finalisée. Choisissez Rejoindre Tech Echo pour la vérifier et la confirmer.',
+  'error.registration_expired':
+    'La confirmation d’adhésion a expiré ou a déjà été utilisée. Recommencez depuis Rejoindre Tech Echo.',
 };
 
 const es: Dictionary = {
@@ -514,14 +583,35 @@ const es: Dictionary = {
   'gateway.joinText': 'Crea una identidad permanente de Tech Echo mediante GitHub.',
   'gateway.continue': 'Continuar con GitHub',
   'gateway.noPassword': 'Sin contraseña separada. GitHub es el proveedor de identidad.',
+  'gateway.joinRequiredTitle': 'No se encontró ningún perfil de miembro de Tech Echo.',
+  'gateway.joinRequiredText':
+    'Esta cuenta de GitHub aún no está registrada en Tech Echo. Continúa solo si deseas crear una identidad y un número de miembro permanentes.',
+  'gateway.joinRequiredNote': 'El intento de inicio de sesión no creó ninguna cuenta.',
+  'gateway.membershipCreatedTitle': 'Tu membresía se ha creado.',
+  'gateway.membershipCreatedText':
+    'El último paso de acceso se interrumpió después de guardar tu identidad permanente.',
+  'gateway.membershipCreatedNote':
+    'Elige Iniciar sesión para continuar. No vuelvas a registrarte.',
   'gateway.publicLinks': 'Privacidad · Condiciones · GitHub',
   'gateway.accountAction': 'Acción de cuenta',
   'status.online': 'COLECTIVO TÉCNICO INFORMAL EN LÍNEA',
-  'onboarding.eyebrow': 'PRIMERA SEÑAL',
-  'onboarding.title': 'Tu identidad de Tech Echo está lista.',
-  'onboarding.member': 'Número de miembro permanente',
+  'onboarding.eyebrow': 'CONFIRMACIÓN DE MEMBRESÍA',
+  'onboarding.title': 'Confirma tu membresía de Tech Echo.',
+  'onboarding.member': 'Número de miembro',
+  'onboarding.numberPending': 'Asignado tras la confirmación',
+  'onboarding.pendingFootnote': 'IDENTIDAD TECH ECHO / CONFIRMACIÓN PENDIENTE',
+  'onboarding.displayName': 'Nombre visible',
   'onboarding.language': 'Idioma preferido de la interfaz',
   'onboarding.enter': 'Entrar en Tech Echo',
+  'onboarding.disclosure':
+    'GitHub ha verificado esta identidad. Aún no se ha creado ninguna membresía de Tech Echo.',
+  'onboarding.permanentRule':
+    'Al confirmar se crea un número de miembro permanente que nunca se reasigna.',
+  'onboarding.publicRule':
+    'Tu nombre visible, usuario de GitHub, número de miembro, rol y fecha de ingreso serán visibles para los miembros conectados.',
+  'onboarding.confirmation':
+    'Quiero crear esta identidad permanente de miembro de Tech Echo y acepto la Política de privacidad y las Condiciones.',
+  'onboarding.confirmAndJoin': 'Confirmar y unirse a Tech Echo',
   'home.heroBefore': 'Un colectivo informal de ',
   'home.heroAccent': 'ciencia e ingeniería',
   'home.heroAfter': '.',
@@ -615,12 +705,12 @@ const es: Dictionary = {
   'role.member': 'Miembro',
   'legal.privacyTitle': 'Privacidad',
   'legal.privacyBody':
-    'Tech Echo guarda los datos mínimos de membresía: identidad estable de GitHub, perfil actual, número de miembro, rol, idioma, sesiones seguras y credenciales cifradas de GitHub App. El nombre visible, el número de miembro, el usuario de GitHub, el rol global y la fecha de ingreso aparecen en el directorio autenticado. Los metadatos públicos de colaboradores de GitHub se actualizan normalmente cada seis horas; durante una interrupción pueden mostrarse datos anteriores, nunca se muestran después de 48 horas y se eliminan en la siguiente limpieza de caché. El contenido del foro permanece en GitHub Discussions. No creamos contraseñas de Tech Echo ni vendemos datos.',
+    'Tech Echo guarda los datos mínimos de membresía: identidad estable de GitHub, perfil actual, número de miembro, rol, idioma, sesiones seguras y credenciales cifradas de GitHub App. Durante la confirmación, la identidad verificada y las credenciales se guardan cifradas, dejan de ser utilizables tras 30 minutos y se retiran después de su uso o durante la limpieza. El nombre visible, el número de miembro, el usuario de GitHub, el rol global y la fecha de ingreso aparecen en el directorio autenticado. Los metadatos públicos de colaboradores de GitHub se actualizan normalmente cada seis horas; durante una interrupción pueden mostrarse datos anteriores, nunca se muestran después de 48 horas y se eliminan en la siguiente limpieza de caché. El contenido del foro permanece en GitHub Discussions. No creamos contraseñas de Tech Echo ni vendemos datos.',
   'legal.termsTitle': 'Condiciones',
   'legal.termsBody':
     'Participa de forma constructiva, respeta la ley y la propiedad intelectual, y no abuses del servicio. Como GitHub Discussions es la fuente canónica, el contenido también se rige por los términos de GitHub. Tech Echo puede limitar el acceso para proteger a la comunidad.',
-  'legal.kicker': 'PÚBLICO / POLÍTICA / V0.2',
-  'legal.updated': 'Última actualización: 31 de agosto de 2026',
+  'legal.kicker': 'PÚBLICO / POLÍTICA / V0.2.1',
+  'legal.updated': 'Última actualización: 4 de septiembre de 2026',
   'common.loading': 'Cargando…',
   'common.loadingSignal': 'ESTABLECIENDO SEÑAL…',
   'common.syncingForum': 'SINCRONIZANDO GITHUB DISCUSSIONS…',
@@ -645,6 +735,10 @@ const es: Dictionary = {
   'error.rate_limit': 'Demasiados intentos. Espera antes de volver a intentarlo.',
   'error.validation': 'Comprueba la información e inténtalo de nuevo.',
   'error.github': 'GitHub Discussions no está disponible temporalmente.',
+  'error.registration_incomplete':
+    'Esta membresía no se completó. Elige Unirse a Tech Echo para revisarla y confirmarla.',
+  'error.registration_expired':
+    'La confirmación de membresía caducó o ya se utilizó. Vuelve a empezar desde Unirse a Tech Echo.',
 };
 
 const dictionaries: Record<Locale, Dictionary> = { en, zh, fr, es };

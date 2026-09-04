@@ -1,8 +1,8 @@
 import { env } from 'cloudflare:workers';
 import { drizzle } from 'drizzle-orm/d1';
 import * as schema from './schema';
+import { getFounderGithubUserId } from '../lib/config';
 
-const DEFAULT_FOUNDER_GITHUB_USER_ID = '267296498';
 let databaseReady: Promise<void> | undefined;
 
 const schemaStatements = [
@@ -78,6 +78,13 @@ const schemaStatements = [
     expires_at TEXT NOT NULL,
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
   )`,
+  `CREATE TABLE IF NOT EXISTS pending_registrations (
+    token_hash TEXT PRIMARY KEY,
+    github_user_id TEXT NOT NULL UNIQUE,
+    payload_encrypted TEXT NOT NULL,
+    expires_at TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+  )`,
   `CREATE TABLE IF NOT EXISTS rate_limits (
     bucket_key TEXT PRIMARY KEY,
     count INTEGER NOT NULL,
@@ -98,6 +105,7 @@ const schemaStatements = [
   'CREATE UNIQUE INDEX IF NOT EXISTS idx_sso_handoffs_family ON sso_handoffs(family_id)',
   'CREATE INDEX IF NOT EXISTS idx_oauth_states_expires_at ON oauth_states(expires_at)',
   'CREATE INDEX IF NOT EXISTS idx_oauth_return_targets_expires_at ON oauth_return_targets(expires_at)',
+  'CREATE INDEX IF NOT EXISTS idx_pending_registrations_expires_at ON pending_registrations(expires_at)',
   'CREATE INDEX IF NOT EXISTS idx_rate_limits_reset_at ON rate_limits(reset_at)',
   `CREATE TRIGGER IF NOT EXISTS members_member_number_immutable
    BEFORE UPDATE OF member_number ON members
@@ -113,6 +121,19 @@ const schemaStatements = [
    BEFORE UPDATE OF member_id ON member_number_allocations
    WHEN OLD.member_id IS NOT NULL AND OLD.member_id IS NOT NEW.member_id
    BEGIN SELECT RAISE(ABORT, 'member number assignment is immutable'); END`,
+  `CREATE TRIGGER IF NOT EXISTS members_github_identity_immutable
+   BEFORE UPDATE OF github_user_id ON members
+   WHEN OLD.github_user_id <> NEW.github_user_id
+   BEGIN SELECT RAISE(ABORT, 'github identity is immutable'); END`,
+  `CREATE TRIGGER IF NOT EXISTS members_reserved_identity_matches
+   BEFORE INSERT ON members
+   WHEN EXISTS (
+     SELECT 1 FROM member_number_allocations a
+     WHERE a.member_number = NEW.member_number
+       AND a.reserved_github_user_id IS NOT NULL
+       AND a.reserved_github_user_id <> NEW.github_user_id
+   )
+   BEGIN SELECT RAISE(ABORT, 'reserved github identity does not match'); END`,
 ];
 
 export function getD1(): D1Database {
@@ -141,7 +162,7 @@ export async function ensureDatabase(): Promise<void> {
       )
       .run();
 
-    const founderId = env.FOUNDER_GITHUB_USER_ID || DEFAULT_FOUNDER_GITHUB_USER_ID;
+    const founderId = getFounderGithubUserId();
     await d1
       .prepare(
         `INSERT OR IGNORE INTO member_number_allocations
@@ -160,6 +181,17 @@ export async function ensureDatabase(): Promise<void> {
       .prepare('DELETE FROM github_contributor_cache WHERE fetched_at < ?')
       .bind(new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString())
       .run();
+    const now = new Date().toISOString();
+    await d1.batch([
+      d1.prepare('DELETE FROM pending_registrations WHERE expires_at <= ?').bind(now),
+      d1.prepare('DELETE FROM oauth_states WHERE expires_at <= ?').bind(now),
+      d1.prepare('DELETE FROM oauth_return_targets WHERE expires_at <= ?').bind(now),
+      d1.prepare('DELETE FROM sso_handoffs WHERE expires_at <= ?').bind(now),
+      d1.prepare('DELETE FROM sessions WHERE expires_at <= ?').bind(now),
+      d1
+        .prepare('DELETE FROM rate_limits WHERE reset_at <= ?')
+        .bind(Math.floor(Date.now() / 1000)),
+    ]);
     await d1.prepare('PRAGMA optimize').run();
   })();
 

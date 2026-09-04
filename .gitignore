@@ -9,3 +9,5 @@ dist/
 *.log
 *.tsbuildinfo
 .DS_Store
+.d1-backups/
+*.d1-export.sql

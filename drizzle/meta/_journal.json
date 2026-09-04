@@ -22,6 +22,13 @@
       "when": 1788160890176,
       "tag": "0002_cute_kingpin",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1788521002493,
+      "tag": "0003_mushy_mantis",
+      "breakpoints": true
     }
   ]
 }

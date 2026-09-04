@@ -14,6 +14,12 @@ original migration or reassign this reservation after launch.
 Before every release, verify that `members.github_user_id = '267296498'` still
 maps to Member Number `1` and that the immutability triggers remain present.
 
+Run the automated release gate before packaging:
+
+```sh
+npm run verify
+```
+
 ## 2. Create the organization GitHub App
 
 As an owner of `Tech-Echo-Collective`, open:
@@ -92,14 +98,23 @@ backoff, and stale rows are removed after 48 hours. It does not change members,
 Member Numbers, sessions, OAuth credentials, forum content, or permissions. The
 Sites build package also includes the Drizzle migration metadata.
 
+`0003_mushy_mantis.sql` adds the encrypted, expiring `pending_registrations`
+table used between GitHub verification and explicit Join confirmation. A
+pending row has no Member Number and is consumed once. It also makes stable
+GitHub IDs immutable and enforces reserved GitHub identities when a member row
+is inserted, strengthening the permanent `267296498 -> #001` guarantee.
+
 Verify:
 
 - allocation row `#001` exists with the confirmed reserved GitHub ID;
 - the member-number immutability trigger exists;
 - the allocation no-delete trigger exists;
-- the member-retention and allocation-assignment immutability triggers exist;
+- the member-retention, allocation-assignment, GitHub-identity, and
+  founder-reservation triggers exist;
 - foreign keys and unique indexes exist.
 - `github_contributor_cache` exists and contains no secrets.
+- `pending_registrations` exists, contains only encrypted payloads, and has an
+  expiry index.
 
 The application also performs idempotent schema initialization as a startup
 safety net, but the checked-in migration remains the auditable production source.
@@ -109,20 +124,25 @@ safety net, but the checked-in migration remains the auditable production source
 This step is mandatory for a fresh deployment and should be repeated after any
 OAuth, GitHub App, or forum-write change.
 
-Use a non-founder test GitHub account:
+Use a non-founder, non-disposable GitHub account:
 
-1. Open the production root and choose Join Tech Echo.
-2. Confirm GitHub shows only the Tech Echo App and expected repository access.
-3. Complete onboarding; note the assigned permanent Member Number.
-4. Sign out, sign in again, and confirm the same number returns.
-5. Open `/forum`; confirm the six actual categories load.
-6. Create a clearly labelled temporary discussion through `/forum/new`.
-7. Confirm it appears both in Tech Echo and in the existing GitHub Discussions.
-8. Confirm GitHub attributes it to the real test user with the App badge.
-9. Add a reply through Tech Echo and confirm it is a real GitHub comment.
-10. Add and remove one reaction in Tech Echo; confirm GitHub matches.
-11. Remove the temporary test content through GitHub as an administrator.
-12. Change the test account's GitHub username or simulate an updated profile and
+1. Open the production root and choose Sign In with an account that has never
+   joined. Confirm it returns to the Join explanation without creating a member,
+   credential, session, or Member Number allocation.
+2. Choose Join Tech Echo with the account that should become a permanent member.
+3. Confirm GitHub shows only the Tech Echo App and expected repository access.
+4. Confirm the membership screen says that no membership exists yet, review the
+   visible profile fields and permanent-number rule, then explicitly confirm.
+5. Note the assigned permanent Member Number.
+6. Sign out, sign in again, and confirm the same number returns.
+7. Open `/forum`; confirm the six actual categories load.
+8. Create a clearly labelled temporary discussion through `/forum/new`.
+9. Confirm it appears both in Tech Echo and in the existing GitHub Discussions.
+10. Confirm GitHub attributes it to the real user with the App badge.
+11. Add a reply through Tech Echo and confirm it is a real GitHub comment.
+12. Add and remove one reaction in Tech Echo; confirm GitHub matches.
+13. Remove the temporary test content through GitHub as an administrator.
+14. Change the account's GitHub username or simulate an updated profile and
     confirm the stable Member Number is unchanged.
 
 If GraphQL returns a permission error, inspect the App installation and verify
@@ -147,7 +167,8 @@ For a safe production cutover:
 2. Add `https://techecho.org/auth/callback` to the GitHub App while retaining the
    currently working callback during verification.
 3. Configure `ACCOUNT_ORIGIN`, `FORUM_ORIGIN`, and the compatibility
-   `APP_ORIGIN`; deploy the Sites version and apply `0001`.
+   `APP_ORIGIN`; deploy the Sites version and apply every pending migration
+   through `0003`.
 4. Attach `techecho.org` and `www.techecho.org` to Sites, then replace the old
    GitHub Pages apex DNS only after Sites supplies its exact DNS instructions.
 5. Verify OAuth, `/home`, the cross-domain forum handoff, real GitHub Discussion
@@ -194,6 +215,12 @@ Before public access:
 - confirm direct GitHub participants display without an invented Member Number;
 - document who can rotate GitHub App and encryption credentials.
 
-Token encryption-key rotation is not automated in v0.1. Changing
+The repository includes baseline CI, a read-only health endpoint, scheduled
+no-side-effect production smoke checks, and an offline D1 export verifier. Follow
+`docs/OPERATIONS.md` for backup and restore. Automated production D1 export still
+requires a dedicated least-privilege export credential and encrypted destination;
+the managed Sites binding does not expose either value to this repository.
+
+Token encryption-key rotation is not automated in v0.2.1. Changing
 `TOKEN_ENCRYPTION_KEY` invalidates stored encrypted GitHub credentials and
 requires members to authorize again.

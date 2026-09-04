@@ -1,6 +1,6 @@
 {
   "name": "tech-echo-collective",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "private": true,
   "type": "module",
   "scripts": {
@@ -14,6 +14,11 @@
     "verify": "npm run format:check && npm run lint && npm run typecheck && npm test && npm run build",
     "smoke:production": "node scripts/smoke-production.mjs",
     "backup:verify": "node scripts/verify-d1-export.mjs",
+    "backup:snapshot:verify": "node scripts/verify-backup-json.mjs",
+    "backup:snapshot:encrypt": "node scripts/backup-crypto.mjs encrypt",
+    "backup:snapshot:decrypt": "node scripts/backup-crypto.mjs decrypt",
+    "backup:snapshot:restore-sql": "node scripts/backup-json-to-sql.mjs",
+    "backup:secrets:generate": "node scripts/generate-backup-secrets.mjs",
     "db:generate": "drizzle-kit generate",
     "test": "vitest run"
   },

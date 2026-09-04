@@ -81,6 +81,15 @@ export function getPublicGitHubReadToken(): string | undefined {
   return token;
 }
 
+export function getBackupExportToken(): string {
+  const token = required(env.BACKUP_EXPORT_TOKEN, 'BACKUP_EXPORT_TOKEN');
+  const byteLength = new TextEncoder().encode(token).byteLength;
+  if (byteLength < 32 || byteLength > 256 || /[\r\n]/.test(token)) {
+    throw new Error('BACKUP_EXPORT_TOKEN has an invalid format.');
+  }
+  return token;
+}
+
 export function getAuthConfig() {
   const { accountOrigin, forumOrigin } = getOriginConfig();
   const sessionSecret = required(env.SESSION_SECRET, 'SESSION_SECRET');

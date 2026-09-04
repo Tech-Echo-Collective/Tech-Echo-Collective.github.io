@@ -1,0 +1,90 @@
+name: Encrypted production backup
+
+on:
+  schedule:
+    - cron: '23 18 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: encrypted-production-backup
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    environment:
+      name: production-backup
+      deployment: false
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Use Node.js 22
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22.13.1
+          package-manager-cache: false
+      - name: Download a fresh durable snapshot
+        env:
+          BACKUP_EXPORT_TOKEN: ${{ secrets.BACKUP_EXPORT_TOKEN }}
+        run: |
+          umask 077
+          if [ "${#BACKUP_EXPORT_TOKEN}" -lt 32 ]; then
+            echo 'Backup export credential is not configured.' >&2
+            exit 1
+          fi
+          curl --fail --silent --show-error \
+            --proto '=https' \
+            --connect-timeout 10 \
+            --max-time 60 \
+            --max-filesize 20971520 \
+            --retry 3 \
+            --retry-all-errors \
+            --request POST \
+            --header "Authorization: Bearer ${BACKUP_EXPORT_TOKEN}" \
+            --output "${RUNNER_TEMP}/tech-echo-backup.json" \
+            https://techecho.org/api/ops/backup
+      - name: Verify the downloaded snapshot
+        run: >-
+          node scripts/verify-backup-json.mjs
+          "${RUNNER_TEMP}/tech-echo-backup.json"
+          --max-age-seconds 900
+      - name: Encrypt the snapshot
+        env:
+          BACKUP_ENCRYPTION_KEY_V1: ${{ secrets.BACKUP_ENCRYPTION_KEY_V1 }}
+        run: >-
+          node scripts/backup-crypto.mjs encrypt
+          "${RUNNER_TEMP}/tech-echo-backup.json"
+          "${RUNNER_TEMP}/tech-echo-backup-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}.teb"
+      - name: Authenticate the encrypted copy
+        env:
+          BACKUP_ENCRYPTION_KEY_V1: ${{ secrets.BACKUP_ENCRYPTION_KEY_V1 }}
+        run: |
+          node scripts/backup-crypto.mjs decrypt \
+            "${RUNNER_TEMP}/tech-echo-backup-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}.teb" \
+            "${RUNNER_TEMP}/tech-echo-backup-verification.json"
+          node scripts/verify-backup-json.mjs \
+            "${RUNNER_TEMP}/tech-echo-backup-verification.json" \
+            --max-age-seconds 900
+      - name: Remove plaintext before upload
+        if: always()
+        run: |
+          rm -f "${RUNNER_TEMP}/tech-echo-backup.json"
+          rm -f "${RUNNER_TEMP}/tech-echo-backup-verification.json"
+      - name: Upload encrypted backup only
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: tech-echo-durable-backup-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/tech-echo-backup-${{ github.run_id }}-${{ github.run_attempt }}.teb
+          if-no-files-found: error
+          retention-days: 90
+          compression-level: 0
+      - name: Remove encrypted runner copy
+        if: always()
+        run: rm -f "${RUNNER_TEMP}/tech-echo-backup-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}.teb"

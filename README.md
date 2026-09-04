@@ -26,6 +26,12 @@ contributor metadata. Account and
 forum sessions use separate host-only cookies and are tied to the same device
 session family for logout.
 
+Production operations include a no-side-effect health check and smoke monitor,
+plus a daily encrypted 90-day durable identity backup. The snapshot preserves
+permanent Member Numbers, member profiles, encrypted GitHub credentials, and the
+allocation high-water mark while deliberately excluding replayable session and
+OAuth state. Recovery remains a reviewed, isolated, manual operation.
+
 ## Local development
 
 Requirements: Node.js 22.13 or newer.

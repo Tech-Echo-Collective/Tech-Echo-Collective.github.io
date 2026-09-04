@@ -166,11 +166,11 @@ const en = {
   'role.member': 'Member',
   'legal.privacyTitle': 'Privacy',
   'legal.privacyBody':
-    'Tech Echo stores the minimum account data needed for membership: your stable GitHub identity, current profile details, Member Number, role, language preference, secure session records, and encrypted GitHub App credentials. During Join confirmation, verified identity and credential details are encrypted, become unusable after 30 minutes, and are removed after use or during cleanup. Your display name, Member Number, GitHub username, global role, and join date appear in the authenticated member directory. Public GitHub contributor metadata is normally refreshed every six hours, may be served stale during an outage, is never served after 48 hours, and is removed during the next cache cleanup. Forum content remains in GitHub Discussions. We do not create Tech Echo passwords or sell member data.',
+    'Tech Echo stores the minimum account data needed for membership: your stable GitHub identity, current profile details, Member Number, role, language preference, secure session records, and encrypted GitHub App credentials. During Join confirmation, verified identity and credential details are encrypted, become unusable after 30 minutes, and are removed after use or during cleanup. Your display name, Member Number, GitHub username, global role, and join date appear in the authenticated member directory. Public GitHub contributor metadata is normally refreshed every six hours, may be served stale during an outage, is never served after 48 hours, and is removed during the next cache cleanup. For recovery, the permanent Member Number ledger, member profiles, and already encrypted GitHub App credentials are copied daily into an additional AES-256-GCM-encrypted GitHub Actions artifact retained for up to 90 days; temporary authentication state and forum content are excluded. Forum content remains in GitHub Discussions. We do not create Tech Echo passwords or sell member data.',
   'legal.termsTitle': 'Terms',
   'legal.termsBody':
     'Participate constructively, respect applicable law and intellectual property, and do not abuse the service. Forum content is also governed by GitHub’s terms because GitHub Discussions is the canonical backend. Tech Echo may restrict access when needed to protect the community.',
-  'legal.kicker': 'PUBLIC / POLICY / V0.2.1',
+  'legal.kicker': 'PUBLIC / POLICY / V0.2.3',
   'legal.updated': 'Last updated: 4 September 2026',
   'common.loading': 'Loading…',
   'common.loadingSignal': 'ESTABLISHING SIGNAL…',
@@ -342,11 +342,11 @@ const zh: Dictionary = {
   'role.member': '会员',
   'legal.privacyTitle': '隐私',
   'legal.privacyBody':
-    'Tech Echo 仅保存会员功能所需的最少账户数据：稳定的 GitHub 身份、当前资料、会员编号、角色、语言偏好、安全会话记录和加密的 GitHub App 凭证。加入确认期间，已验证的身份和凭证资料会加密保存，30 分钟后即无法使用，并会在使用后或清理时移除。登录后的成员目录会显示你的显示名称、会员编号、GitHub 用户名、全局角色和加入日期。公开的 GitHub 贡献者元数据通常每六小时刷新一次；GitHub 故障时可能短暂显示旧数据，超过 48 小时后不再显示，并会在下一次缓存清理时移除。论坛内容仍保存在 GitHub Discussions。我们不创建 Tech Echo 密码，也不出售会员数据。',
+    'Tech Echo 仅保存会员功能所需的最少账户数据：稳定的 GitHub 身份、当前资料、会员编号、角色、语言偏好、安全会话记录和加密的 GitHub App 凭证。加入确认期间，已验证的身份和凭证资料会加密保存，30 分钟后即无法使用，并会在使用后或清理时移除。登录后的成员目录会显示你的显示名称、会员编号、GitHub 用户名、全局角色和加入日期。公开的 GitHub 贡献者元数据通常每六小时刷新一次；GitHub 故障时可能短暂显示旧数据，超过 48 小时后不再显示，并会在下一次缓存清理时移除。为灾难恢复，永久会员编号账本、会员资料和已经加密的 GitHub App 凭证每天会复制到额外的 AES-256-GCM 加密 GitHub Actions 备份中，最长保留 90 天；临时身份验证状态和论坛内容不在备份内。论坛内容仍保存在 GitHub Discussions。我们不创建 Tech Echo 密码，也不出售会员数据。',
   'legal.termsTitle': '使用条款',
   'legal.termsBody':
     '请建设性参与，遵守适用法律并尊重知识产权，不要滥用服务。由于 GitHub Discussions 是唯一论坛后端，论坛内容同时受 GitHub 条款约束。为保护社区，Tech Echo 可在必要时限制访问。',
-  'legal.kicker': '公开 / 政策 / V0.2.1',
+  'legal.kicker': '公开 / 政策 / V0.2.3',
   'legal.updated': '最后更新：2026年9月4日',
   'common.loading': '加载中…',
   'common.loadingSignal': '正在建立信号…',
@@ -522,11 +522,11 @@ const fr: Dictionary = {
   'role.member': 'Membre',
   'legal.privacyTitle': 'Confidentialité',
   'legal.privacyBody':
-    'Tech Echo conserve uniquement les données nécessaires à l’adhésion : identité GitHub stable, profil actuel, numéro de membre, rôle, langue, sessions sécurisées et identifiants GitHub App chiffrés. Pendant la confirmation, l’identité vérifiée et les identifiants sont chiffrés, deviennent inutilisables après 30 minutes, puis sont retirés après utilisation ou lors du nettoyage. Le nom affiché, le numéro de membre, le nom GitHub, le rôle global et la date d’inscription apparaissent dans l’annuaire réservé aux membres connectés. Les métadonnées publiques des contributeurs GitHub sont normalement actualisées toutes les six heures ; des données anciennes peuvent être affichées pendant une panne, ne sont jamais affichées après 48 heures et sont retirées lors du nettoyage suivant. Le contenu du forum reste dans GitHub Discussions. Aucun mot de passe Tech Echo n’est créé et les données ne sont pas vendues.',
+    'Tech Echo conserve uniquement les données nécessaires à l’adhésion : identité GitHub stable, profil actuel, numéro de membre, rôle, langue, sessions sécurisées et identifiants GitHub App chiffrés. Pendant la confirmation, l’identité vérifiée et les identifiants sont chiffrés, deviennent inutilisables après 30 minutes, puis sont retirés après utilisation ou lors du nettoyage. Le nom affiché, le numéro de membre, le nom GitHub, le rôle global et la date d’inscription apparaissent dans l’annuaire réservé aux membres connectés. Les métadonnées publiques des contributeurs GitHub sont normalement actualisées toutes les six heures ; des données anciennes peuvent être affichées pendant une panne, ne sont jamais affichées après 48 heures et sont retirées lors du nettoyage suivant. Pour la reprise, le registre permanent des numéros de membre, les profils des membres et les identifiants GitHub App déjà chiffrés sont copiés chaque jour dans une archive GitHub Actions supplémentaire chiffrée en AES-256-GCM et conservée jusqu’à 90 jours ; les états d’authentification temporaires et le contenu du forum en sont exclus. Le contenu du forum reste dans GitHub Discussions. Aucun mot de passe Tech Echo n’est créé et les données ne sont pas vendues.',
   'legal.termsTitle': 'Conditions',
   'legal.termsBody':
     'Participez de manière constructive, respectez la loi et la propriété intellectuelle, et n’abusez pas du service. GitHub Discussions étant la source canonique, son contenu est également soumis aux conditions de GitHub. Tech Echo peut limiter l’accès pour protéger la communauté.',
-  'legal.kicker': 'PUBLIC / POLITIQUE / V0.2.1',
+  'legal.kicker': 'PUBLIC / POLITIQUE / V0.2.3',
   'legal.updated': 'Dernière mise à jour : 4 septembre 2026',
   'common.loading': 'Chargement…',
   'common.loadingSignal': 'ÉTABLISSEMENT DU SIGNAL…',
@@ -705,11 +705,11 @@ const es: Dictionary = {
   'role.member': 'Miembro',
   'legal.privacyTitle': 'Privacidad',
   'legal.privacyBody':
-    'Tech Echo guarda los datos mínimos de membresía: identidad estable de GitHub, perfil actual, número de miembro, rol, idioma, sesiones seguras y credenciales cifradas de GitHub App. Durante la confirmación, la identidad verificada y las credenciales se guardan cifradas, dejan de ser utilizables tras 30 minutos y se retiran después de su uso o durante la limpieza. El nombre visible, el número de miembro, el usuario de GitHub, el rol global y la fecha de ingreso aparecen en el directorio autenticado. Los metadatos públicos de colaboradores de GitHub se actualizan normalmente cada seis horas; durante una interrupción pueden mostrarse datos anteriores, nunca se muestran después de 48 horas y se eliminan en la siguiente limpieza de caché. El contenido del foro permanece en GitHub Discussions. No creamos contraseñas de Tech Echo ni vendemos datos.',
+    'Tech Echo guarda los datos mínimos de membresía: identidad estable de GitHub, perfil actual, número de miembro, rol, idioma, sesiones seguras y credenciales cifradas de GitHub App. Durante la confirmación, la identidad verificada y las credenciales se guardan cifradas, dejan de ser utilizables tras 30 minutos y se retiran después de su uso o durante la limpieza. El nombre visible, el número de miembro, el usuario de GitHub, el rol global y la fecha de ingreso aparecen en el directorio autenticado. Los metadatos públicos de colaboradores de GitHub se actualizan normalmente cada seis horas; durante una interrupción pueden mostrarse datos anteriores, nunca se muestran después de 48 horas y se eliminan en la siguiente limpieza de caché. Para recuperación, el registro permanente de números de miembro, los perfiles de miembros y las credenciales de GitHub App ya cifradas se copian cada día en un artefacto adicional de GitHub Actions cifrado con AES-256-GCM y conservado hasta 90 días; se excluyen el estado temporal de autenticación y el contenido del foro. El contenido del foro permanece en GitHub Discussions. No creamos contraseñas de Tech Echo ni vendemos datos.',
   'legal.termsTitle': 'Condiciones',
   'legal.termsBody':
     'Participa de forma constructiva, respeta la ley y la propiedad intelectual, y no abuses del servicio. Como GitHub Discussions es la fuente canónica, el contenido también se rige por los términos de GitHub. Tech Echo puede limitar el acceso para proteger a la comunidad.',
-  'legal.kicker': 'PÚBLICO / POLÍTICA / V0.2.1',
+  'legal.kicker': 'PÚBLICO / POLÍTICA / V0.2.3',
   'legal.updated': 'Última actualización: 4 de septiembre de 2026',
   'common.loading': 'Cargando…',
   'common.loadingSignal': 'ESTABLECIENDO SEÑAL…',

@@ -16,10 +16,11 @@ new one. Founder GitHub ID `267296498` remains the only identity that can claim
 `#001`.
 
 Operational additions include CI, scheduled no-side-effect production smoke
-checks, a non-disclosing D1 health endpoint, an offline D1 export verifier, and a
-backup/restore runbook. Managed production export remains a manual prerequisite
-until a least-privilege D1 export credential and encrypted destination are
-provided.
+checks, a non-disclosing D1 health endpoint, offline backup verification, and a
+backup/restore runbook. v0.2.3 adds a daily, transactionally consistent durable
+identity snapshot, AES-256-GCM encrypted GitHub artifact retention, and guarded
+restore-SQL generation. Short-lived login, OAuth, registration, and cache state
+is intentionally excluded.
 
 ## v0.2 dashboard, projects, contributors, and About
 

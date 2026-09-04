@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.2.3 — 2026-09-04
+
+- Added a production-only, independently authenticated durable identity snapshot endpoint.
+- Added a daily main-branch GitHub Actions backup that strictly verifies, AES-256-GCM encrypts, re-verifies, and retains only ciphertext for 90 days.
+- Preserved Member Number allocations, the AUTOINCREMENT high-water mark, members, and already encrypted GitHub credentials while excluding all replayable session, OAuth, registration, rate-limit, and cache state.
+- Added strict JSON verification, authenticated encryption/decryption tooling, fresh-database restore SQL guards, and a monthly restore-drill runbook.
+
 ## v0.2.2 — 2026-09-04
 
 - Turned the Home orbit into six real, localized Quick Links for Profile, Projects, Members, Settings, About, and GitHub.

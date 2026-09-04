@@ -9,6 +9,7 @@ declare namespace Cloudflare {
     GITHUB_PUBLIC_READ_TOKEN?: string;
     SESSION_SECRET?: string;
     TOKEN_ENCRYPTION_KEY?: string;
+    BACKUP_EXPORT_TOKEN?: string;
     GITHUB_DISCUSSIONS_OWNER?: string;
     GITHUB_DISCUSSIONS_REPO?: string;
     GITHUB_DISCUSSIONS_REPOSITORY_ID?: string;

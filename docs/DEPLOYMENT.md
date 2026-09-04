@@ -70,6 +70,7 @@ secret-variable facility.
 | `GITHUB_PUBLIC_READ_TOKEN`         |    Yes | Fine-grained project Metadata read     |
 | `SESSION_SECRET`                   |    Yes | At least 32 random bytes, base64url    |
 | `TOKEN_ENCRYPTION_KEY`             |    Yes | Exactly 32 random bytes, base64        |
+| `BACKUP_EXPORT_TOKEN`              |    Yes | Independent random token, 32+ bytes    |
 | `GITHUB_DISCUSSIONS_OWNER`         |     No | `Tech-Echo-Collective`                 |
 | `GITHUB_DISCUSSIONS_REPO`          |     No | `Tech-Echo-Discussion`                 |
 | `GITHUB_DISCUSSIONS_REPOSITORY_ID` |     No | `1293776929`                           |
@@ -206,7 +207,8 @@ the change automatically.
 Before public access:
 
 - review privacy and terms copy with the organization;
-- confirm backup/observability policies for the D1 identity database;
+- confirm the daily encrypted backup workflow succeeds and its recovery keys are
+  escrowed outside GitHub;
 - test mobile login, onboarding, forum creation, reply, and reaction;
 - test all four interface languages;
 - confirm secrets are absent from Git history, build output, client bundles, and
@@ -216,10 +218,10 @@ Before public access:
 - document who can rotate GitHub App and encryption credentials.
 
 The repository includes baseline CI, a read-only health endpoint, scheduled
-no-side-effect production smoke checks, and an offline D1 export verifier. Follow
-`docs/OPERATIONS.md` for backup and restore. Automated production D1 export still
-requires a dedicated least-privilege export credential and encrypted destination;
-the managed Sites binding does not expose either value to this repository.
+no-side-effect production smoke checks, a daily encrypted durable identity
+snapshot, and offline snapshot/native-export verification. Follow
+`docs/OPERATIONS.md` for backup setup, key escrow, monthly restore drills, and the
+explicit production recovery procedure.
 
 Token encryption-key rotation is not automated in v0.2.1. Changing
 `TOKEN_ENCRYPTION_KEY` invalidates stored encrypted GitHub credentials and

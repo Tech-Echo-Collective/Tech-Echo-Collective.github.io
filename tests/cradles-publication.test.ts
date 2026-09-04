@@ -15,6 +15,7 @@ describe('Cradles of Civilization public build', () => {
       'index.html',
       'ending.html',
       'styles.css',
+      'localization.js',
       'game.js',
       'balance-model.js',
       'endings.js',
@@ -31,12 +32,27 @@ describe('Cradles of Civilization public build', () => {
     const index = fs.readFileSync(path.join(gameDirectory, 'index.html'), 'utf8');
     const ending = fs.readFileSync(path.join(gameDirectory, 'ending.html'), 'utf8');
     const game = fs.readFileSync(path.join(gameDirectory, 'game.js'), 'utf8');
+    const localization = fs.readFileSync(
+      path.join(gameDirectory, 'localization.js'),
+      'utf8',
+    );
+    const endings = fs.readFileSync(path.join(gameDirectory, 'endings.js'), 'utf8');
 
     expect(index).toContain('href="styles.css');
+    expect(index).toContain('id="languageToggle"');
+    expect(index).toContain('src="localization.js');
     expect(index).toContain('src="game.js');
     expect(index).toContain('src="assets/');
     expect(ending).toContain('href="styles.css');
+    expect(ending).toContain('id="languageToggle"');
+    expect(ending).toContain('src="localization.js');
     expect(game).toContain('const ENDING_PAGE = "ending.html"');
+    expect(game).toContain('I18N.init()');
+    expect(localization).toContain('three-sun-chronicle:language:v1');
+    expect(localization).toContain('searchParams.get("lang")');
+    expect(endings.match(/nameEn:/g)).toHaveLength(12);
+    expect(endings.match(/paragraphsEn:/g)).toHaveLength(12);
+    expect(endings.match(/quoteEn:/g)).toHaveLength(12);
     expect(index).toContain('href="https://techecho.org/"');
     expect(ending).toContain('href="https://techecho.org/"');
   });

@@ -1,6 +1,15 @@
 "use strict";
 
 const BALANCE_MODEL = globalThis.CRADLES_BALANCE;
+const I18N = globalThis.CRADLES_I18N || {
+  init() {},
+  isEnglish() { return false; },
+  locale() { return "zh-CN"; },
+  translate(value) { return String(value ?? ""); },
+  localizeDocument() {},
+  toggle() {},
+  setProtectedTerms() {}
+};
 const CAP = 20000;
 const LA_CAP = CAP;
 const SPECIAL_KNOWLEDGE_SCALE = CAP / 1000;
@@ -1598,6 +1607,7 @@ function updateCivilizationStats(snapshotValue = snapshot(), specialEventTitle =
 }
 
 function init() {
+  I18N.init();
   cacheDom();
   syncActionButtonCopy();
   syncUtilityButtonCopy();
@@ -1618,6 +1628,7 @@ function init() {
     state = restoredState || createNewState();
     state.loadedFromSave = Boolean(restoredState);
   }
+  syncLocalizationContext();
   state.aiAggression = normalizeAiAggression(state.aiAggression);
   state.governorId = normalizeGovernorId(state.governorId);
   state.startingRegionId = normalizeStartingRegionId(state.startingRegionId || state.map?.startingRegionId);
@@ -1653,6 +1664,7 @@ function removeSeedFromUrl() {
 }
 
 function cacheDom() {
+  dom.languageToggle = document.querySelector("#languageToggle");
   dom.setupPanel = document.querySelector("#setupPanel");
   dom.gamePanel = document.querySelector("#gamePanel");
   dom.realmNameForm = document.querySelector("#realmNameForm");
@@ -1768,10 +1780,13 @@ function syncActionButtonCopy() {
 
     const title = button.querySelector(".action-copy strong");
     const description = button.querySelector(".action-copy small");
-    if (title) title.textContent = action.label;
-    if (description) description.textContent = action.text;
+    const actionLabel = I18N.translate(action.label);
+    if (title) title.textContent = actionLabel;
+    if (description) description.textContent = I18N.translate(action.text);
     const shortcut = ACTION_SHORTCUT_LABELS[button.dataset.action];
-    const accessibleName = shortcut ? `${action.label}，快捷键 ${shortcut}` : action.label;
+    const accessibleName = shortcut
+      ? I18N.translate(`${action.label}，快捷键 ${shortcut}`)
+      : actionLabel;
     button.dataset.accessibleName = accessibleName;
     button.title = accessibleName;
     button.setAttribute("aria-label", accessibleName);
@@ -1784,8 +1799,9 @@ function syncUtilityButtonCopy() {
     const button = document.querySelector(`#${shortcut.buttonId}`);
     if (!button) return;
 
-    const baseLabel = button.dataset.baseLabel || button.textContent.trim();
-    button.dataset.baseLabel = baseLabel;
+    const sourceLabel = button.dataset.sourceLabel || button.textContent.trim();
+    button.dataset.sourceLabel = sourceLabel;
+    const baseLabel = I18N.translate(sourceLabel);
     button.textContent = "";
 
     const label = document.createElement("span");
@@ -1817,6 +1833,7 @@ function syncShortcutBadge(button, label, className) {
 }
 
 function bindEvents() {
+  dom.languageToggle?.addEventListener("click", toggleLanguage);
   dom.realmNameForm?.addEventListener("submit", confirmRealmName);
   dom.difficultyButtons.forEach((button) => {
     button.addEventListener("click", () => selectDifficulty(button.dataset.difficulty));
@@ -1857,6 +1874,21 @@ function bindEvents() {
   });
 
   window.addEventListener("keydown", handleShortcut);
+}
+
+function syncLocalizationContext() {
+  const protectedTerms = state?.realmName && state.realmName !== DEFAULT_REALM_NAME
+    ? [state.realmName]
+    : [];
+  I18N.setProtectedTerms(protectedTerms);
+}
+
+function toggleLanguage() {
+  I18N.toggle();
+  syncLocalizationContext();
+  syncActionButtonCopy();
+  syncUtilityButtonCopy();
+  render();
 }
 
 function scheduleAutoRunIfNeeded() {
@@ -5382,6 +5414,7 @@ function clearSavedRun() {
 function goToEndingPage(endingId) {
   const url = new URL(ENDING_PAGE, window.location.href);
   url.searchParams.set("ending", endingId);
+  if (I18N.isEnglish()) url.searchParams.set("lang", "en");
   window.location.href = url.href;
 }
 
@@ -5522,7 +5555,8 @@ function eraIndexFor(value, eras) {
   return index;
 }
 
-function renderSetup() {
+function renderSetup(deferLocalization = false) {
+  syncLocalizationContext();
   const setupComplete = Boolean(state?.setupComplete);
   if (dom.setupPanel) dom.setupPanel.hidden = setupComplete;
   if (dom.gamePanel) dom.gamePanel.hidden = !setupComplete;
@@ -5535,7 +5569,10 @@ function renderSetup() {
     dom.activeGovernorPortrait.alt = `${governor.label}像`;
   }
   if (dom.activeGovernorName) dom.activeGovernorName.textContent = governor.label;
-  if (setupComplete) return;
+  if (setupComplete) {
+    if (!deferLocalization) I18N.localizeDocument(document);
+    return;
+  }
 
   const stage = ["difficulty", "governor", "territory"].includes(state?.setupStage)
     ? state.setupStage
@@ -5575,6 +5612,7 @@ function renderSetup() {
     button.setAttribute("aria-pressed", button.dataset.mapMode === mode ? "true" : "false");
   });
   if (stage === "territory") renderStartingRegionPicker();
+  if (!deferLocalization) I18N.localizeDocument(document);
 }
 
 function renderStartingRegionPicker() {
@@ -5615,8 +5653,11 @@ function renderStartingRegionPicker() {
 }
 
 function render() {
-  renderSetup();
-  if (!state.setupComplete) return;
+  renderSetup(true);
+  if (!state.setupComplete) {
+    I18N.localizeDocument(document);
+    return;
+  }
   dom.countValue.textContent = state.count;
   dom.turnValue.textContent = state.turn;
   dom.randValue.textContent = state.lastRand === null ? "----" : formatRand(state.lastRand);
@@ -5650,6 +5691,7 @@ function render() {
   renderLog();
   renderArchive();
   renderSpecialNotice();
+  I18N.localizeDocument(document);
 }
 
 function renderActionButtons() {
@@ -6792,7 +6834,7 @@ function normalizeCivilizationArchiveEntry(entry, fallbackCivilization = 1) {
 function formatNumber(value) {
   const number = finiteOr(value, 0);
   const hasFraction = Math.abs(number - Math.round(number)) > 0.0001;
-  return new Intl.NumberFormat("zh-CN", {
+  return new Intl.NumberFormat(I18N.locale(), {
     maximumFractionDigits: hasFraction ? 4 : 0
   }).format(number);
 }
@@ -6803,7 +6845,7 @@ function formatSignedNumber(value) {
 }
 
 function formatPercent(value) {
-  return new Intl.NumberFormat("zh-CN", {
+  return new Intl.NumberFormat(I18N.locale(), {
     maximumFractionDigits: 1,
     style: "percent"
   }).format(finiteOr(value, 0));

@@ -197,14 +197,22 @@ input {
   font: inherit;
 }
 
-.site-return-link {
+.site-tools {
   position: fixed;
   top: 12px;
   right: 14px;
   z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.site-return-link,
+.language-toggle {
   min-height: 34px;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   padding: 0 11px;
   color: #c8d5e5;
   background: rgba(5, 10, 17, 0.9);
@@ -218,8 +226,15 @@ input {
   backdrop-filter: blur(8px);
 }
 
+.language-toggle {
+  min-width: 46px;
+  cursor: pointer;
+}
+
 .site-return-link:hover,
-.site-return-link:focus-visible {
+.site-return-link:focus-visible,
+.language-toggle:hover,
+.language-toggle:focus-visible {
   color: #ffffff;
   background: #102434;
   border-color: var(--science);
@@ -286,7 +301,7 @@ input {
   font-size: 0.74rem;
   font-style: normal;
   text-align: left;
-  white-space: nowrap;
+  white-space: normal;
 }
 
 .setup-step {
@@ -530,7 +545,7 @@ input {
 .governor-copy {
   position: relative;
   display: block;
-  min-height: 4.35em;
+  min-height: 5.8em;
   overflow: hidden;
 }
 
@@ -547,14 +562,14 @@ input {
 .governor-options .governor-caption {
   overflow: hidden;
   font-size: 0.54rem;
-  white-space: pre;
+  white-space: pre-line;
 }
 
 .governor-options .governor-skill {
   overflow: hidden;
   font-size: 0.48rem;
   opacity: 0;
-  white-space: nowrap;
+  white-space: normal;
 }
 
 .governor-options button:hover .governor-caption,
@@ -638,6 +653,10 @@ input {
   stroke: #071018;
   stroke-width: 0.65px;
   pointer-events: none;
+}
+
+html[lang="en"] .start-region text {
+  font-size: 1.55px;
 }
 
 .map-mode-setup {
@@ -1410,6 +1429,18 @@ h2 {
   fill: #d6e1e9;
   font-size: 1.42px;
   font-weight: 800;
+}
+
+html[lang="en"] .map-entity-name {
+  font-size: 4.4px;
+}
+
+html[lang="en"] .map-region-label {
+  font-size: 1.45px;
+}
+
+html[lang="en"] .map-region-label .map-region-meta {
+  font-size: 1.18px;
 }
 
 .map-region.entity-player-realm .map-territory {

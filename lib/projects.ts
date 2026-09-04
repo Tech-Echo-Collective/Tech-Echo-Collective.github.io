@@ -95,7 +95,7 @@ export const projects: readonly ProjectDefinition[] = [
     status: 'active',
     mark: '/assets/projects/illuminatio-physica-mark.svg',
     repositoryUrl: 'https://github.com/Tech-Echo-Collective/physica-illuminatio',
-    websiteUrl: 'https://illuminatio-physica.noahwalkerror.chatgpt.site',
+    websiteUrl: 'https://illuminatio.techecho.org/',
     repositories: [
       {
         owner: 'Tech-Echo-Collective',

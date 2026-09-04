@@ -53,6 +53,6 @@ Tech Echo 使用 GitHub 身份建立账户，并为每位成员分配永久编�
 
 - [Physics Atlas](https://atlas.techecho.org/)——由成员独立维护、用于描绘物理研究生态的项目。
 - [文明的摇篮](https://github.com/Tech-Echo-Collective/cradles-of-civilization)——作为 Tech Echo 项目开发的原创文字策略游戏。
-- [Illuminatio Physica](https://illuminatio-physica.noahwalkerror.chatgpt.site)——由成员独立维护、用于探索物理概念与学习路径的交互式三维知识地图。
+- [Illuminatio Physica](https://illuminatio.techecho.org/)——由成员独立维护、用于探索物理概念与学习路径的交互式三维知识地图。
 
 共同体仍然刻意保持小型、早期与实验性。现阶段的重点是做出真实工作、清晰记录，并负责任地开放贡献路径。

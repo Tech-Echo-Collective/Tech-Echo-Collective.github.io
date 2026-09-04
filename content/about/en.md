@@ -53,6 +53,6 @@ Tech Echo uses GitHub identity for accounts and assigns every member a permanent
 
 - [Physics Atlas](https://atlas.techecho.org/) — an independently maintained member project mapping physics research ecosystems.
 - [Cradles of Civilization](https://github.com/Tech-Echo-Collective/cradles-of-civilization) — an original text strategy game developed as a Tech Echo project.
-- [Illuminatio Physica](https://illuminatio-physica.noahwalkerror.chatgpt.site) — an independently maintained interactive 3D map of physics concepts and learning paths.
+- [Illuminatio Physica](https://illuminatio.techecho.org/) — an independently maintained interactive 3D map of physics concepts and learning paths.
 
 The collective remains small, early, and experimental by design. The priority is to build real work, document it clearly, and open contribution paths responsibly.

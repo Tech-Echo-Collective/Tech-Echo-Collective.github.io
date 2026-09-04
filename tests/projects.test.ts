@@ -52,7 +52,7 @@ describe('project registry', () => {
     const illuminatio = getProject('illuminatio-physica');
     expect(illuminatio).toMatchObject({
       classification: 'member_project',
-      websiteUrl: 'https://illuminatio-physica.noahwalkerror.chatgpt.site',
+      websiteUrl: 'https://illuminatio.techecho.org/',
       repositories: [
         {
           owner: 'Tech-Echo-Collective',

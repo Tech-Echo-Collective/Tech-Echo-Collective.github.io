@@ -20,11 +20,11 @@ export function getHomeQuickLinks(
   labels: HomeQuickLinkLabels,
 ): HomeQuickLink[] {
   return [
-    { id: 'profile', symbol: '○', label: labels.profile, href: `/member/${memberNumber}` },
-    { id: 'projects', symbol: '◇', label: labels.projects, href: '/projects' },
-    { id: 'members', symbol: '◎', label: labels.members, href: '/members' },
-    { id: 'settings', symbol: '⌁', label: labels.settings, href: '/settings' },
-    { id: 'about', symbol: '≡', label: labels.about, href: '/about' },
+    { id: 'profile', symbol: 'ID', label: labels.profile, href: `/member/${memberNumber}` },
+    { id: 'projects', symbol: 'PRJ', label: labels.projects, href: '/projects' },
+    { id: 'members', symbol: 'MEM', label: labels.members, href: '/members' },
+    { id: 'settings', symbol: 'SET', label: labels.settings, href: '/settings' },
+    { id: 'about', symbol: 'TEC', label: labels.about, href: '/about' },
     {
       id: 'github',
       symbol: 'GH',

@@ -86,9 +86,6 @@ export default async function ForumPage({
         <div className="forum-list" aria-live="polite">
           {forum.discussions.nodes.length === 0 ? (
             <div className="empty-state">
-              <span className="empty-state__signal" aria-hidden="true">
-                ∿
-              </span>
               <h2>{dictionary['forum.emptyTitle']}</h2>
               <p>{dictionary['forum.emptyText']}</p>
               <a
@@ -143,7 +140,7 @@ export default async function ForumPage({
             className="load-more"
             href={`/forum?${activeCategory ? `category=${encodeURIComponent(activeCategory.id)}&` : ''}after=${encodeURIComponent(forum.discussions.pageInfo.endCursor)}`}
           >
-            {dictionary['forum.loadMore']} ↓
+            {dictionary['forum.loadMore']}
           </a>
         ) : null}
       </div>

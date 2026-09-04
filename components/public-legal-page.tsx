@@ -20,7 +20,7 @@ export async function PublicLegalPage({ type }: { type: 'privacy' | 'terms' }) {
         <p>{body}</p>
         <p className="legal-updated">{dictionary['legal.updated']}</p>
         <a className="button" href="/">
-          ← Tech Echo
+          Tech Echo
         </a>
       </article>
     </main>

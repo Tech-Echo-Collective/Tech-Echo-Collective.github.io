@@ -58,12 +58,11 @@ export default async function ProjectsPage() {
                       <a className="button" href={project.websiteUrl}>
                         {project.playable
                           ? copy.common.playOnline
-                          : copy.common.visitWebsite}{' '}
-                        ↗
+                          : copy.common.visitWebsite}
                       </a>
                     ) : (
                       <a className="button" href={project.repositoryUrl}>
-                        {copy.common.viewRepository} ↗
+                        {copy.common.viewRepository}
                       </a>
                     )}
                   </div>

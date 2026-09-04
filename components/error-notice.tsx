@@ -21,7 +21,6 @@ export function ErrorNotice({ code, locale }: { code?: string; locale: Locale })
   const key = errorKeys[code as keyof typeof errorKeys] || 'common.error';
   return (
     <div className="notice notice--error" role="alert">
-      <span aria-hidden="true">!</span>
       <p>{dictionary[key]}</p>
     </div>
   );

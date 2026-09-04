@@ -336,9 +336,6 @@ a {
     background 150ms ease,
     transform 150ms ease;
 }
-.github-button span {
-  margin-left: auto;
-}
 .github-glyph {
   font: 700 0.72rem/1 var(--font-mono);
   letter-spacing: -0.04em;
@@ -361,16 +358,6 @@ a {
   padding: 12px 14px;
   border: 1px solid var(--border);
   background: rgba(86, 140, 255, 0.05);
-}
-.notice span {
-  flex: 0 0 auto;
-  width: 20px;
-  height: 20px;
-  display: grid;
-  place-items: center;
-  border: 1px solid currentColor;
-  border-radius: 50%;
-  font: 700 0.7rem/1 var(--font-mono);
 }
 .notice p {
   margin: 0;
@@ -1233,19 +1220,8 @@ a {
   border: 1px solid var(--border);
   background: linear-gradient(160deg, rgba(86, 140, 255, 0.05), rgba(2, 8, 18, 0.6));
 }
-.empty-state__signal {
-  width: 52px;
-  height: 52px;
-  display: grid;
-  place-items: center;
-  border: 1px solid var(--border-strong);
-  border-radius: 50%;
-  color: var(--blue);
-  font: 1.5rem/1 var(--font-mono);
-  box-shadow: 0 0 30px rgba(86, 140, 255, 0.12);
-}
 .empty-state h2 {
-  margin: 20px 0 8px;
+  margin: 0 0 8px;
   font-size: 1.8rem;
 }
 .empty-state > p {
@@ -1385,7 +1361,8 @@ a {
 }
 .reaction-bar button {
   min-height: 32px;
-  min-width: 52px;
+  min-width: 0;
+  padding: 0 10px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -2173,22 +2150,12 @@ a {
   min-height: 62px;
   padding: 10px 0;
   display: grid;
-  grid-template-columns: 32px minmax(0, 1fr);
-  gap: 10px;
+  grid-template-columns: minmax(0, 1fr);
   align-items: center;
   border-bottom: 1px solid rgba(104, 151, 255, 0.15);
 }
 .activity-item:hover strong {
   color: var(--blue-bright);
-}
-.activity-item__icon {
-  width: 30px;
-  height: 30px;
-  display: grid;
-  place-items: center;
-  border: 1px solid rgba(86, 140, 255, 0.24);
-  color: var(--blue-bright);
-  background: rgba(46, 98, 220, 0.09);
 }
 .activity-item__copy {
   min-width: 0;

@@ -24,7 +24,7 @@ export function MemberByline({
         <img src={avatar} alt="" />
       ) : (
         <span className="avatar-fallback" aria-hidden="true">
-          ?
+          GH
         </span>
       )}
       <span className="member-byline__text">

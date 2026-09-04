@@ -21,9 +21,6 @@ export function ForumError({
   reconnect.searchParams.set('returnTo', safeForumReturnPath(returnTo));
   return (
     <div className="empty-state">
-      <span className="empty-state__signal" aria-hidden="true">
-        ×
-      </span>
       <h2>{dictionary['common.error']}</h2>
       <ErrorNotice locale={locale} code={code} />
       {code === 'reauthorize' ? (

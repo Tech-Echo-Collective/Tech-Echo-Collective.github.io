@@ -62,7 +62,7 @@ export default async function MembersPage() {
                   <dt>{copy.membersPage.githubIdentity}</dt>
                   <dd>
                     <a href={`https://github.com/${member.githubUsername}`}>
-                      @{member.githubUsername} ↗
+                      @{member.githubUsername}
                     </a>
                   </dd>
                 </div>

@@ -2,12 +2,7 @@ import type { ReactionGroup } from '@/lib/github';
 import { getDictionary } from '@/lib/i18n';
 import type { Locale } from '@/lib/types';
 
-const reactions = {
-  THUMBS_UP: '↑',
-  HEART: '♥',
-  ROCKET: '↗',
-  EYES: '◉',
-} as const;
+const reactions = ['THUMBS_UP', 'HEART', 'ROCKET', 'EYES'] as const;
 
 export function ReactionBar({
   subjectId,
@@ -33,7 +28,7 @@ export function ReactionBar({
   };
   return (
     <div className="reaction-bar" aria-label={dictionary['forum.reactions']}>
-      {Object.entries(reactions).map(([content, symbol]) => {
+      {reactions.map((content) => {
         const group = groups.find((item) => item.content === content);
         return (
           <form action="/api/reactions" method="post" key={content}>
@@ -52,7 +47,7 @@ export function ReactionBar({
               aria-pressed={group?.viewerHasReacted || false}
               aria-label={`${labels[content as keyof typeof labels]}: ${group?.reactors.totalCount || 0}`}
             >
-              <span aria-hidden="true">{symbol}</span>
+              <span>{labels[content]}</span>
               {group?.reactors.totalCount || 0}
             </button>
           </form>

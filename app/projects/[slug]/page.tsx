@@ -63,7 +63,7 @@ export default async function ProjectDetailPage({
     <AppShell member={viewer} active="projects" returnTo={`/projects/${project.slug}`}>
       <article className="project-detail-page">
         <a className="back-link" href="/projects">
-          ← {copy.projectDetail.back}
+          {copy.projectDetail.back}
         </a>
 
         <header className="project-detail-hero">
@@ -82,11 +82,11 @@ export default async function ProjectDetailPage({
             <div className="button-row">
               {project.websiteUrl ? (
                 <a className="button button--primary" href={project.websiteUrl}>
-                  {project.playable ? copy.common.playOnline : copy.common.visitWebsite} ↗
+                  {project.playable ? copy.common.playOnline : copy.common.visitWebsite}
                 </a>
               ) : null}
               <a className="button" href={project.repositoryUrl}>
-                {copy.common.viewRepository} ↗
+                {copy.common.viewRepository}
               </a>
             </div>
           </div>
@@ -205,7 +205,7 @@ export default async function ProjectDetailPage({
                 <strong>
                   {repository.owner}/{repository.name}
                 </strong>
-                <small>GitHub ↗</small>
+                <small>GitHub</small>
               </a>
             ))}
           </div>

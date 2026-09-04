@@ -68,7 +68,7 @@ export default async function DiscussionPage({
     <AppShell member={viewer} active="forum" returnTo={returnTo}>
       <div className="discussion-page">
         <a className="back-link" href="/forum">
-          ← {dictionary['forum.back']}
+          {dictionary['forum.back']}
         </a>
         <article className="discussion-post">
           <header>
@@ -91,7 +91,7 @@ export default async function DiscussionPage({
               discussionNumber={number}
               locale={viewer.preferredLocale}
             />
-            <a href={discussion.url}>{dictionary['forum.viewGithub']} ↗</a>
+            <a href={discussion.url}>{dictionary['forum.viewGithub']}</a>
           </footer>
         </article>
 
@@ -125,7 +125,7 @@ export default async function DiscussionPage({
                     discussionNumber={number}
                     locale={viewer.preferredLocale}
                   />
-                  <a href={comment.url}>{dictionary['forum.viewGithub']} ↗</a>
+                  <a href={comment.url}>{dictionary['forum.viewGithub']}</a>
                 </footer>
               </article>
             );
@@ -133,7 +133,7 @@ export default async function DiscussionPage({
           {discussion.comments.pageInfo.hasNextPage ? (
             <p className="comments-truncated">
               {dictionary['forum.commentsTruncated']}{' '}
-              <a href={discussion.url}>{dictionary['forum.viewGithub']} ↗</a>
+              <a href={discussion.url}>{dictionary['forum.viewGithub']}</a>
             </p>
           ) : null}
         </section>

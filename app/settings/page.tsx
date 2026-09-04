@@ -29,7 +29,6 @@ export default async function SettingsPage({
         <h1>{dictionary['settings.title']}</h1>
         {params.saved ? (
           <div className="notice notice--success" role="status">
-            <span>✓</span>
             <p>{dictionary['settings.saved']}</p>
           </div>
         ) : null}

@@ -24,11 +24,11 @@ describe('home orbit quick links', () => {
     const { links } = linksFor('en');
 
     expect(links.map(({ id, symbol, href }) => ({ id, symbol, href }))).toEqual([
-      { id: 'profile', symbol: '○', href: '/member/7' },
-      { id: 'projects', symbol: '◇', href: '/projects' },
-      { id: 'members', symbol: '◎', href: '/members' },
-      { id: 'settings', symbol: '⌁', href: '/settings' },
-      { id: 'about', symbol: '≡', href: '/about' },
+      { id: 'profile', symbol: 'ID', href: '/member/7' },
+      { id: 'projects', symbol: 'PRJ', href: '/projects' },
+      { id: 'members', symbol: 'MEM', href: '/members' },
+      { id: 'settings', symbol: 'SET', href: '/settings' },
+      { id: 'about', symbol: 'TEC', href: '/about' },
       {
         id: 'github',
         symbol: 'GH',

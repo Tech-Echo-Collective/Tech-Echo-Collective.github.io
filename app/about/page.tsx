@@ -28,7 +28,7 @@ export default async function AboutPage() {
           <a className="about-source-card" href={ABOUT_SOURCE.sourceUrl}>
             <span>{copy.aboutPage.canonicalSource}</span>
             <strong>{ABOUT_SOURCE.repository}</strong>
-            <small>{ABOUT_SOURCE.path} ↗</small>
+            <small>{ABOUT_SOURCE.path}</small>
           </a>
         </header>
 
@@ -36,7 +36,7 @@ export default async function AboutPage() {
           <span>{copy.aboutPage.maintainedDerivative}</span>
           <span>
             {copy.aboutPage.revision} /{' '}
-            <a href={ABOUT_SOURCE.revisionUrl}>{ABOUT_SOURCE.commitSha.slice(0, 12)} ↗</a>
+            <a href={ABOUT_SOURCE.revisionUrl}>{ABOUT_SOURCE.commitSha.slice(0, 12)}</a>
           </span>
         </div>
 

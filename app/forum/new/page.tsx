@@ -42,7 +42,7 @@ export default async function NewDiscussionPage({
     <AppShell member={member} active="forum" returnTo="/forum/new">
       <div className="compose-page">
         <a className="back-link" href="/forum">
-          ← {dictionary['forum.back']}
+          {dictionary['forum.back']}
         </a>
         <span className="section-kicker">{dictionary['forum.createKicker']}</span>
         <h1>{dictionary['forum.newTitle']}</h1>

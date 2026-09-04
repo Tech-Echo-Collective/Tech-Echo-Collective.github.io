@@ -6,6 +6,7 @@
 - Added its interactive 3D knowledge-graph links, attribution, contributor source, and localized project copy.
 - Added a matching projected-orbit mark and wordmark; the mark appears in the Projects directory, project detail, and Home surfaces.
 - Added Illuminatio Physica to the localized About current-work lists.
+- Replaced emoji-prone interface glyphs with restrained text labels and navigation codes while preserving all underlying actions.
 
 ## v0.2.3 — 2026-09-04
 

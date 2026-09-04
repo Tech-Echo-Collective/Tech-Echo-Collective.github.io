@@ -90,7 +90,7 @@ export default async function OnboardingPage({
             </a>
           </p>
           <button className="button button--primary" type="submit">
-            {dictionary['onboarding.confirmAndJoin']} →
+            {dictionary['onboarding.confirmAndJoin']}
           </button>
         </form>
       </section>

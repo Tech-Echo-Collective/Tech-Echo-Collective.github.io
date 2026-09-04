@@ -54,10 +54,10 @@ export default async function HomePage() {
               <p>{copy.home.intro}</p>
               <div className="button-row">
                 <a className="button button--primary" href={forumEntryUrl('/forum')}>
-                  <span aria-hidden="true">▣</span> {copy.home.enterForum}
+                  {copy.home.enterForum}
                 </a>
                 <a className="button" href="/projects">
-                  <span aria-hidden="true">◇</span> {copy.home.exploreProjects}
+                  {copy.home.exploreProjects}
                 </a>
               </div>
             </div>
@@ -67,8 +67,8 @@ export default async function HomePage() {
 
           <section className="featured-projects" aria-labelledby="featured-title">
             <header className="dashboard-section-heading">
-              <h2 id="featured-title">◇ {copy.home.featuredProjects}</h2>
-              <a href="/projects">{copy.home.viewAllProjects} →</a>
+              <h2 id="featured-title">{copy.home.featuredProjects}</h2>
+              <a href="/projects">{copy.home.viewAllProjects}</a>
             </header>
             <div className="featured-projects__grid">
               {projects
@@ -99,10 +99,10 @@ export default async function HomePage() {
           <section className="dashboard-panel activity-panel">
             <header className="dashboard-section-heading">
               <div>
-                <h2>∿ {copy.home.latestActivity}</h2>
+                <h2>{copy.home.latestActivity}</h2>
                 <p>{copy.home.latestDiscussions}</p>
               </div>
-              <a href={forumEntryUrl('/forum')}>{copy.nav.forum} →</a>
+              <a href={forumEntryUrl('/forum')}>{copy.nav.forum}</a>
             </header>
 
             <div className="activity-list">
@@ -117,9 +117,6 @@ export default async function HomePage() {
                     href={forumEntryUrl(`/forum/${discussion.number}`)}
                     key={discussion.id}
                   >
-                    <span className="activity-item__icon" aria-hidden="true">
-                      ▣
-                    </span>
                     <span className="activity-item__copy">
                       <strong>{discussion.title}</strong>
                       <small>
@@ -135,12 +132,12 @@ export default async function HomePage() {
 
           <section className="dashboard-panel quick-links-panel">
             <header className="dashboard-section-heading">
-              <h2>↗ {copy.home.quickLinks}</h2>
+              <h2>{copy.home.quickLinks}</h2>
             </header>
             <nav>
               {quickLinks.map((link) => (
                 <a href={link.href} key={link.id}>
-                  <span aria-hidden="true">{link.symbol}</span> {link.label}
+                  {link.label}
                 </a>
               ))}
             </nav>

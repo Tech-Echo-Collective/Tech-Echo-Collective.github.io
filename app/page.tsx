@@ -128,7 +128,6 @@ export default async function GatewayPage({
 
             {infoNotice ? (
               <div className="notice notice--info" role="status">
-                <span aria-hidden="true">i</span>
                 <div>
                   <strong>{infoNotice.title}</strong>
                   <p>{infoNotice.text}</p>
@@ -148,7 +147,6 @@ export default async function GatewayPage({
                 GH
               </strong>
               {dictionary['gateway.continue']}
-              <span aria-hidden="true">↗</span>
             </a>
 
             <p className="auth-note">{dictionary['gateway.noPassword']}</p>

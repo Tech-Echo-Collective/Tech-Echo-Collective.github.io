@@ -48,7 +48,7 @@ export default async function MemberPage({ params }: { params: Promise<{ id: str
                 <a
                   href={`https://github.com/${encodeURIComponent(profile.githubUsername)}`}
                 >
-                  github.com/{profile.githubUsername} ↗
+                  github.com/{profile.githubUsername}
                 </a>
               </dd>
             </div>

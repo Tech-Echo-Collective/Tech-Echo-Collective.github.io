@@ -204,6 +204,13 @@ const en: V02Copy = {
         'A public game project and testbed for worldbuilding, systems design, tooling, and transparent development.',
       ownership: 'A Tech Echo Collective project.',
     },
+    'illuminatio-physica': {
+      name: 'Illuminatio Physica',
+      summary: 'An interactive map of physics concepts and learning paths.',
+      description:
+        'An interactive 3D knowledge graph for exploring physics concepts, semantic relations, prerequisites, and learning paths.',
+      ownership: 'Created and maintained independently by Noah #001.',
+    },
   },
 };
 
@@ -313,6 +320,13 @@ const zh: V02Copy = {
       description:
         '一个公开的游戏项目，也是世界观、系统设计、开发工具与透明制作流程的试验场。',
       ownership: 'Tech Echo Collective 项目。',
+    },
+    'illuminatio-physica': {
+      name: 'Illuminatio Physica',
+      summary: '一幅用于探索物理概念与学习路径的交互式三维知识地图。',
+      description:
+        '一个交互式三维物理知识图谱，用于探索物理概念、语义关系、先修依赖与学习路径。',
+      ownership: '由 Noah #001 独立创建并维护。',
     },
   },
 };
@@ -434,6 +448,14 @@ const fr: V02Copy = {
         'Un projet de jeu public et un terrain d’essai pour la création d’univers, la conception de systèmes, les outils et le développement transparent.',
       ownership: 'Un projet de Tech Echo Collective.',
     },
+    'illuminatio-physica': {
+      name: 'Illuminatio Physica',
+      summary:
+        'Une carte 3D interactive des concepts physiques et des parcours d’apprentissage.',
+      description:
+        'Un graphe de connaissances 3D interactif pour explorer les concepts physiques, leurs relations sémantiques, leurs prérequis et leurs parcours d’apprentissage.',
+      ownership: 'Créé et maintenu indépendamment par Noah #001.',
+    },
   },
 };
 
@@ -553,6 +575,13 @@ const es: V02Copy = {
       description:
         'Un proyecto de juego público y banco de pruebas para narrativa, diseño de sistemas, herramientas y desarrollo transparente.',
       ownership: 'Un proyecto de Tech Echo Collective.',
+    },
+    'illuminatio-physica': {
+      name: 'Illuminatio Physica',
+      summary: 'Un mapa 3D interactivo de conceptos físicos y rutas de aprendizaje.',
+      description:
+        'Un grafo de conocimiento 3D interactivo para explorar conceptos físicos, relaciones semánticas, prerrequisitos y rutas de aprendizaje.',
+      ownership: 'Creado y mantenido de forma independiente por Noah #001.',
     },
   },
 };

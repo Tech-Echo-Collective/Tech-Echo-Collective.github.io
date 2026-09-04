@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.2.4 — 2026-09-04
+
+- Added Illuminatio Physica as Noah #001’s independently maintained Member Project.
+- Added its interactive 3D knowledge-graph links, attribution, contributor source, and localized project copy.
+- Added a matching projected-orbit mark and wordmark; the mark appears in the Projects directory, project detail, and Home surfaces.
+- Added Illuminatio Physica to the localized About current-work lists.
+
 ## v0.2.3 — 2026-09-04
 
 - Added a production-only, independently authenticated durable identity snapshot endpoint.

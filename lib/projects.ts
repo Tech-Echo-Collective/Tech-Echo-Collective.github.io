@@ -32,7 +32,7 @@ export interface FeaturedProjectContributor {
 }
 
 export interface ProjectDefinition {
-  slug: 'physics-atlas' | 'cradles-of-civilization';
+  slug: 'physics-atlas' | 'cradles-of-civilization' | 'illuminatio-physica';
   classification: ProjectClassification;
   status: 'active';
   mark: string;
@@ -85,6 +85,29 @@ export const projects: readonly ProjectDefinition[] = [
         githubUserId: '267296498',
         githubUsername: 'noahwalkerror-hash',
         role: 'creator',
+      },
+    ],
+    featured: true,
+  },
+  {
+    slug: 'illuminatio-physica',
+    classification: 'member_project',
+    status: 'active',
+    mark: '/assets/projects/illuminatio-physica-mark.svg',
+    repositoryUrl: 'https://github.com/Tech-Echo-Collective/physica-illuminatio',
+    websiteUrl: 'https://illuminatio-physica.noahwalkerror.chatgpt.site',
+    repositories: [
+      {
+        owner: 'Tech-Echo-Collective',
+        name: 'physica-illuminatio',
+        label: 'source',
+      },
+    ],
+    featuredContributors: [
+      {
+        githubUserId: '267296498',
+        githubUsername: 'noahwalkerror-hash',
+        role: 'creator_maintainer',
       },
     ],
     featured: true,

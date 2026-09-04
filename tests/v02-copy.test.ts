@@ -17,6 +17,12 @@ describe('v0.2 interface localization', () => {
       expect(copy.common.playOnline).toBeTruthy();
       expect(copy.nav.members).toBeTruthy();
       expect(copy.projects['physics-atlas'].ownership).toContain('#001');
+      expect(copy.projects['illuminatio-physica']).toMatchObject({
+        name: expect.any(String),
+        summary: expect.any(String),
+        description: expect.any(String),
+        ownership: expect.stringContaining('#001'),
+      });
       expect(copy).not.toHaveProperty('brandSupport');
       expect(copy.home).not.toHaveProperty('build');
       expect(copy.home).not.toHaveProperty('explore');

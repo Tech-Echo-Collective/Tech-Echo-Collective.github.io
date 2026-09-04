@@ -27,7 +27,7 @@ A project initiated and stewarded by Tech Echo Collective. Its ownership and pro
 
 ### Member Project
 
-An independently created and maintained project belonging to a Tech Echo member. Tech Echo may host, present, or support it without acquiring authorship, ownership, or management rights. **Physics Atlas is a Member Project created and maintained by Noah #001.**
+An independently created and maintained project belonging to a Tech Echo member. Tech Echo may host, present, or support it without acquiring authorship, ownership, or management rights. **Physics Atlas and Illuminatio Physica are Member Projects created and maintained by Noah #001.**
 
 ### Collaboration
 
@@ -53,5 +53,6 @@ Tech Echo uses GitHub identity for accounts and assigns every member a permanent
 
 - [Physics Atlas](https://atlas.techecho.org/) — an independently maintained member project mapping physics research ecosystems.
 - [Cradles of Civilization](https://github.com/Tech-Echo-Collective/cradles-of-civilization) — an original text strategy game developed as a Tech Echo project.
+- [Illuminatio Physica](https://illuminatio-physica.noahwalkerror.chatgpt.site) — an independently maintained interactive 3D map of physics concepts and learning paths.
 
 The collective remains small, early, and experimental by design. The priority is to build real work, document it clearly, and open contribution paths responsibly.

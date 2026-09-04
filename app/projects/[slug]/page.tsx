@@ -82,7 +82,7 @@ export default async function ProjectDetailPage({
             <div className="button-row">
               {project.websiteUrl ? (
                 <a className="button button--primary" href={project.websiteUrl}>
-                  {copy.common.visitWebsite} ↗
+                  {project.playable ? copy.common.playOnline : copy.common.visitWebsite} ↗
                 </a>
               ) : null}
               <a className="button" href={project.repositoryUrl}>

@@ -34,6 +34,7 @@ interface V02Copy {
     viewProject: string;
     viewRepository: string;
     visitWebsite: string;
+    playOnline: string;
     source: string;
     profile: string;
     settings: string;
@@ -114,6 +115,7 @@ const en: V02Copy = {
     viewProject: 'View project',
     viewRepository: 'View repository',
     visitWebsite: 'Visit website',
+    playOnline: 'Play online',
     source: 'Source',
     profile: 'My profile',
     settings: 'Settings',
@@ -231,6 +233,7 @@ const zh: V02Copy = {
     viewProject: '查看项目',
     viewRepository: '查看仓库',
     visitWebsite: '访问网站',
+    playOnline: '在线游玩',
     source: '来源',
     profile: '我的资料',
     settings: '设置',
@@ -305,7 +308,7 @@ const zh: V02Copy = {
       ownership: '由 Noah #001 独立创建并维护。',
     },
     'cradles-of-civilization': {
-      name: '文明的摇篮',
+      name: '文明摇篮',
       summary: '一款正在持续开发的原创文字策略游戏。',
       description:
         '一个公开的游戏项目，也是世界观、系统设计、开发工具与透明制作流程的试验场。',
@@ -341,6 +344,7 @@ const fr: V02Copy = {
     viewProject: 'Voir le projet',
     viewRepository: 'Voir le dépôt',
     visitWebsite: 'Visiter le site',
+    playOnline: 'Jouer en ligne',
     source: 'Source',
     profile: 'Mon profil',
     settings: 'Paramètres',
@@ -460,6 +464,7 @@ const es: V02Copy = {
     viewProject: 'Ver proyecto',
     viewRepository: 'Ver repositorio',
     visitWebsite: 'Visitar sitio',
+    playOnline: 'Jugar en línea',
     source: 'Fuente',
     profile: 'Mi perfil',
     settings: 'Ajustes',

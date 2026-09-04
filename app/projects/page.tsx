@@ -56,7 +56,10 @@ export default async function ProjectsPage() {
                     </a>
                     {project.websiteUrl ? (
                       <a className="button" href={project.websiteUrl}>
-                        {copy.common.visitWebsite} ↗
+                        {project.playable
+                          ? copy.common.playOnline
+                          : copy.common.visitWebsite}{' '}
+                        ↗
                       </a>
                     ) : (
                       <a className="button" href={project.repositoryUrl}>

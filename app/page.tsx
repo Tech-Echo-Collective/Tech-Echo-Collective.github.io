@@ -7,6 +7,7 @@ import { CANONICAL_LATIN_MOTTO } from '@/lib/branding';
 import { forumEntryUrl } from '@/lib/config';
 import { getCookieLocale, getDictionary } from '@/lib/i18n';
 import { normalizeLocale, safeForumReturnPath } from '@/lib/validation';
+import { getV02Copy } from '@/lib/v02-copy';
 
 export const dynamic = 'force-dynamic';
 
@@ -34,6 +35,7 @@ export default async function GatewayPage({
   const cookieLocale = await getCookieLocale();
   const locale = normalizeLocale(params.lang, cookieLocale);
   const dictionary = getDictionary(locale);
+  const siteCopy = getV02Copy(locale);
   const mode = params.mode === 'join' ? 'join' : 'signin';
   const error = typeof params.error === 'string' ? params.error : undefined;
   const continuation = forumReturnPath
@@ -122,6 +124,10 @@ export default async function GatewayPage({
         </div>
 
         <footer className="gateway-footer">
+          <a href="/games/cradles-of-civilization/">
+            {siteCopy.common.playOnline}:{' '}
+            {siteCopy.projects['cradles-of-civilization'].name}
+          </a>
           <a href="/privacy">{dictionary['legal.privacyTitle']}</a>
           <a href="/terms">{dictionary['legal.termsTitle']}</a>
           <a href="https://github.com/Tech-Echo-Collective">GitHub</a>

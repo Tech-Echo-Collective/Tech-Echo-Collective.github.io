@@ -38,6 +38,7 @@ export interface ProjectDefinition {
   mark: string;
   repositoryUrl: string;
   websiteUrl?: string;
+  playable?: boolean;
   repositories: readonly ProjectRepository[];
   featuredContributors: readonly FeaturedProjectContributor[];
   featured: boolean;
@@ -70,6 +71,8 @@ export const projects: readonly ProjectDefinition[] = [
     status: 'active',
     mark: '/assets/projects/cradles-of-civilization-mark.svg',
     repositoryUrl: 'https://github.com/Tech-Echo-Collective/cradles-of-civilization',
+    websiteUrl: '/games/cradles-of-civilization/',
+    playable: true,
     repositories: [
       {
         owner: 'Tech-Echo-Collective',

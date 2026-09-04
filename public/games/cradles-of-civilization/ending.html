@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="author" content="Noah Walker">
+    <meta name="copyright" content="Original concept by Noah Walker">
+    <title>文明摇篮：终局</title>
+    <link rel="stylesheet" href="styles.css?v=20260713-v035">
+  </head>
+  <body class="ending-body">
+    <a class="site-return-link" href="https://techecho.org/" aria-label="返回 Tech Echo 官网 / Return to Tech Echo">← Tech Echo</a>
+    <main class="ending-shell" aria-label="文明摇篮终局">
+      <section class="ending-scene">
+        <h1 id="endingTitle">终局</h1>
+        <div class="ending-copy" id="endingCopy"></div>
+        <section class="ending-recap" aria-label="终局复盘">
+          <h2>本局复盘</h2>
+          <dl id="endingRecapList"></dl>
+          <button id="copyChallengeButton" type="button">复制挑战链接</button>
+          <button id="dataReviewButton" type="button">查看文明数据</button>
+        </section>
+        <section class="ending-data-review" id="endingDataReview" aria-label="文明数据复盘" hidden>
+          <div class="ending-data-head">
+            <h2>文明数据</h2>
+            <select id="civilizationDataSelect" aria-label="选择文明代际"></select>
+          </div>
+          <div class="ending-chart-grid">
+            <article>
+              <h3>知识与记忆</h3>
+              <canvas id="endingKnowledgeChart" class="metrics-chart" width="520" height="260"></canvas>
+            </article>
+            <article>
+              <h3>经济</h3>
+              <canvas id="endingEconomyChart" class="metrics-chart" width="360" height="260"></canvas>
+            </article>
+            <article>
+              <h3>人口与秩序</h3>
+              <canvas id="endingPopulationChart" class="metrics-chart" width="360" height="260"></canvas>
+            </article>
+          </div>
+        </section>
+        <button id="restartButton" type="button" aria-label="新世界，快捷键 Shift+N" aria-keyshortcuts="Shift+N">
+          <span>新世界</span>
+          <span class="inline-shortcut" aria-hidden="true">Shift+N</span>
+        </button>
+        <form class="seed-form ending-seed-form" id="endingSeedForm" autocomplete="off">
+          <label for="endingSeedInput">指定种子</label>
+          <div>
+            <input id="endingSeedInput" name="seed" inputmode="numeric" pattern="[0-9]*" placeholder="例如 1058">
+            <button id="endingSeedStartButton" type="submit" aria-label="使用指定种子开始，快捷键 Enter">
+              <span>开始</span>
+              <span class="inline-shortcut" aria-hidden="true">Enter</span>
+            </button>
+          </div>
+        </form>
+      </section>
+    </main>
+
+    <script src="endings.js?v=20260713-v035"></script>
+    <script>
+      "use strict";
+
+      const GAME_STORE_KEY = "three-sun-chronicle:v1";
+      const ENDING_STORE_KEY = "three-sun-chronicle:ending:v1";
+      const endingTitle = document.querySelector("#endingTitle");
+      const endingCopy = document.querySelector("#endingCopy");
+      const endingRecapList = document.querySelector("#endingRecapList");
+      const copyChallengeButton = document.querySelector("#copyChallengeButton");
+      const dataReviewButton = document.querySelector("#dataReviewButton");
+      const endingDataReview = document.querySelector("#endingDataReview");
+      const civilizationDataSelect = document.querySelector("#civilizationDataSelect");
+      const restartButton = document.querySelector("#restartButton");
+      const endingSeedForm = document.querySelector("#endingSeedForm");
+      const endingSeedInput = document.querySelector("#endingSeedInput");
+
+      function readStoredEnding() {
+        try {
+          const raw = localStorage.getItem(ENDING_STORE_KEY);
+          return raw ? JSON.parse(raw) : null;
+        } catch {
+          return null;
+        }
+      }
+
+      function clearGame() {
+        try {
+          localStorage.removeItem(GAME_STORE_KEY);
+          localStorage.removeItem(ENDING_STORE_KEY);
+        } catch {
+          // Storage is optional for the static build.
+        }
+      }
+
+      const storedEnding = readStoredEnding();
+      const queryEnding = new URLSearchParams(window.location.search).get("ending");
+      const endingId = queryEnding || storedEnding?.id || "A";
+      document.body.dataset.ending = endingId;
+      const ending = window.THREE_SUN_ENDINGS?.[endingId] || {
+        name: `${endingId}结局`,
+        paragraphs: ["终局资料缺失。"],
+        quote: ""
+      };
+
+      document.title = `文明摇篮：${ending.name}`;
+      endingTitle.innerHTML = "";
+      ending.name.split("/").forEach((line) => {
+        const titleLine = document.createElement("span");
+        titleLine.className = "ending-title-line";
+        titleLine.textContent = line;
+        endingTitle.append(titleLine);
+      });
+      endingCopy.innerHTML = "";
+
+      ending.paragraphs.forEach((line) => {
+        const paragraph = document.createElement("p");
+        paragraph.textContent = line;
+        endingCopy.append(paragraph);
+      });
+
+      if (ending.quote) {
+        const quote = document.createElement("p");
+        quote.className = "ending-quote";
+        const italic = document.createElement("em");
+        const [quoteText, ...attributionParts] = ending.quote.split("——");
+        const quoteLine = document.createElement("span");
+        quoteLine.className = "quote-line";
+        quoteLine.textContent = quoteText;
+        italic.append(quoteLine);
+        if (attributionParts.length) {
+          const attribution = document.createElement("span");
+          attribution.className = "quote-attribution";
+          attribution.textContent = `——${attributionParts.join("——")}`;
+          italic.append(attribution);
+        }
+        quote.append(italic);
+        endingCopy.append(quote);
+      }
+
+      function formatNumber(value) {
+        return new Intl.NumberFormat("zh-CN", { maximumFractionDigits: 0 }).format(Number(value) || 0);
+      }
+
+      function renderRecap() {
+        const snapshot = storedEnding?.snapshot || {};
+        const peak = storedEnding?.peakSnapshot || snapshot;
+        const endingStats = storedEnding?.endingStats || {};
+        const difficultyLabels = { easy: "简单", normal: "普通", hard: "困难", ultimate: "终极困难" };
+        const aggressionLabels = { restrained: "克制", standard: "标准", aggressive: "好战", total: "全面战争" };
+        const unique = endingStats.endings
+          ? Object.values(endingStats.endings).filter((count) => count > 0).length
+          : 0;
+        const rows = [
+          ["种子", storedEnding?.seed ?? "未知"],
+          ["执政官", storedEnding?.governorLabel || "未记录"],
+          ["战局", `${difficultyLabels[storedEnding?.difficulty] || "普通"} / AI ${aggressionLabels[storedEnding?.aiAggression || storedEnding?.mapArchive?.aiAggression] || "标准"}`],
+          ["文明", storedEnding?.civilization ? `第 ${formatNumber(storedEnding.civilization)} 号` : "未知"],
+          ["年份", storedEnding?.turn ? `${formatNumber(storedEnding.turn)} 年` : "未知"],
+          ["触发", storedEnding?.trigger || ending.name],
+          ["终局统计", endingStats.total ? `已达成 ${formatNumber(unique)} 种 / 总计 ${formatNumber(endingStats.total)} 次` : "尚未记录"],
+          ["终值", `SC ${formatNumber(snapshot.sc)} / BE ${formatNumber(snapshot.be)} / LA ${formatNumber(snapshot.la)} / POP ${formatNumber(snapshot.pop)} / ECO ${formatNumber(snapshot.eco)} / 秩序 ${formatNumber(snapshot.stability)}`],
+          ["峰值", `SC ${formatNumber(peak.sc)} / BE ${formatNumber(peak.be)} / LA ${formatNumber(peak.la)} / POP ${formatNumber(peak.pop)} / ECO ${formatNumber(peak.eco)} / EERF ${formatNumber(peak.eerf)}`],
+          ["地图", storedEnding?.mapArchive ? `${storedEnding.mapArchive.status}｜本国 ${formatNumber(storedEnding.mapArchive.counts?.player)} / 中立 ${formatNumber(storedEnding.mapArchive.counts?.neutral)} / 敌国 ${formatNumber(storedEnding.mapArchive.counts?.rival)}` : "尚无地图数据"],
+          ["军力", storedEnding?.military ? `军力 ${formatNumber(storedEnding.military.force)} / 进攻 ${formatNumber(storedEnding.military.attack)} / 防守 ${formatNumber(storedEnding.military.defense)}` : "尚无军事数据"]
+        ];
+        endingRecapList.innerHTML = rows.map(([label, value]) => `<div><dt>${label}</dt><dd>${value}</dd></div>`).join("");
+        copyChallengeButton.disabled = !storedEnding?.seed;
+        dataReviewButton.disabled = !storedEnding?.metricArchive?.length;
+      }
+
+      function challengeUrl() {
+        const url = new URL("index.html", window.location.href);
+        if (storedEnding?.seed) {
+          url.searchParams.set("seed", storedEnding.seed);
+        }
+        return url.href;
+      }
+
+      async function copyChallengeLink() {
+        const link = challengeUrl();
+        try {
+          await navigator.clipboard.writeText(link);
+          copyChallengeButton.textContent = "已复制";
+        } catch {
+          copyChallengeButton.textContent = link;
+        }
+        window.setTimeout(() => {
+          copyChallengeButton.textContent = "复制挑战链接";
+        }, 1600);
+      }
+
+      renderRecap();
+      initDataReview();
+
+      function initDataReview() {
+        const archive = Array.isArray(storedEnding?.metricArchive) ? storedEnding.metricArchive : [];
+        civilizationDataSelect.innerHTML = "";
+        archive.forEach((entry, index) => {
+          const option = document.createElement("option");
+          option.value = String(index);
+          option.textContent = `第 ${formatNumber(entry.civilization)} 号文明${entry.collapseCause ? `｜${entry.collapseCause}` : ""}`;
+          civilizationDataSelect.append(option);
+        });
+        renderEndingCharts();
+      }
+
+      function toggleDataReview() {
+        endingDataReview.hidden = !endingDataReview.hidden;
+        dataReviewButton.textContent = endingDataReview.hidden ? "查看文明数据" : "收起文明数据";
+        if (!endingDataReview.hidden) renderEndingCharts();
+      }
+
+      function renderEndingCharts() {
+        if (endingDataReview.hidden) return;
+        const archive = Array.isArray(storedEnding?.metricArchive) ? storedEnding.metricArchive : [];
+        const index = Math.max(0, Number(civilizationDataSelect.value) || 0);
+        const samples = Array.isArray(archive[index]?.samples) ? archive[index].samples : [];
+        drawEndingChart(document.querySelector("#endingKnowledgeChart"), samples, ["sc", "be", "la"]);
+        drawEndingChart(document.querySelector("#endingEconomyChart"), samples, ["eco"]);
+        drawEndingChart(document.querySelector("#endingPopulationChart"), samples, ["pop", "stability"]);
+      }
+
+      function drawEndingChart(canvas, samples, keys) {
+        if (!canvas) return;
+        const context = canvas.getContext("2d");
+        const rect = canvas.getBoundingClientRect();
+        const width = Math.max(260, Math.round(rect.width || canvas.width));
+        const height = Math.max(200, Math.round(rect.height || canvas.height));
+        const ratio = Math.min(window.devicePixelRatio || 1, 1.5);
+        canvas.width = Math.round(width * ratio);
+        canvas.height = Math.round(height * ratio);
+        context.setTransform(ratio, 0, 0, ratio, 0, 0);
+        context.clearRect(0, 0, width, height);
+        context.fillStyle = "#050a10";
+        context.fillRect(0, 0, width, height);
+        const plot = { left: 52, right: width - 72, top: 22, bottom: height - 42 };
+        context.strokeStyle = "rgba(84, 216, 255, 0.14)";
+        for (let line = 0; line <= 4; line += 1) {
+          const y = plot.top + (plot.bottom - plot.top) * (line / 4);
+          context.beginPath();
+          context.moveTo(plot.left, y);
+          context.lineTo(plot.right, y);
+          context.stroke();
+          context.fillStyle = "#718096";
+          context.font = "700 9px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace";
+          context.textAlign = "right";
+          context.fillText(`${100 - line * 25}%`, plot.left - 7, y + 3);
+        }
+        if (samples.length < 2) {
+          context.fillStyle = "#8ea2b8";
+          context.font = "700 13px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace";
+          context.textAlign = "center";
+          context.fillText("无足够样本", width / 2, height / 2);
+          return;
+        }
+        keys.forEach((key, index) => drawEndingSeries(context, samples, key, plot, index, keys.length));
+        drawEndingYearAxis(context, samples, plot);
+      }
+
+      function drawEndingSeries(context, samples, key, plot, seriesIndex, seriesCount) {
+        const series = {
+          sc: ["SC", "#54d8ff", 20000],
+          be: ["BE", "#ffd166", 20000],
+          la: ["LA", "#f4a7d8", 20000],
+          eco: ["ECO", "#c5ef7f", 300000],
+          pop: ["POP", "#74e0a8", 180000],
+          stability: ["ORDER", "#e2e8f0", 100]
+        }[key];
+        if (!series) return;
+        const [label, color, cap] = series;
+        context.save();
+        context.strokeStyle = color;
+        context.lineWidth = 2;
+        context.beginPath();
+        samples.forEach((sample, index) => {
+          const x = plot.left + (plot.right - plot.left) * (index / Math.max(1, samples.length - 1));
+          const y = plot.bottom - (plot.bottom - plot.top) * Math.max(0, Math.min(1, (Number(sample[key]) || 0) / cap));
+          if (index === 0) context.moveTo(x, y);
+          else context.lineTo(x, y);
+        });
+        context.stroke();
+        context.fillStyle = color;
+        samples.forEach((sample, index) => {
+          const x = plot.left + (plot.right - plot.left) * (index / Math.max(1, samples.length - 1));
+          const y = plot.bottom - (plot.bottom - plot.top) * Math.max(0, Math.min(1, (Number(sample[key]) || 0) / cap));
+          context.beginPath();
+          context.arc(x, y, 2.2, 0, Math.PI * 2);
+          context.fill();
+        });
+        const last = samples[samples.length - 1];
+        const lastY = plot.bottom - (plot.bottom - plot.top) * Math.max(0, Math.min(1, (Number(last[key]) || 0) / cap));
+        const offset = (seriesIndex - (seriesCount - 1) / 2) * 11;
+        context.font = "800 9px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace";
+        context.textAlign = "left";
+        context.fillText(`${label} ${formatChartValue(last[key])}`, plot.right + 6, Math.max(plot.top + 8, Math.min(plot.bottom, lastY + offset)));
+        context.restore();
+      }
+
+      function drawEndingYearAxis(context, samples, plot) {
+        const tickCount = Math.min(5, samples.length);
+        const indexes = Array.from({ length: tickCount }, (_, index) => {
+          return Math.round(index * (samples.length - 1) / Math.max(1, tickCount - 1));
+        });
+        context.save();
+        context.fillStyle = "#8ea2b8";
+        context.font = "700 9px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace";
+        context.textAlign = "center";
+        indexes.forEach((sampleIndex) => {
+          const x = plot.left + (plot.right - plot.left) * (sampleIndex / Math.max(1, samples.length - 1));
+          context.fillText(`Y${formatNumber(samples[sampleIndex]?.turn)}`, x, plot.bottom + 18);
+        });
+        context.restore();
+      }
+
+      function formatChartValue(value) {
+        const number = Math.round(Number(value) || 0);
+        if (Math.abs(number) >= 1000000) return `${(number / 1000000).toFixed(1)}m`;
+        if (Math.abs(number) >= 1000) return `${(number / 1000).toFixed(number >= 10000 ? 0 : 1)}k`;
+        return String(number);
+      }
+
+      function restartGame() {
+        clearGame();
+        window.location.href = new URL("index.html", window.location.href).href;
+      }
+
+      function restartGameWithSeed(event) {
+        event.preventDefault();
+        const seedText = endingSeedInput.value.trim();
+        if (!seedText) {
+          restartGame();
+          return;
+        }
+
+        clearGame();
+        const url = new URL("index.html", window.location.href);
+        url.searchParams.set("seed", seedText);
+        window.location.href = url.href;
+      }
+
+      function shouldIgnoreShortcut(event) {
+        if (event.defaultPrevented || event.metaKey || event.ctrlKey || event.altKey || event.repeat) return true;
+        const target = event.target;
+        if (!target || target === document.body) return false;
+        const tagName = target.tagName;
+        return target.isContentEditable || tagName === "INPUT" || tagName === "TEXTAREA" || tagName === "SELECT";
+      }
+
+      function flashRestartButton() {
+        restartButton.classList.remove("shortcut-flash");
+        void restartButton.offsetWidth;
+        restartButton.classList.add("shortcut-flash");
+        window.setTimeout(() => restartButton.classList.remove("shortcut-flash"), 180);
+      }
+
+      restartButton.addEventListener("click", restartGame);
+      copyChallengeButton.addEventListener("click", copyChallengeLink);
+      dataReviewButton.addEventListener("click", toggleDataReview);
+      civilizationDataSelect.addEventListener("change", renderEndingCharts);
+      endingSeedForm.addEventListener("submit", restartGameWithSeed);
+      window.addEventListener("keydown", (event) => {
+        if (shouldIgnoreShortcut(event)) return;
+        if (event.key.toLowerCase() !== "n" || !event.shiftKey) return;
+        event.preventDefault();
+        flashRestartButton();
+        restartGame();
+      });
+    </script>
+  </body>
+</html>

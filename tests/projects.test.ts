@@ -38,6 +38,14 @@ describe('project registry', () => {
     ]);
   });
 
+  it('publishes Cradles of Civilization as a playable Tech Echo project', () => {
+    expect(getProject('cradles-of-civilization')).toMatchObject({
+      classification: 'tech_echo_project',
+      playable: true,
+      websiteUrl: '/games/cradles-of-civilization/',
+    });
+  });
+
   it('keeps project roles separate from global community roles', () => {
     expect(projectRoles.some((role) => memberRoles.includes(role as never))).toBe(false);
     for (const project of projects) {

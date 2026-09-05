@@ -6,7 +6,7 @@
     <meta name="author" content="Noah Walker">
     <meta name="copyright" content="Original concept by Noah Walker">
     <title>文明摇篮：终局</title>
-    <link rel="stylesheet" href="styles.css?v=20260904-v040">
+    <link rel="stylesheet" href="styles.css?v=20260905-ending-polish">
   </head>
   <body class="ending-body">
     <div class="site-tools">
@@ -60,8 +60,9 @@
       </section>
     </main>
 
-    <script src="localization.js?v=20260904-v040"></script>
-    <script src="endings.js?v=20260904-v040"></script>
+    <script src="map-lab/map-data.js?v=20260904-strategy64"></script>
+    <script src="localization.js?v=20260905-ending-polish"></script>
+    <script src="endings.js?v=20260905-ending-polish"></script>
     <script>
       "use strict";
 
@@ -111,19 +112,31 @@
         name: "尚无结局记录",
         nameEn: "No Ending Recorded",
         paragraphs: ["这一页会在文明抵达终局后显示结果。返回新世界，开始一轮新的演化。"],
-        paragraphsEn: ["This page will display the result after a civilization reaches an ending. Return to a new world to begin another evolution."],
+        paragraphsEn: ["Your civilization’s final chapter will appear here when you reach an ending. Start a new world to begin its story."],
         quote: "",
         quoteEn: ""
       };
-      const endingName = I18N.isEnglish() ? ending.nameEn : ending.name.split("/")[0];
+      const endingNameParts = String(ending.name || "").split("/");
+      const endingNameZh = endingNameParts[0] || "尚无结局记录";
+      const endingNameEn = ending.nameEn || endingNameParts.slice(1).join("/") || "No Ending Recorded";
+      const endingName = I18N.isEnglish() ? endingNameEn : endingNameZh;
+      const endingTitleLines = I18N.isEnglish()
+        ? [endingNameEn]
+        : endingNameZh === endingNameEn
+          ? [endingNameZh]
+          : [endingNameZh, endingNameEn];
       const endingParagraphs = I18N.isEnglish() ? ending.paragraphsEn : ending.paragraphs;
       const endingQuote = I18N.isEnglish() ? ending.quoteEn : ending.quote;
 
-      document.title = T(`文明摇篮：${endingName}`, `Cradles of Civilization: ${endingName}`);
+      document.title = T(
+        `文明摇篮：${endingTitleLines.join(" / ")}`,
+        `Cradles of Civilization: ${endingTitleLines.join(" / ")}`
+      );
       endingTitle.innerHTML = "";
-      [endingName].forEach((line) => {
+      endingTitleLines.forEach((line) => {
         const titleLine = document.createElement("span");
         titleLine.className = "ending-title-line";
+        titleLine.dataset.i18nSkip = "";
         titleLine.textContent = line;
         endingTitle.append(titleLine);
       });
@@ -148,7 +161,7 @@
         if (attributionParts.length) {
           const attribution = document.createElement("span");
           attribution.className = "quote-attribution";
-          attribution.textContent = `${I18N.isEnglish() ? "—" : "——"}${attributionParts.join(separator)}`;
+          attribution.textContent = `${I18N.isEnglish() ? "— " : "——"}${attributionParts.join(separator)}`;
           italic.append(attribution);
         }
         quote.append(italic);
@@ -163,8 +176,8 @@
         if (!storedEnding) {
           const label = T("状态", "Status");
           const value = endingId
-            ? T("通过链接查看结局；未载入本局复盘", "Ending opened from a link; no run recap is loaded")
-            : T("尚无结局记录", "No ending has been recorded");
+            ? T("通过链接查看结局；未载入本局复盘", "You are previewing an ending. No run recap is available.")
+            : T("尚无结局记录", "No ending recorded yet.");
           endingRecapList.innerHTML = "";
           const row = document.createElement("div");
           const term = document.createElement("dt");
@@ -191,15 +204,15 @@
         const rows = I18N.isEnglish() ? [
           ["Seed", storedEnding.seed ?? "Unknown"],
           ["Governor", I18N.translate(storedEnding.governorLabel || "未记录")],
-          ["Campaign", `${I18N.translate(difficulty)} / AI ${I18N.translate(aggression)}`],
+          ["Campaign Settings", `${I18N.translate(difficulty)} / AI aggression: ${I18N.translate(aggression)}`],
           ["Civilization", storedEnding.civilization ? `Civilization ${formatNumber(storedEnding.civilization)}` : "Unknown"],
           ["Year", storedEnding.turn ? `${formatNumber(storedEnding.turn)} years` : "Unknown"],
-          ["Trigger", I18N.translate(storedEnding.trigger || endingName)],
-          ["Ending Statistics", endingStats.total ? `${formatNumber(unique)} endings reached / ${formatNumber(endingStats.total)} total` : "Not recorded yet"],
-          ["Final values", `SC ${formatNumber(snapshot.sc)} / BE ${formatNumber(snapshot.be)} / LA ${formatNumber(snapshot.la)} / POP ${formatNumber(snapshot.pop)} / ECO ${formatNumber(snapshot.eco)} / ORDER ${formatNumber(snapshot.stability)}`],
-          ["Peak values", `SC ${formatNumber(peak.sc)} / BE ${formatNumber(peak.be)} / LA ${formatNumber(peak.la)} / POP ${formatNumber(peak.pop)} / ECO ${formatNumber(peak.eco)} / EERF ${formatNumber(peak.eerf)}`],
-          ["Map", storedEnding.mapArchive ? `${I18N.translate(storedEnding.mapArchive.status)} | your realm ${formatNumber(storedEnding.mapArchive.counts?.player)} / neutral ${formatNumber(storedEnding.mapArchive.counts?.neutral)} / rivals ${formatNumber(storedEnding.mapArchive.counts?.rival)}` : "No map data"],
-          ["Military Strength", storedEnding.military ? `Force ${formatNumber(storedEnding.military.force)} / attack ${formatNumber(storedEnding.military.attack)} / defense ${formatNumber(storedEnding.military.defense)}` : "No military data"]
+          ["Triggered By", I18N.translate(storedEnding.trigger || endingName)],
+          ["Ending Statistics", endingStats.total ? `${formatNumber(unique)} distinct endings / ${formatNumber(endingStats.total)} total completions` : "No endings recorded yet"],
+          ["Final Stats", `SC ${formatNumber(snapshot.sc)} / BE ${formatNumber(snapshot.be)} / LA ${formatNumber(snapshot.la)} / POP ${formatNumber(snapshot.pop)} / ECO ${formatNumber(snapshot.eco)} / ORDER ${formatNumber(snapshot.stability)}`],
+          ["Peak Stats", `SC ${formatNumber(peak.sc)} / BE ${formatNumber(peak.be)} / LA ${formatNumber(peak.la)} / POP ${formatNumber(peak.pop)} / ECO ${formatNumber(peak.eco)} / EERF ${formatNumber(peak.eerf)}`],
+          ["Territory", storedEnding.mapArchive ? `${I18N.translate(storedEnding.mapArchive.status)} | Your realm: ${formatNumber(storedEnding.mapArchive.counts?.player)} / Neutral: ${formatNumber(storedEnding.mapArchive.counts?.neutral)} / Rivals: ${formatNumber(storedEnding.mapArchive.counts?.rival)}` : "No territory data recorded"],
+          ["Military Strength", storedEnding.military ? `Troops: ${formatNumber(storedEnding.military.force)} / Attack: ${formatNumber(storedEnding.military.attack)} / Defense: ${formatNumber(storedEnding.military.defense)}` : "No military data recorded"]
         ] : [
           ["种子", storedEnding.seed ?? "未知"],
           ["执政官", storedEnding.governorLabel || "未记录"],
@@ -232,7 +245,7 @@
         if (storedEnding?.seed) {
           url.searchParams.set("seed", storedEnding.seed);
         }
-        if (I18N.isEnglish()) url.searchParams.set("lang", "en");
+        url.searchParams.set("lang", I18N.isEnglish() ? "en" : "zh");
         return url.href;
       }
 
@@ -270,7 +283,7 @@
       function toggleDataReview() {
         endingDataReview.hidden = !endingDataReview.hidden;
         dataReviewButton.textContent = endingDataReview.hidden
-          ? T("查看文明数据", "Review Civilization Data")
+          ? T("查看文明数据", "View Civilization Data")
           : T("收起文明数据", "Hide Civilization Data");
         if (!endingDataReview.hidden) renderEndingCharts();
       }
@@ -315,7 +328,7 @@
           context.fillStyle = "#8ea2b8";
           context.font = "700 13px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace";
           context.textAlign = "center";
-          context.fillText(T("无足够样本", "Not enough samples"), width / 2, height / 2);
+          context.fillText(T("无足够样本", "Not enough data yet"), width / 2, height / 2);
           return;
         }
         keys.forEach((key, index) => drawEndingSeries(context, samples, key, plot, index, keys.length));
@@ -387,7 +400,7 @@
       function restartGame() {
         clearGame();
         const url = new URL("index.html", window.location.href);
-        if (I18N.isEnglish()) url.searchParams.set("lang", "en");
+        url.searchParams.set("lang", I18N.isEnglish() ? "en" : "zh");
         window.location.href = url.href;
       }
 
@@ -402,7 +415,7 @@
         clearGame();
         const url = new URL("index.html", window.location.href);
         url.searchParams.set("seed", seedText);
-        if (I18N.isEnglish()) url.searchParams.set("lang", "en");
+        url.searchParams.set("lang", I18N.isEnglish() ? "en" : "zh");
         window.location.href = url.href;
       }
 

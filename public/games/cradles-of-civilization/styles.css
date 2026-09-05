@@ -1305,237 +1305,626 @@ h2 {
 
 .map-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(292px, 0.36fr);
+  grid-template-columns: minmax(0, 1fr) 332px;
   gap: 12px;
   align-items: start;
+}
+
+.strategic-map-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+}
+
+.strategic-map-modes {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(76px, 1fr));
+  border: 1px solid rgba(84, 216, 255, 0.2);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.strategic-map-modes button {
+  display: grid;
+  grid-template-columns: 18px 1fr;
+  align-items: center;
+  min-height: 42px;
+  padding: 0 10px;
+  color: #aebbd0;
+  background: #0a111a;
+  border: 0;
+  border-right: 1px solid rgba(84, 216, 255, 0.14);
+  border-radius: 0;
+  cursor: pointer;
+}
+
+.strategic-map-modes button:last-child {
+  border-right: 0;
+}
+
+.strategic-map-modes button span {
+  color: rgba(84, 216, 255, 0.58);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.6rem;
+}
+
+.strategic-map-modes button strong {
+  font-size: 0.76rem;
+  letter-spacing: 0.08em;
+}
+
+.strategic-map-modes button:hover,
+.strategic-map-modes button:focus-visible,
+.strategic-map-modes button[aria-pressed="true"] {
+  color: #ffffff;
+  background: #17283a;
+  outline: none;
+}
+
+.strategic-map-modes button[aria-pressed="true"] {
+  box-shadow: inset 0 -3px 0 var(--science);
+}
+
+.strategic-map-view-tools {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+#mapReliefToggle,
+.strategic-map-zoom-controls button {
+  display: inline-grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  color: #e8f3fa;
+  background: #0a111a;
+  border: 1px solid rgba(84, 216, 255, 0.2);
+  border-radius: 4px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+#mapReliefToggle[aria-pressed="true"] {
+  color: #fff1c4;
+  background: #493f29;
+  border-color: rgba(255, 209, 102, 0.54);
+}
+
+#mapReliefToggle:hover,
+#mapReliefToggle:focus-visible,
+.strategic-map-zoom-controls button:hover,
+.strategic-map-zoom-controls button:focus-visible {
+  color: #ffffff;
+  background: #17283a;
+  border-color: var(--science);
+  outline: none;
+}
+
+.strategic-map-zoom-readout {
+  min-width: 54px;
+  color: #dce8f2;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.7rem;
+  font-weight: 900;
+  text-align: center;
+}
+
+.strategic-map-zoom-controls {
+  display: grid;
+  grid-template-columns: repeat(3, 42px);
+  gap: 4px;
 }
 
 .world-map {
   position: relative;
   width: 100%;
-  height: min(72vw, 760px);
-  min-height: 660px;
+  aspect-ratio: 1200 / 760;
+  min-height: 460px;
   overflow: hidden;
   background:
-    linear-gradient(rgba(4, 10, 15, 0.16), rgba(4, 10, 15, 0.42)),
-    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 10px),
-    #071018;
-  border: 1px solid rgba(84, 216, 255, 0.14);
+    radial-gradient(circle at 68% 12%, rgba(189, 100, 54, 0.1), transparent 24%),
+    #0b171a;
+  border: 1px solid rgba(84, 216, 255, 0.2);
   border-radius: 6px;
+  isolation: isolate;
 }
 
 .world-map::before {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, transparent, rgba(84, 216, 255, 0.04), transparent);
+  z-index: 2;
+  background:
+    linear-gradient(90deg, transparent, rgba(84, 216, 255, 0.025), transparent),
+    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.012) 0 1px, transparent 1px 12px);
   pointer-events: none;
 }
 
-.world-map-svg {
+.strategic-map-surface {
   position: absolute;
   inset: 0;
+  display: block;
   width: 100%;
   height: 100%;
   z-index: 1;
+  user-select: none;
+  touch-action: none;
+  cursor: grab;
 }
 
-.map-road {
+.strategic-map-surface.is-dragging {
+  cursor: grabbing;
+}
+
+.strategic-ocean-plane {
+  fill: url(#formalOceanGradient);
+}
+
+.strategic-ocean-current {
   fill: none;
-  stroke: rgba(226, 232, 240, 0.48);
-  stroke-width: 1.5;
-  stroke-dasharray: 4 3;
+  stroke: rgba(145, 194, 199, 0.12);
+  stroke-width: 2;
+  stroke-dasharray: 14 18;
   vector-effect: non-scaling-stroke;
   pointer-events: none;
 }
 
-.map-road.available {
-  stroke: rgba(84, 216, 255, 0.84);
-  stroke-width: 2.5;
+.strategic-land-depth {
+  fill: #111c19;
+  stroke: #050908;
+  stroke-width: 6.5;
+  vector-effect: non-scaling-stroke;
 }
 
-.map-region {
+.strategic-land-base {
+  fill: url(#formalLandGradient);
+  stroke: rgba(220, 205, 163, 0.22);
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+
+.strategic-province-relief-layer,
+.strategic-relief-cell {
+  pointer-events: none;
+}
+
+.strategic-relief-wall {
+  stroke: rgba(239, 225, 188, 0.18);
+  stroke-width: 0.75;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.strategic-relief-front {
+  fill: var(--map-relief-realm-front, #2d3a36);
+  fill-opacity: 0.94;
+}
+
+.strategic-relief-side {
+  fill: var(--map-relief-realm-side, #202a27);
+  fill-opacity: 0.98;
+}
+
+.strategic-relief-rim {
+  fill: none;
+  stroke: rgba(248, 235, 201, 0.34);
+  stroke-width: 1.15;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.strategic-relief-cell.relief-terrain-mountain .strategic-relief-rim,
+.strategic-relief-cell.relief-terrain-canyon .strategic-relief-rim {
+  stroke: rgba(255, 234, 187, 0.48);
+  stroke-width: 1.35;
+}
+
+.world-map[data-strategic-map-mode="terrain"] .strategic-relief-front {
+  fill: var(--map-relief-terrain-front, #393930);
+}
+
+.world-map[data-strategic-map-mode="terrain"] .strategic-relief-side {
+  fill: var(--map-relief-terrain-side, #292921);
+}
+
+.world-map[data-strategic-map-mode="military"] .strategic-relief-wall {
+  fill-opacity: 0.58;
+}
+
+.world-map[data-relief="2d"] .strategic-land-depth,
+.world-map[data-relief="2d"] .strategic-province-relief-layer {
+  display: none;
+}
+
+.world-map[data-relief="3d"] .strategic-land-base {
+  stroke: rgba(237, 221, 178, 0.32);
+  stroke-width: 2.4;
+}
+
+.strategic-province {
+  --map-realm-color: #596b68;
+  --map-terrain-color: #777463;
+  fill: var(--map-realm-color);
+  fill-opacity: 0.82;
+  stroke: rgba(231, 227, 208, 0.22);
+  stroke-width: 0.9;
+  vector-effect: non-scaling-stroke;
+  transition: fill 160ms ease, fill-opacity 160ms ease, filter 120ms ease, stroke 120ms ease;
   cursor: pointer;
   outline: none;
 }
 
-.map-territory {
-  fill: #243341;
-  stroke: rgba(233, 241, 247, 0.44);
-  stroke-width: 1.4;
+.world-map[data-strategic-map-mode="terrain"] .strategic-province {
+  fill: var(--map-terrain-color);
+  fill-opacity: 0.86;
+  stroke: rgba(36, 39, 35, 0.42);
+}
+
+.world-map[data-strategic-map-mode="military"] .strategic-province {
+  fill-opacity: 0.5;
+  filter: saturate(0.66) brightness(0.82);
+  stroke: rgba(218, 219, 203, 0.2);
+}
+
+.strategic-province:hover,
+.strategic-province.is-hovered,
+.strategic-province:focus-visible {
+  fill-opacity: 0.98;
+  filter: brightness(1.18) saturate(1.05);
+  stroke: #fff9e4;
+  stroke-width: 1.8;
+}
+
+.strategic-province.is-selected {
+  fill-opacity: 1;
+  filter: brightness(1.2) saturate(1.08);
+  stroke: #ffffff;
+  stroke-width: 3;
+  stroke-dasharray: 8 3;
+}
+
+.world-map[data-strategic-map-mode="military"] .strategic-province.is-move-target {
+  fill-opacity: 0.9;
+  filter: brightness(1.18) saturate(1.2);
+  stroke: #70e5a7;
+  stroke-width: 3.2;
+  stroke-dasharray: 7 3;
+}
+
+.world-map[data-strategic-map-mode="military"] .strategic-province.is-attack-target {
+  fill-opacity: 0.84;
+  filter: brightness(1.04) saturate(1.3);
+  stroke: #f08072;
+  stroke-width: 3.2;
+  stroke-dasharray: 4 3;
+}
+
+.world-map[data-strategic-map-mode="military"] .strategic-province.is-neutral-target {
+  fill-opacity: 0.88;
+  filter: brightness(1.08) saturate(1.18);
+  stroke: #efc76e;
+  stroke-width: 3.2;
+  stroke-dasharray: 7 3;
+}
+
+.strategic-province.is-army-region:not(.is-selected) {
+  stroke-dasharray: 5 3;
+}
+
+.strategic-province-relief-layer,
+.strategic-terrain-texture-layer,
+.strategic-route-layer,
+.strategic-river-layer,
+.strategic-region-border-layer,
+.strategic-realm-border-layer,
+.strategic-capital-layer,
+.strategic-realm-label-layer,
+.strategic-region-label-layer,
+.strategic-province-label-layer {
+  pointer-events: none;
+}
+
+.strategic-terrain-texture {
+  fill: transparent;
+  opacity: 0.28;
+}
+
+.strategic-terrain-texture.terrain-tundra {
+  fill: url(#formalTundraHatch);
+}
+
+.strategic-terrain-texture.terrain-waste,
+.strategic-terrain-texture.terrain-canyon {
+  fill: url(#formalWasteHatch);
+}
+
+.world-map[data-strategic-map-mode="political"] .strategic-terrain-texture {
+  opacity: 0.12;
+}
+
+.world-map[data-strategic-map-mode="military"] .strategic-terrain-texture {
+  opacity: 0.08;
+}
+
+.strategic-terrain-mountain {
+  fill: rgba(37, 34, 30, 0.5);
+  stroke: rgba(237, 224, 190, 0.25);
+  stroke-width: 1;
   vector-effect: non-scaling-stroke;
-  transition: filter 120ms ease, stroke 120ms ease;
 }
 
-.map-region:hover .map-territory,
-.map-region:focus-visible .map-territory {
-  filter: brightness(1.22);
-  stroke: #f8fafc;
-  stroke-width: 2.4;
+.world-map[data-strategic-map-mode="political"] .strategic-terrain-mountain {
+  opacity: 0.35;
 }
 
-.map-region.available-target .map-territory {
-  stroke: var(--science);
-  stroke-width: 2.8;
+.world-map[data-strategic-map-mode="military"] .strategic-terrain-mountain {
+  opacity: 0.2;
 }
 
-.map-region.selected-region .map-territory {
-  filter: brightness(1.18);
+.strategic-map-road {
+  fill: none;
+  stroke: rgba(226, 197, 139, 0.28);
+  stroke-width: 1.35;
+  stroke-dasharray: 2 6;
+  stroke-linecap: round;
+  opacity: 0.22;
+  vector-effect: non-scaling-stroke;
+}
+
+.world-map[data-strategic-map-mode="terrain"] .strategic-map-road {
+  opacity: 0.08;
+}
+
+.world-map[data-strategic-map-mode="military"] .strategic-map-road {
+  stroke: rgba(244, 217, 151, 0.52);
+  stroke-width: 1.8;
+  opacity: 0.58;
+}
+
+.world-map[data-strategic-map-mode="military"] .strategic-map-road.is-available {
+  stroke: #70e5a7;
+  stroke-width: 3.3;
+  stroke-dasharray: 7 3;
+  opacity: 1;
+}
+
+.strategic-map-river {
+  fill: none;
+  stroke: rgba(90, 178, 197, 0.72);
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+
+.strategic-map-river.major {
+  stroke-width: 3.5;
+}
+
+.world-map[data-strategic-map-mode="political"] .strategic-map-river {
+  opacity: 0.55;
+}
+
+.strategic-region-border {
+  fill: none;
+  stroke: rgba(235, 222, 187, 0.4);
+  stroke-width: 2.1;
+  stroke-dasharray: 8 5;
+  vector-effect: non-scaling-stroke;
+}
+
+.world-map[data-strategic-map-mode="political"] .strategic-region-border,
+.world-map[data-strategic-map-mode="military"] .strategic-region-border {
+  opacity: 0.32;
+}
+
+.strategic-realm-border {
+  fill: none;
+  stroke: rgba(21, 16, 12, 0.92);
+  stroke-width: 5.5;
+  vector-effect: non-scaling-stroke;
+}
+
+.strategic-realm-border.frontline {
+  stroke: #f3b067;
+  stroke-width: 6.5;
+  stroke-dasharray: 10 5;
+}
+
+.strategic-realm-border.neutral-frontier {
+  stroke: #efc76e;
+  stroke-width: 5.5;
+  stroke-dasharray: 5 5;
+}
+
+.world-map[data-strategic-map-mode="terrain"] .strategic-realm-border {
+  opacity: 0.35;
+  stroke-width: 3.5;
+}
+
+.strategic-coast-line {
+  fill: none;
+  stroke: rgba(226, 216, 184, 0.64);
+  stroke-width: 3;
+  filter: drop-shadow(0 0 4px rgba(15, 9, 5, 0.8));
+  vector-effect: non-scaling-stroke;
+  pointer-events: none;
+}
+
+.strategic-capital-marker {
+  fill: #f4ddb1;
+  stroke: #22170d;
+  stroke-width: 1.7;
+  vector-effect: non-scaling-stroke;
+}
+
+.strategic-realm-label,
+.strategic-region-label,
+.strategic-province-label {
+  text-anchor: middle;
+  paint-order: stroke;
+  pointer-events: none;
+  user-select: none;
+}
+
+.strategic-realm-label {
+  fill: rgba(255, 250, 232, 0.78);
+  stroke: rgba(18, 13, 9, 0.74);
+  stroke-width: 5px;
+  font-size: 28px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+}
+
+.strategic-region-label {
+  fill: rgba(247, 239, 216, 0.8);
+  stroke: rgba(16, 13, 10, 0.82);
+  stroke-width: 3px;
+  font-size: 16px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+}
+
+.strategic-province-label {
+  fill: #fffbea;
+  stroke: rgba(11, 9, 7, 0.9);
+  stroke-width: 2.5px;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.strategic-province-meta {
+  fill: rgba(236, 235, 216, 0.78);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 8px;
+  font-weight: 800;
+}
+
+.world-map[data-zoom-band="far"] .strategic-region-label,
+.world-map[data-zoom-band="far"] .strategic-province-label,
+.world-map[data-zoom-band="mid"] .strategic-realm-label,
+.world-map[data-zoom-band="mid"] .strategic-province-label,
+.world-map[data-zoom-band="near"] .strategic-realm-label,
+.world-map[data-zoom-band="near"] .strategic-region-label {
+  display: none;
+}
+
+.world-map[data-strategic-map-mode="terrain"] .strategic-realm-label,
+.world-map[data-strategic-map-mode="military"] .strategic-realm-label {
+  opacity: 0.38;
+}
+
+.strategic-army-marker {
+  cursor: pointer;
+  outline: none;
+}
+
+.strategic-army-shield {
+  fill: #d7e0e8;
+  stroke: #19130e;
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+
+.strategic-army-marker.army-player .strategic-army-shield {
+  fill: #bdebd1;
+}
+
+.strategic-army-marker.army-rival .strategic-army-shield {
+  fill: #f3b0ad;
+}
+
+.strategic-army-marker.army-hostile-neutral .strategic-army-shield {
+  fill: #f4c39f;
+}
+
+.strategic-army-marker text {
+  fill: #14120e;
+  text-anchor: middle;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-weight: 1000;
+  pointer-events: none;
+}
+
+.strategic-army-tier {
+  font-size: 9px;
+}
+
+.strategic-army-force {
+  font-size: 6px;
+}
+
+.strategic-army-marker:hover .strategic-army-shield,
+.strategic-army-marker:focus-visible .strategic-army-shield,
+.strategic-army-marker.is-selected .strategic-army-shield {
+  fill: #fff7d8;
   stroke: #ffffff;
   stroke-width: 3;
 }
 
-.map-region.army-region .map-territory {
-  box-shadow: none;
-  stroke-dasharray: 5 3;
+.world-map[data-strategic-map-mode="political"] .strategic-army-marker {
+  opacity: 0.72;
 }
 
-.map-entity-name {
-  fill: rgba(245, 251, 255, 0.19);
-  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
-  font-size: 5.2px;
-  font-weight: 1000;
-  letter-spacing: 0;
-  text-anchor: middle;
-  paint-order: stroke;
-  stroke: rgba(3, 7, 12, 0.3);
-  stroke-width: 0.5px;
-  filter: blur(0.18px);
-  pointer-events: none;
+.world-map[data-strategic-map-mode="terrain"] .strategic-army-marker {
+  opacity: 0.38;
 }
 
-.map-entity-name-player {
-  fill: rgba(170, 255, 211, 0.25);
+.world-map[data-strategic-map-mode="military"] .strategic-army-marker {
+  opacity: 1;
 }
 
-.map-entity-name-rival {
-  fill: rgba(255, 194, 194, 0.22);
+.world-map[data-zoom-band="far"] .strategic-army-marker.secondary-army:not(.is-selected) {
+  display: none;
 }
 
-.map-region-label {
-  fill: #f5f8fb;
-  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
-  font-size: 1.9px;
-  font-weight: 900;
-  letter-spacing: 0;
-  text-anchor: middle;
-  paint-order: stroke;
-  stroke: rgba(4, 8, 12, 0.88);
-  stroke-width: 0.7px;
-  pointer-events: none;
-}
-
-.map-region-label .map-region-meta {
-  fill: #d6e1e9;
-  font-size: 1.42px;
-  font-weight: 800;
-}
-
-html[lang="en"] .map-entity-name {
-  font-size: 4.4px;
-}
-
-html[lang="en"] .map-region-label {
-  font-size: 1.45px;
-}
-
-html[lang="en"] .map-region-label .map-region-meta {
-  font-size: 1.18px;
-}
-
-.map-region.entity-player-realm .map-territory {
-  fill: #1c654f;
-}
-
-.map-region.entity-free-cities .map-territory {
-  fill: #3d5368;
-}
-
-.map-region.entity-coastal-republic .map-territory {
-  fill: #276676;
-}
-
-.map-region.entity-solar-court .map-territory {
-  fill: #7d3539;
-}
-
-.map-region.entity-ash-confederacy .map-territory {
-  fill: #75502d;
-}
-
-.map-region.owner-ruins .map-territory {
-  fill: #7d3539;
-  stroke: rgba(255, 180, 180, 0.34);
-}
-
-.map-region.owner-hostile-neutral .map-territory {
-  stroke: #ff9f68;
-}
-
-.army-token {
+.strategic-map-hint {
   position: absolute;
+  left: 12px;
+  bottom: 10px;
   z-index: 4;
-  display: grid;
-  place-items: center;
-  width: 48px;
-  height: 44px;
-  padding: 0;
-  transform: translate(-50%, -50%);
-  color: #071017;
-  background: #d5e6f3;
-  border: 2px solid #071017;
-  border-radius: 4px;
-  box-shadow: 0 0 0 1px currentColor, 0 8px 18px rgba(0, 0, 0, 0.5);
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 0.68rem;
-  font-weight: 1000;
-  cursor: pointer;
+  max-width: calc(100% - 24px);
+  margin: 0;
+  padding: 5px 8px;
+  color: rgba(225, 235, 240, 0.74);
+  background: rgba(5, 12, 15, 0.76);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 3px;
+  font-size: 0.62rem;
+  font-weight: 800;
+  pointer-events: none;
 }
 
-.army-token strong,
-.army-token small {
-  display: block;
-  line-height: 1;
+.strategic-map-tooltip {
+  position: absolute;
+  z-index: 5;
+  max-width: min(280px, calc(100% - 24px));
+  padding: 7px 9px;
+  color: #f4f8f9;
+  background: rgba(5, 12, 14, 0.94);
+  border: 1px solid rgba(215, 185, 111, 0.45);
+  border-radius: 3px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.34);
+  font-size: 0.7rem;
+  line-height: 1.35;
+  pointer-events: none;
 }
 
-.army-token strong {
-  font-size: 0.72rem;
-}
-
-.army-token small {
-  margin-top: 3px;
-  font-size: 0.56rem;
-  font-weight: 900;
-}
-
-.army-token.army-player {
-  color: var(--people);
-  background: #b8f2d4;
-}
-
-.army-token.army-neutral {
-  color: #8ea2b8;
-  background: #d6e0e9;
-}
-
-.army-token.army-rival {
-  color: var(--danger);
-  background: #ffc4c4;
-}
-
-.army-token.army-hostile-neutral {
-  color: #ff9f68;
-  background: #ffd2ba;
-}
-
-.army-token[aria-pressed="true"] {
-  outline: 2px solid #f8fafc;
-  outline-offset: 3px;
-}
-
-.army-token:focus-visible {
-  outline: 2px solid var(--science);
-  outline-offset: 3px;
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
 }
 
 .map-sidebar {
@@ -2660,6 +3049,14 @@ html[lang="en"] .map-region-label .map-region-meta {
     grid-template-columns: 1fr;
   }
 
+  .map-sidebar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .military-panel {
+    grid-column: 1 / -1;
+  }
+
   .governor-options {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -2737,13 +3134,35 @@ html[lang="en"] .map-region-label .map-region-meta {
     justify-content: start;
   }
 
-  .world-map {
-    min-height: 620px;
+  .strategic-map-toolbar {
+    display: grid;
   }
 
-  .army-token {
-    width: 42px;
-    height: 38px;
+  .strategic-map-modes {
+    width: 100%;
+  }
+
+  .strategic-map-view-tools {
+    justify-content: space-between;
+  }
+
+  .world-map {
+    aspect-ratio: auto;
+    height: clamp(360px, 58svh, 520px);
+    min-height: 360px;
+  }
+
+  .map-sidebar {
+    grid-template-columns: 1fr;
+  }
+
+  .military-panel {
+    grid-column: auto;
+  }
+
+  .strategic-map-hint {
+    right: 10px;
+    text-align: center;
   }
 
   .metrics-chart {

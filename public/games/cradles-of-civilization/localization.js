@@ -6,6 +6,24 @@
   const HAN_PATTERN = /[\u3400-\u9fff]/u;
 
   const CORE_PAIRS = {
+  "政治": "Political",
+  "地形": "Terrain",
+  "军事": "Military",
+  "地图图层": "Map layers",
+  "地图视角": "Map view",
+  "地图缩放": "Map zoom",
+  "缩小地图": "Zoom out",
+  "放大地图": "Zoom in",
+  "重置地图镜头": "Reset map camera",
+  "切换到平面地图": "Switch to flat map",
+  "开启立体地形": "Enable relief map",
+  "三体世界战略地图": "Trisolaran strategic map",
+  "拖动平移 · Ctrl/⌘ + 滚轮或双指缩放 · 普通滚轮滚动页面 · 选择军队与相邻地块后在右侧下令": "Drag to pan · Ctrl/⌘ + wheel or pinch to zoom · use the wheel normally to scroll the page · select an army and adjacent province, then issue the order on the right",
+  "轻量立体地形已开启": "Lightweight relief enabled",
+  "平面地图已开启": "Flat map enabled",
+  "镜头已重置": "Camera reset",
+  "未知阵营": "Unknown realm",
+  "军队": "Army",
   "我们不禁驻足思考。生命、宇宙和万物的终极答案，究竟是什么？\nSC 暴涨，旧神学体系崩塌，EERF 被一次性推至满级。人口被锁定 5 次行动。\n": "We cannot help but pause and wonder: what is the ultimate answer to life, the universe, and everything?\nSC surges, the old theology collapses, and EERF is raised to maximum level at once. Population is locked for 5 actions.\n",
   "难道就没有一个基督徒来砍下我的头吗？！\n——君士坦丁十一世，1453年5月29日。\n经济衰退至原有的五分之一，人口流失一成。\n": "Is there no Christian here who will take my head?!\n—Constantine XI, May 29, 1453.\nThe economy falls to one-fifth of its former level, and one-tenth of the population is lost.\n",
   "“在朦胧的月光下，泪水涌出我的眼睛。”——《Take Me Home, Country Roads》，约翰·丹佛，1971年": "“Moonlit mist brings tears to my eyes.” —Take Me Home, Country Roads, John Denver, 1971",
@@ -235,7 +253,7 @@
   "系统压力：": "System pressure: ",
   "科学史进入": "The history of science enters the ",
   "神学史进入": "The history of theology enters the ",
-  "手动结算：": "Manual settlement: ",
+  "手动结算：": "Ending chosen: ",
   "地上天国": "Promised Land",
   "人间地狱": "Suffer In Hell",
   "都灵之马": "The Turin Horse",
@@ -247,7 +265,7 @@
   "永志不忘": "Here's Looking At You",
   "本局复盘": "RUN RECAP",
   "终局统计": "ENDING STATISTICS",
-  "指定种子": "Specified Seed",
+  "指定种子": "Custom Seed",
   "文明摇篮": "CRADLES OF CIVILIZATION",
   "你的国度": "Your Realm",
   "输入国名": "Enter realm name",
@@ -331,7 +349,7 @@
     "文明摇篮终局": "Cradles of Civilization ending",
     "返回 Tech Echo 官网 / Return to Tech Echo": "Return to Tech Echo",
     "尚无结局记录": "No Ending Recorded",
-    "这一页会在文明抵达终局后显示结果。返回新世界，开始一轮新的演化。": "This page will display the result after a civilization reaches an ending. Return to a new world to begin another evolution.",
+    "这一页会在文明抵达终局后显示结果。返回新世界，开始一轮新的演化。": "Your civilization’s final chapter will appear here when you reach an ending. Start a new world to begin its story.",
     "未知触发": "Unknown trigger",
     "未知灾变": "Unknown disaster",
     "地上天国/Promised Land": "Promised Land",
@@ -367,6 +385,7 @@
     "人类从历史中学到的唯一教训，": "The only lesson humanity learns from history is",
     "就是人类从未从历史中学到任何教训。": "that humanity has never learned anything from history.",
     "同一种子会生成相同的地块、道路与随机序列。": "The same seed generates the same regions, roads, and random sequence.",
+    "大陆地理固定；同一种子会重现势力分布与随机序列。": "Continental geography is fixed; the same seed reproduces political borders and the random sequence.",
     "敌军与灾变较弱，边境反应较慢": "Weaker enemies and disasters, with slower pressure at the frontier",
     "标准军力、灾变与边境压力": "Standard military strength, disasters, and frontier pressure",
     "敌军更强，灾变和进攻更频繁": "Stronger enemies, with more frequent disasters and attacks",
@@ -637,25 +656,25 @@
     "末代皇帝": "Viva La Vida",
     "终局资料缺失。": "Ending data is unavailable.",
     "终极答案倒计时归零": "Ultimate Answer Countdown Reaches Zero",
-    "查看文明数据": "Review Civilization Data",
+    "查看文明数据": "View Civilization Data",
     "收起文明数据": "Hide Civilization Data",
     "文明数据": "CIVILIZATION DATA",
     "知识与记忆": "Knowledge & Memory",
     "人口与秩序": "Population & Order",
     "开始": "Start",
     "文明数据复盘": "Civilization Data Review",
-    "选择文明代际": "Select Civilization",
+    "选择文明代际": "Select a Civilization",
     "终局复盘": "Ending Recap",
     "新世界，快捷键 Shift+N": "New World, shortcut Shift+N",
-    "使用指定种子开始，快捷键 Enter": "Start with the specified seed, shortcut Enter",
+    "使用指定种子开始，快捷键 Enter": "Start with this seed, shortcut Enter",
     "未知": "Unknown",
     "未记录": "Not recorded",
     "尚未记录": "Not recorded yet",
     "尚无地图数据": "No map data",
     "尚无军事数据": "No military data",
     "地图": "Map",
-    "指定种子": "Specified Seed",
-    "无足够样本": "Not enough samples",
+    "指定种子": "Custom Seed",
+    "无足够样本": "Not enough data yet",
     "当前执政官": "Current Governor",
     "当前执政官像": "Portrait of the current governor",
     "文明状态": "Civilization Status",
@@ -889,11 +908,23 @@
     "EERF 线性保存增幅": "EERF linear preservation bonus",
     "文明苏醒": "Civilization Awakens",
     "开始文明演化": " begins its civilizational evolution",
+    "战略地图升级": "Strategic Map Upgrade",
+    "旧战略层已迁移到固定的 64 省大陆。文明数值、EERF 与文明编年史全部保留；旧 25 格疆域和驻军按当前种子重新生成。": "The old strategic layer has been migrated to the fixed 64-province continent. Civilization metrics, EERF, and the chronicle are preserved; the old 25-region borders and armies are regenerated from the current seed.",
     "载入存档": "Save Loaded",
     "存档恢复": "Save Restored"
   };
 
-  const EXACT_PAIRS = Object.freeze({ ...CORE_PAIRS, ...WEB_PAIRS });
+  const mapData = global.CRADLES_MAP_LAB_DATA;
+  const MAP_PAIRS = Object.freeze(Object.fromEntries([
+    ...(mapData?.provinces || []).map((province) => [province.nameZh, province.nameEn]),
+    ...(mapData?.strategicRegions || []).map((region) => [region.nameZh, region.nameEn]),
+    ...(mapData?.realms || []).flatMap((realm) => [
+      [realm.nameZh, realm.nameEn],
+      [realm.shortZh, realm.shortEn]
+    ]),
+    ...Object.values(mapData?.terrainTypes || {}).map((terrain) => [terrain.nameZh, terrain.nameEn])
+  ].filter(([source, target]) => source && target)));
+  const EXACT_PAIRS = Object.freeze({ ...CORE_PAIRS, ...WEB_PAIRS, ...MAP_PAIRS });
   const SEGMENT_PAIRS = Object.entries(EXACT_PAIRS)
     .filter(([source]) => source.length > 1 && !source.includes("\\"))
     .sort(([left], [right]) => right.length - left.length);
@@ -1078,6 +1109,9 @@
     }
     if ((match = value.match(/^(.+)｜攻\s+([^｜]+)｜防\s+([^｜]+)｜基础工事\s+([^｜]+)｜将生成五块连通初始疆域$/u))) {
       return `${en(match[1])} | ATK ${match[2].trim()} | DEF ${match[3].trim()} | Base fortification ${match[4].trim()} | Five connected starting regions will be generated`;
+    }
+    if ((match = value.match(/^(.+)｜攻\s+([^｜]+)｜防\s+([^｜]+)｜基础工事\s+([^｜]+)｜将围绕首都生成\s+([^ ]+)\s+块连通初始疆域$/u))) {
+      return `${en(match[1])} | ATK ${match[2].trim()} | DEF ${match[3].trim()} | Base fortification ${match[4].trim()} | Generates ${match[5].trim()} connected starting provinces around this capital`;
     }
     if ((match = value.match(/^(.+)，(.+)，地块防御\s+(.+)$/u))) {
       return `${en(match[1])}, ${en(match[2])}, region defense ${match[3]}`;

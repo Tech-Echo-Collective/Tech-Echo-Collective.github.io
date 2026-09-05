@@ -9,8 +9,8 @@ window.THREE_SUN_ENDINGS = {
       "这应许之地，是你我亲手所造。"
     ],
     paragraphsEn: [
-      "At last, we may proudly declare that the days when humanity bled rivers for ideals are over. No angel sounds a trumpet; no holy city descends from heaven—",
-      "This promised land was made by our own hands."
+      "At last, we can proudly proclaim that the age in which humanity spilled rivers of blood for its ideals is over; no angel has sounded the trumpet, nor has any holy city descended from heaven—",
+      "You and I built this promised land with our own hands."
     ],
     quote: "“看哪，我将一切都更新了。”——《启示录》21:5",
     quoteEn: "“Behold, I make all things new.” —Revelation 21:5"
@@ -23,8 +23,8 @@ window.THREE_SUN_ENDINGS = {
       "你们终将归于上上善道。"
     ],
     paragraphsEn: [
-      "At last, we may proudly declare that the days when humanity bled rivers for the Holy Spirit are over. No angel will sound a trumpet; no holy city will descend from heaven—",
-      "You will all return to the highest good."
+      "At last, we can proudly proclaim that the age in which humanity spilled rivers of blood for the Holy Spirit is over; no angel will sound the trumpet, nor will any holy city descend from heaven—",
+      "In the end, you shall all return to the Way of Supreme Good."
     ],
     quote: "“进入此门者，当舍弃一切希望。”——《神曲·地狱篇》，但丁，1307年",
     quoteEn: "“Abandon all hope, you who enter here.” —Inferno, Dante, 1307"
@@ -36,7 +36,7 @@ window.THREE_SUN_ENDINGS = {
       "这片大地人烟荒芜。可是没关系，人们拥有信仰；但是，人们仅仅拥有信仰，因为可怜的青铜器永远无法战胜三颗太阳。"
     ],
     paragraphsEn: [
-      "The land lies empty. Yet it does not matter: the people have faith. But faith is all they have, for their pitiful bronze can never defeat three suns."
+      "This land lies desolate. But no matter: its people have faith. Yet faith is all they have, for their pitiful bronze can never prevail against three suns."
     ],
     quote: "“哦，妈妈，我真傻。”——弗里德里希·尼采，1889年",
     quoteEn: "“Mother, I am stupid.” —Friedrich Nietzsche, 1889"
@@ -48,7 +48,7 @@ window.THREE_SUN_ENDINGS = {
       "在无数轮灾难、饥荒、战争之后，我们登上了前往天空的飞船，告别了脚下残酷的故乡；家园垂泪，故国荒芜，我们再不回头。"
     ],
     paragraphsEn: [
-      "After countless cycles of disaster, famine, and war, we board ships bound for the sky and bid farewell to the cruel homeland beneath us. Home weeps, the old country lies barren, and we never look back."
+      "After countless cycles of disaster, famine, and war, we board ships bound for the heavens and bid farewell to the cruel homeland beneath our feet; our home weeps, our native land lies desolate, and we never look back."
     ],
     quote: "“在朦胧的月光下，泪水涌出我的眼睛。”——《Take Me Home, Country Roads》，约翰·丹佛，1971年",
     quoteEn: "“Moonlit mist brings tears to my eyes.” —Take Me Home, Country Roads, John Denver, 1971"
@@ -60,7 +60,7 @@ window.THREE_SUN_ENDINGS = {
       "在无数轮灾难、饥荒、战争之后，我们信仰了前往天国的正道，告别了过去迷惘的时光；土地哭泣，山脉默哀，我们无动于衷。"
     ],
     paragraphsEn: [
-      "After countless cycles of disaster, famine, and war, we embrace the true path to heaven and leave our lost years behind. The land weeps, the mountains mourn, and we remain unmoved."
+      "After countless cycles of disaster, famine, and war, we put our faith in the righteous path to Heaven and bid farewell to the years we spent astray; the land weeps, the mountains mourn in silence, and we remain unmoved."
     ],
     quote: "“耶和华是我的牧者，我必不至缺乏。”——《诗篇》23:1",
     quoteEn: "“The Lord is my shepherd; I shall not want.” —Psalm 23:1"
@@ -74,9 +74,9 @@ window.THREE_SUN_ENDINGS = {
       "——来吧，我们要作砖；将土烧透了。"
     ],
     paragraphsEn: [
-      "To a species still at dawn, advanced science is as frightening as sorcery. How dare we claim that ignorance is behind us?",
-      "In universal love, the Creator made scientist and priest alike; perhaps equation and hymn were always two faces of one truth.",
-      "—Come, let us make bricks, and burn them thoroughly."
+      "To a species still at the dawn of its existence, science far ahead of its time is as terrifying as sorcery; how dare we claim that we ourselves have left ignorance behind?",
+      "In His all-embracing love, the Creator made scientists and priests alike; perhaps equations and hymns have always been two faces of a single whole.",
+      "—Come, let us make bricks, and fire them well."
     ],
     quote: "“看哪，我们将造一座塔，为要传扬我们的名，使我们免于分散在全地上。”——《创世记》，11:4",
     quoteEn: "“Come, let us build ourselves a city and a tower, and make a name for ourselves, lest we be dispersed.” —Genesis 11:4"
@@ -90,7 +90,7 @@ window.THREE_SUN_ENDINGS = {
       "一如既往。"
     ],
     paragraphsEn: [
-      "City and future vanish together beyond the horizon, as always. Survivors strip machines for parts and relearn farming, water, and seasons, as always. They wake at last from the long dream of progress to face the ruins of the old world, as always.",
+      "Cities and the future vanish together beyond the horizon, as always. The survivors dismantle machines for parts and learn once more to till the soil, draw water, and read the seasons, as always. At last, they wake from the long dream of progress to face the ruins left by the old world, as always.",
       "They call it a new world.",
       "As always."
     ],
@@ -105,8 +105,8 @@ window.THREE_SUN_ENDINGS = {
       "双加好，双加好，老大哥在看着你。"
     ],
     paragraphsEn: [
-      "Science has gone far enough. We will never conquer the stars, but we can conquer the masses: do not raise your head; do not look upon your supreme ruler.",
-      "Doubleplusgood, doubleplusgood. Big Brother is watching you."
+      "Science has gone quite far enough. We will never conquer the stars, but we can conquer the rabble: do not raise your head; do not look upon your sovereign king.",
+      "Doubleplusgood, doubleplusgood—Big Brother is watching you."
     ],
     quote: "“他战胜了自己，他热爱老大哥。”——《1984》，乔治·奥威尔，1949年",
     quoteEn: "“He had won the victory over himself. He loved Big Brother.” —1984, George Orwell, 1949"
@@ -119,8 +119,8 @@ window.THREE_SUN_ENDINGS = {
       "谈判破裂，大军压境，你我唯有浴血。"
     ],
     paragraphsEn: [
-      "Governors and city-states crown themselves and defy the authority of the center. Beacons rise, power slips away, and order vanishes. War breeds blood feud, and blood feud breeds new wars—for water, land, technology, true faith, or a better tomorrow.",
-      "Negotiations fail. Armies close in. You and I can only bleed."
+      "Governors and city-states crown themselves as kings, defying the authority and commands of the central government. The smoke of war rises on every side, power slips from the throne, and order collapses. War breeds blood feud, and blood feud breeds another war—for water, for land, for technology, for the true faith, or for a better tomorrow.",
+      "Negotiations collapse. A great host bears down upon us. Our only choice is to fight and bleed."
     ],
     quote: "“君不见，青海头，古来白骨无人收。”——《兵车行》，杜甫，750年",
     quoteEn: "“Do you not see, by the shores of Kokonor, the white bones uncollected since ancient times?” —Ballad of the Army Carts, Du Fu, 750"
@@ -133,8 +133,8 @@ window.THREE_SUN_ENDINGS = {
       "多谢后世人，戒之慎勿忘。"
     ],
     paragraphsEn: [
-      "We create novels, poems, paintings, and music, waiting for a great disaster to turn them into history. One day, all that is dust returns to dust; before then, they will know we existed.",
-      "Thank you, people of the future. Take heed, and do not forget."
+      "We write novels and poems, paint pictures, and compose music, awaiting the great calamity that will turn them all into history. One day, all that is dust shall return to dust; but until then, those who come after will know that we were here.",
+      "To those who come after us: take heed, and never forget."
     ],
     quote: "“把字刻在石头上。”——罗辑，掩体纪元67年",
     quoteEn: "“Carve the words into stone.” —Luo Ji, Bunker Era 67"
@@ -147,8 +147,8 @@ window.THREE_SUN_ENDINGS = {
       "三颗太阳的光辉之下，大主教为你加冕；人海顿首朝拜，高呼万王之王。"
     ],
     paragraphsEn: [
-      "All beings suffer; all conditioned things are impermanent. Kings and dukes wage war without end. Before the conqueror's army, everything becomes history.",
-      "Beneath the light of three suns, the archbishop crowns you; multitudes bow and acclaim the King of All Kings."
+      "All beings suffer; all conditioned things are impermanent. Kings and dukes wage war against one another and know no day of peace. Before the conqueror's host, all things pass into history.",
+      "Beneath the radiance of three suns, the archbishop places the crown upon your head; a sea of people bows low in worship and hails you as King of All Kings."
     ],
     quote: "“愿你的国度降临；愿你的旨意行在地上，如同行在天上。”——《马太福音》6:10",
     quoteEn: "“Your kingdom come, your will be done, on earth as it is in heaven.” —Matthew 6:10"
@@ -161,8 +161,8 @@ window.THREE_SUN_ENDINGS = {
       "三颗太阳的光辉之下，大主教为你祈祷；人海奔走号哭，王旗悄然落地。"
     ],
     paragraphsEn: [
-      "The nation is in mortal peril; its temples and ancestral altars fall. Invaders and rebels advance unchecked and reach the gates. Beneath the conqueror's iron hooves, everything returns to nothing.",
-      "Beneath the light of three suns, the archbishop prays for you; the multitude runs weeping, and the royal banner quietly falls."
+      "The nation stands on the brink of ruin; its ancestral temples fall. Invaders and rebels sweep all before them and reach the city walls. Beneath the conqueror's iron heel, all shall be reduced to nothing.",
+      "Beneath the radiance of three suns, the archbishop prays for you; a sea of people scatters, wailing, while the royal banner falls silently to the ground."
     ],
     quote: "“冠冕从我们的头上掉落；我们有祸了，因为犯了罪。”——《耶利米哀歌》5:16",
     quoteEn: "“The crown has fallen from our head; woe to us, for we have sinned!” —Lamentations 5:16"

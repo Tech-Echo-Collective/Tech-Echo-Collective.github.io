@@ -1,6 +1,12 @@
 "use strict";
 
 const BALANCE_MODEL = globalThis.CRADLES_BALANCE;
+const STRATEGIC_MAP_DATA = globalThis.CRADLES_MAP_LAB_DATA;
+const STRATEGIC_MAP_MODEL = globalThis.CRADLES_MAP_LAB_MODEL;
+if (!STRATEGIC_MAP_DATA || !STRATEGIC_MAP_MODEL) {
+  throw new Error("The fixed strategic map data must load before game.js.");
+}
+const STRATEGIC_GEOGRAPHY = STRATEGIC_MAP_MODEL.buildGeography(STRATEGIC_MAP_DATA);
 const I18N = globalThis.CRADLES_I18N || {
   init() {},
   isEnglish() { return false; },
@@ -20,7 +26,7 @@ const ECO_METER_CAP = 300000;
 const EERF_MAX_LEVEL = 5;
 const BASE_RESTART_POP = 2600;
 const MIN_SUSTAINABLE_POP = 1200;
-const SAVE_VERSION = 10;
+const SAVE_VERSION = 11;
 const STORE_KEY = "three-sun-chronicle:v1";
 const ENDING_STORE_KEY = "three-sun-chronicle:ending:v1";
 const ENDING_STATS_STORE_KEY = "three-sun-chronicle:ending-stats:v1";
@@ -42,6 +48,27 @@ const NEUTRAL_ENTITY_ID = "free-cities";
 const NEUTRAL_COAST_ENTITY_ID = "coastal-republic";
 const RIVAL_ENTITY_ID = "solar-court";
 const RIVAL_ASH_ENTITY_ID = "ash-confederacy";
+const STRATEGIC_MAP_VIEW_MODES = new Set(["political", "terrain", "military"]);
+const STRATEGIC_MAP_RELIEF_KEY = "three-sun-chronicle:map-relief:v1";
+const STRATEGIC_MAP_SVG_NS = "http://www.w3.org/2000/svg";
+const STRATEGIC_MAP_RELIEF_PROJECTION = Object.freeze({ x: 0.34, y: 1 });
+const STRATEGIC_MAP_RELIEF_DEPTHS = Object.freeze({
+  coast: 2,
+  river: 3,
+  basin: 4,
+  plain: 5,
+  tundra: 5,
+  waste: 6,
+  canyon: 9,
+  mountain: 11
+});
+const STRATEGIC_MAP_ENTITY_COLORS = Object.freeze({
+  [PLAYER_ENTITY_ID]: "#2f8f68",
+  [NEUTRAL_ENTITY_ID]: "#4d7088",
+  [NEUTRAL_COAST_ENTITY_ID]: "#6767a8",
+  [RIVAL_ENTITY_ID]: "#a5464d",
+  [RIVAL_ASH_ENTITY_ID]: "#9a643d"
+});
 const POLITICAL_ENTITY_IDS = [
   PLAYER_ENTITY_ID,
   NEUTRAL_ENTITY_ID,
@@ -130,61 +157,46 @@ const DIFFICULTIES = {
     disasterMultiplier: 1.48
   }
 };
-const MAP_GRID_SIZE = 5;
-const MAP_REGIONS = [
-  { id: "frostCrown", name: "寒鸦冻原", row: 0, col: 0, strength: 28, terrain: "tundra" },
-  { id: "northReach", name: "北境冰原", row: 0, col: 1, strength: 34, terrain: "tundra" },
-  { id: "sunCoast", name: "日冕海岸", row: 0, col: 2, strength: 48, terrain: "coast" },
-  { id: "mirrorCoast", name: "镜海湾", row: 0, col: 3, strength: 42, terrain: "coast" },
-  { id: "northHarbor", name: "北辰港", row: 0, col: 4, strength: 38, terrain: "coast" },
-  { id: "ironHills", name: "铁山关", row: 1, col: 0, strength: 52, terrain: "mountain" },
-  { id: "westernMarch", name: "西陲旷野", row: 1, col: 1, strength: 38, terrain: "plain" },
-  { id: "capital", name: "中央盆地", row: 1, col: 2, strength: 66, terrain: "basin", core: true },
-  { id: "easternBasin", name: "东部城邦", row: 1, col: 3, strength: 46, terrain: "urban" },
-  { id: "easternCliffs", name: "东崖要塞", row: 1, col: 4, strength: 54, terrain: "mountain" },
-  { id: "saltFlats", name: "盐湖废原", row: 2, col: 0, strength: 30, terrain: "salt" },
-  { id: "southGate", name: "南门高地", row: 2, col: 1, strength: 58, terrain: "mountain" },
-  { id: "skyPrairie", name: "苍穹草原", row: 2, col: 2, strength: 34, terrain: "plain" },
-  { id: "ashRiver", name: "灰河上游", row: 2, col: 3, strength: 40, terrain: "river" },
-  { id: "reedMarsh", name: "芦苇沼泽", row: 2, col: 4, strength: 31, terrain: "river" },
-  { id: "obsidianSteppe", name: "黑曜荒原", row: 3, col: 0, strength: 36, terrain: "waste" },
-  { id: "redCanyon", name: "赤岩峡谷", row: 3, col: 1, strength: 55, terrain: "canyon" },
-  { id: "deltaPorts", name: "三角洲港群", row: 3, col: 2, strength: 44, terrain: "river" },
-  { id: "farCape", name: "远望海角", row: 3, col: 3, strength: 32, terrain: "coast" },
-  { id: "seaWall", name: "潮汐海墙", row: 3, col: 4, strength: 50, terrain: "coast" },
-  { id: "silentDunes", name: "寂静沙丘", row: 4, col: 0, strength: 29, terrain: "waste" },
-  { id: "southernCrater", name: "南方环坑", row: 4, col: 1, strength: 47, terrain: "canyon" },
-  { id: "greenDelta", name: "青绿三角洲", row: 4, col: 2, strength: 39, terrain: "river" },
-  { id: "glassFields", name: "琉璃原野", row: 4, col: 3, strength: 35, terrain: "plain" },
-  { id: "lastLight", name: "终光海岬", row: 4, col: 4, strength: 45, terrain: "coast" }
-];
-const INITIAL_REGION_CONTROLLERS = {
-  capital: PLAYER_ENTITY_ID,
-  westernMarch: PLAYER_ENTITY_ID,
-  southGate: PLAYER_ENTITY_ID,
-  skyPrairie: PLAYER_ENTITY_ID,
-  greenDelta: PLAYER_ENTITY_ID,
-  frostCrown: NEUTRAL_ENTITY_ID,
-  ironHills: NEUTRAL_ENTITY_ID,
-  saltFlats: NEUTRAL_ENTITY_ID,
-  obsidianSteppe: NEUTRAL_ENTITY_ID,
-  silentDunes: NEUTRAL_ENTITY_ID,
-  mirrorCoast: NEUTRAL_COAST_ENTITY_ID,
-  easternBasin: NEUTRAL_COAST_ENTITY_ID,
-  deltaPorts: NEUTRAL_COAST_ENTITY_ID,
-  northHarbor: NEUTRAL_COAST_ENTITY_ID,
-  reedMarsh: NEUTRAL_COAST_ENTITY_ID,
-  northReach: RIVAL_ENTITY_ID,
-  sunCoast: RIVAL_ENTITY_ID,
-  redCanyon: RIVAL_ENTITY_ID,
-  easternCliffs: RIVAL_ENTITY_ID,
-  southernCrater: RIVAL_ENTITY_ID,
-  ashRiver: RIVAL_ASH_ENTITY_ID,
-  farCape: RIVAL_ASH_ENTITY_ID,
-  seaWall: RIVAL_ASH_ENTITY_ID,
-  glassFields: RIVAL_ASH_ENTITY_ID,
-  lastLight: RIVAL_ASH_ENTITY_ID
-};
+const LEGACY_MAP_REGION_COUNT = 25;
+const DEFAULT_STARTING_PROVINCE_ID = STRATEGIC_MAP_DATA.initialSelection || "cb05";
+const MAP_REGIONS = Object.freeze(STRATEGIC_MAP_DATA.provinces.map((province) => Object.freeze({
+  id: province.id,
+  name: province.nameZh,
+  nameEn: province.nameEn,
+  strategicRegionId: province.strategicRegionId,
+  strength: province.base.fortification,
+  terrain: province.terrain,
+  core: province.id === DEFAULT_STARTING_PROVINCE_ID
+})));
+const MAP_REGION_ID_SET = new Set(MAP_REGIONS.map((region) => region.id));
+const MAP_DISTANCE_CACHE = new Map();
+const LEGACY_REGION_ID_MAP = Object.freeze({
+  frostCrown: "fc01",
+  northReach: "nb02",
+  sunCoast: "cc01",
+  mirrorCoast: "nb03",
+  northHarbor: "nb01",
+  ironHills: "ih01",
+  westernMarch: "ws01",
+  capital: "cb05",
+  easternBasin: "cb03",
+  easternCliffs: "cc04",
+  saltFlats: "ws02",
+  southGate: "sc04",
+  skyPrairie: "cb07",
+  ashRiver: "ar01",
+  reedMarsh: "ar02",
+  obsidianSteppe: "ow01",
+  redCanyon: "sc01",
+  deltaPorts: "ld01",
+  farCape: "ld06",
+  seaWall: "ld04",
+  silentDunes: "ow04",
+  southernCrater: "sc05",
+  greenDelta: "ld02",
+  glassFields: "ld03",
+  lastLight: "ld05"
+});
 const MILITARY_FORCE_CAP = 120000;
 const MAP_EVENT_NONE = "边境暂无大规模军事行动。";
 const KNOWLEDGE_TREND_RESTART_RATES = [0, 0.08, 0.12, 0.16, 0.2, 0.25];
@@ -585,6 +597,32 @@ const dom = {};
 let state = null;
 let autoRunHandle = 0;
 let currentLogFilter = "all";
+const strategicMapView = {
+  built: false,
+  preferencesLoaded: false,
+  mode: "political",
+  relief: "3d",
+  camera: {
+    cx: STRATEGIC_MAP_DATA.viewBox.x + STRATEGIC_MAP_DATA.viewBox.width / 2,
+    cy: STRATEGIC_MAP_DATA.viewBox.y + STRATEGIC_MAP_DATA.viewBox.height / 2,
+    zoom: 1
+  },
+  provinceNodes: new Map(),
+  reliefNodes: new Map(),
+  provinceLabelNodes: new Map(),
+  realmBorderNodes: [],
+  roadNodes: [],
+  realmClipNodes: new Map(),
+  realmLabelNodes: new Map(),
+  capitalNodes: new Map(),
+  armyNodes: new Map(),
+  pointers: new Map(),
+  dragState: null,
+  pinchState: null,
+  suppressClick: false,
+  hoveredRegionId: null,
+  resizeFrame: 0
+};
 
 class Lcg {
   constructor(seed) {
@@ -628,7 +666,7 @@ function createNewState(seedValue = Date.now()) {
     difficulty: "normal",
     aiAggression: "standard",
     governorId: DEFAULT_GOVERNOR_ID,
-    startingRegionId: "capital",
+    startingRegionId: DEFAULT_STARTING_PROVINCE_ID,
     mapUiExpanded: true,
     lastSavedAt: null,
     loadedFromSave: false,
@@ -650,13 +688,13 @@ function createNewState(seedValue = Date.now()) {
     metricTrends: { sc: 0, be: 0, la: 0, pop: 0, eco: 0, stability: 0 },
     metricSamples: [createMetricSample(0, 1, initialSnapshot, { label: "文明苏醒" })],
     map: createInitialMapState(
-      { realmName: DEFAULT_REALM_NAME, difficulty: "normal", seed, startingRegionId: "capital" },
-      { seed, realmName: DEFAULT_REALM_NAME, difficulty: "normal", startingRegionId: "capital" }
+      { realmName: DEFAULT_REALM_NAME, difficulty: "normal", seed, startingRegionId: DEFAULT_STARTING_PROVINCE_ID },
+      { seed, realmName: DEFAULT_REALM_NAME, difficulty: "normal", startingRegionId: DEFAULT_STARTING_PROVINCE_ID }
     ),
     military: createInitialMilitaryState(initialSnapshot, { difficulty: "normal" }),
     selectedArmyId: PLAYER_ARMY_ID,
     selectedEntityId: PLAYER_ENTITY_ID,
-    selectedRegionId: "capital",
+    selectedRegionId: DEFAULT_STARTING_PROVINCE_ID,
     specialDecisionState: createSpecialDecisionState(),
     awaitingCivilizationRestart: false,
     pendingRestart: null,
@@ -846,92 +884,119 @@ function createPoliticalEntities(source = {}, realmName = DEFAULT_REALM_NAME, se
   };
 }
 
-function initialControllerForRegion(regionId) {
-  return INITIAL_REGION_CONTROLLERS[regionId] || NEUTRAL_ENTITY_ID;
-}
-
-function initialMapOwner(regionId) {
-  const controllerId = initialControllerForRegion(regionId);
+function initialMapOwner(controllerId) {
   if (controllerId === PLAYER_ENTITY_ID) return MAP_OWNER_PLAYER;
   if ([RIVAL_ENTITY_ID, RIVAL_ASH_ENTITY_ID].includes(controllerId)) return MAP_OWNER_RIVAL;
   return MAP_OWNER_NEUTRAL;
 }
 
 function normalizeStartingRegionId(value) {
-  return mapRegionById(value)?.id || "capital";
+  const requested = String(value || "");
+  if (MAP_REGION_ID_SET.has(requested)) return requested;
+  const migrated = LEGACY_REGION_ID_MAP[requested];
+  return MAP_REGION_ID_SET.has(migrated) ? migrated : DEFAULT_STARTING_PROVINCE_ID;
+}
+
+function hasCurrentStrategicMapState(mapState) {
+  const regions = Array.isArray(mapState?.regions) ? mapState.regions : [];
+  const regionIds = new Set(regions.map((region) => region?.id).filter(Boolean));
+  return regions.length === MAP_REGIONS.length &&
+    regionIds.size === MAP_REGIONS.length &&
+    MAP_REGIONS.every((region) => regionIds.has(region.id));
 }
 
 function mapGridDistance(leftId, rightId) {
-  const left = mapRegionById(leftId);
-  const right = mapRegionById(rightId);
-  if (!left || !right) return MAP_GRID_SIZE * 2;
-  return Math.abs(left.row - right.row) + Math.abs(left.col - right.col);
+  if (!MAP_REGION_ID_SET.has(leftId) || !MAP_REGION_ID_SET.has(rightId)) return MAP_REGIONS.length;
+  if (leftId === rightId) return 0;
+  const cacheKey = [leftId, rightId].sort().join("|");
+  if (MAP_DISTANCE_CACHE.has(cacheKey)) return MAP_DISTANCE_CACHE.get(cacheKey);
+  const visited = new Set([leftId]);
+  const queue = [{ regionId: leftId, distance: 0 }];
+  while (queue.length) {
+    const current = queue.shift();
+    for (const neighborId of gridNeighborIds(current.regionId)) {
+      if (visited.has(neighborId)) continue;
+      const distance = current.distance + 1;
+      if (neighborId === rightId) {
+        MAP_DISTANCE_CACHE.set(cacheKey, distance);
+        return distance;
+      }
+      visited.add(neighborId);
+      queue.push({ regionId: neighborId, distance });
+    }
+  }
+  MAP_DISTANCE_CACHE.set(cacheKey, MAP_REGIONS.length);
+  return MAP_REGIONS.length;
 }
 
 function gridNeighborIds(regionId) {
-  const region = mapRegionById(regionId);
-  if (!region) return [];
-  return MAP_REGIONS
-    .filter((candidate) => Math.abs(candidate.row - region.row) + Math.abs(candidate.col - region.col) === 1)
-    .map((candidate) => candidate.id);
+  return Array.isArray(STRATEGIC_GEOGRAPHY.neighbors[regionId])
+    ? [...STRATEGIC_GEOGRAPHY.neighbors[regionId]]
+    : [];
 }
 
 function generateInitialRegionControllers(seedValue, startingRegionId) {
-  const rng = new Lcg(normalizeSeed(normalizeSeed(seedValue) + 51193));
   const entityIds = [...POLITICAL_ENTITY_IDS];
   const start = normalizeStartingRegionId(startingRegionId);
-  const capitals = [start];
-  const available = MAP_REGIONS.map((region) => region.id).filter((regionId) => regionId !== start);
+  const baseTarget = Math.floor(MAP_REGIONS.length / entityIds.length);
+  const targets = entityIds.map((_, index) => baseTarget + (index < MAP_REGIONS.length % entityIds.length ? 1 : 0));
+  const allRegionIds = MAP_REGIONS.map((region) => region.id);
 
-  while (capitals.length < entityIds.length) {
-    const ranked = available
-      .filter((regionId) => !capitals.includes(regionId))
-      .map((regionId) => ({
-        regionId,
-        score: Math.min(...capitals.map((capitalId) => mapGridDistance(regionId, capitalId))) * 100 + rng.nextInt(45)
-      }))
-      .sort((left, right) => right.score - left.score);
-    capitals.push(ranked[0]?.regionId || available[capitals.length - 1]);
-  }
-
-  const assignments = {};
-  entityIds.forEach((entityId, index) => {
-    assignments[capitals[index]] = entityId;
-  });
-  const targetCount = Math.floor(MAP_REGIONS.length / entityIds.length);
-  let guard = 0;
-  while (Object.keys(assignments).length < MAP_REGIONS.length && guard < MAP_REGIONS.length * 12) {
-    guard += 1;
-    let progressed = false;
-    const order = [...entityIds].sort((left, right) => {
-      const leftCount = Object.values(assignments).filter((entityId) => entityId === left).length;
-      const rightCount = Object.values(assignments).filter((entityId) => entityId === right).length;
-      return leftCount - rightCount;
-    });
-    order.forEach((entityId, index) => {
-      const controlled = Object.keys(assignments).filter((regionId) => assignments[regionId] === entityId);
-      if (controlled.length >= targetCount) return;
-      const frontier = Array.from(new Set(controlled.flatMap(gridNeighborIds)))
-        .filter((regionId) => !assignments[regionId])
+  for (let attempt = 0; attempt < 120; attempt += 1) {
+    const rng = new Lcg(normalizeSeed(normalizeSeed(seedValue) + 51193 + attempt * 104729));
+    const capitals = [start];
+    const available = allRegionIds.filter((regionId) => regionId !== start);
+    while (capitals.length < entityIds.length) {
+      const ranked = available
+        .filter((regionId) => !capitals.includes(regionId))
         .map((regionId) => ({
           regionId,
-          support: gridNeighborIds(regionId).filter((neighborId) => assignments[neighborId] === entityId).length,
-          jitter: (rng.nextInt(100) + index * 13) % 100
+          score: Math.min(...capitals.map((capitalId) => mapGridDistance(regionId, capitalId))) * 100 + rng.nextInt(60)
         }))
-        .sort((left, right) => right.support - left.support || right.jitter - left.jitter);
-      if (!frontier.length) return;
-      assignments[frontier[0].regionId] = entityId;
-      progressed = true;
+        .sort((left, right) => right.score - left.score);
+      capitals.push(ranked[0]?.regionId || available[capitals.length - 1]);
+    }
+
+    const assignments = {};
+    const controlledByEntity = Object.fromEntries(entityIds.map((entityId) => [entityId, []]));
+    entityIds.forEach((entityId, index) => {
+      assignments[capitals[index]] = entityId;
+      controlledByEntity[entityId].push(capitals[index]);
     });
-    if (progressed) continue;
-    const unassigned = MAP_REGIONS.map((region) => region.id).filter((regionId) => !assignments[regionId]);
-    const underfilled = entityIds.find((entityId) => {
-      return Object.values(assignments).filter((assignedId) => assignedId === entityId).length < targetCount;
-    });
-    if (!underfilled || !unassigned.length) break;
-    assignments[unassigned[rng.nextInt(unassigned.length)]] = underfilled;
+
+    while (Object.keys(assignments).length < MAP_REGIONS.length) {
+      const options = entityIds.map((entityId, index) => {
+        const controlled = controlledByEntity[entityId];
+        if (controlled.length >= targets[index]) return null;
+        const frontier = Array.from(new Set(controlled.flatMap(gridNeighborIds)))
+          .filter((regionId) => !assignments[regionId]);
+        if (!frontier.length) return null;
+        return {
+          entityId,
+          index,
+          frontier,
+          ratio: controlled.length / targets[index],
+          tie: rng.next()
+        };
+      }).filter(Boolean).sort((left, right) => left.ratio - right.ratio || left.tie - right.tie);
+      if (!options.length) break;
+      const option = options[0];
+      const rankedFrontier = option.frontier.map((regionId) => ({
+        regionId,
+        score: gridNeighborIds(regionId).filter((neighborId) => assignments[neighborId] === option.entityId).length * 100
+          - mapGridDistance(regionId, capitals[option.index]) * 3
+          + rng.next() * 15
+      })).sort((left, right) => right.score - left.score);
+      const selected = rankedFrontier[0].regionId;
+      assignments[selected] = option.entityId;
+      controlledByEntity[option.entityId].push(selected);
+    }
+
+    const complete = Object.keys(assignments).length === MAP_REGIONS.length;
+    const balanced = entityIds.every((entityId, index) => controlledByEntity[entityId].length === targets[index]);
+    if (complete && balanced) return assignments;
   }
-  return assignments;
+  throw new Error("Unable to generate five connected strategic territories.");
 }
 
 function entityIdForOwner(owner) {
@@ -941,86 +1006,36 @@ function entityIdForOwner(owner) {
 }
 
 function generateMapBlueprint(seedValue) {
-  const rng = new Lcg(normalizeSeed(normalizeSeed(seedValue) + 73013));
-  const vertices = [];
-  const start = 2;
-  const span = 96;
-  const step = span / MAP_GRID_SIZE;
-  for (let row = 0; row <= MAP_GRID_SIZE; row += 1) {
-    vertices[row] = [];
-    for (let col = 0; col <= MAP_GRID_SIZE; col += 1) {
-      const edge = row === 0 || col === 0 || row === MAP_GRID_SIZE || col === MAP_GRID_SIZE;
-      const jitterX = edge ? 0 : (rng.next() - 0.5) * 5.4;
-      const jitterY = edge ? 0 : (rng.next() - 0.5) * 6.2;
-      vertices[row][col] = {
-        x: roundMapCoordinate(start + col * step + jitterX),
-        y: roundMapCoordinate(start + row * step + jitterY)
-      };
-    }
-  }
-
-  const regions = {};
-  MAP_REGIONS.forEach((region) => {
-    const points = [
-      vertices[region.row][region.col],
-      vertices[region.row][region.col + 1],
-      vertices[region.row + 1][region.col + 1],
-      vertices[region.row + 1][region.col]
-    ];
-    regions[region.id] = {
+  void seedValue;
+  const viewBox = STRATEGIC_MAP_DATA.viewBox;
+  const normalizePoint = (point) => ({
+    x: roundMapCoordinate((point.x - viewBox.x) / viewBox.width * 100),
+    y: roundMapCoordinate((point.y - viewBox.y) / viewBox.height * 100)
+  });
+  const regions = Object.fromEntries(MAP_REGIONS.map((region) => {
+    const cell = STRATEGIC_GEOGRAPHY.cellByProvinceId[region.id];
+    const province = STRATEGIC_GEOGRAPHY.provinceById[region.id];
+    const points = cell.points.map(normalizePoint);
+    return [region.id, {
       points,
-      centerX: roundMapCoordinate(points.reduce((sum, point) => sum + point.x, 0) / points.length),
-      centerY: roundMapCoordinate(points.reduce((sum, point) => sum + point.y, 0) / points.length)
+      centerX: roundMapCoordinate((province.center[0] - viewBox.x) / viewBox.width * 100),
+      centerY: roundMapCoordinate((province.center[1] - viewBox.y) / viewBox.height * 100)
+    }];
+  }));
+  const roads = STRATEGIC_GEOGRAPHY.connections.map((connection, index) => {
+    const left = regions[connection.a];
+    const right = regions[connection.b];
+    return {
+      id: `road-${index}-${connection.a}-${connection.b}`,
+      a: connection.a,
+      b: connection.b,
+      bendX: roundMapCoordinate((left.centerX + right.centerX) / 2),
+      bendY: roundMapCoordinate((left.centerY + right.centerY) / 2)
     };
   });
-
-  const candidates = [];
-  MAP_REGIONS.forEach((region) => {
-    const right = MAP_REGIONS.find((candidate) => candidate.row === region.row && candidate.col === region.col + 1);
-    const down = MAP_REGIONS.find((candidate) => candidate.row === region.row + 1 && candidate.col === region.col);
-    if (right) candidates.push({ a: region.id, b: right.id });
-    if (down) candidates.push({ a: region.id, b: down.id });
-  });
-  shuffleWithRng(candidates, rng);
-
-  const parents = new Map(MAP_REGIONS.map((region) => [region.id, region.id]));
-  const findRoot = (id) => {
-    let root = id;
-    while (parents.get(root) !== root) root = parents.get(root);
-    return root;
-  };
-  const roads = [];
-  const remaining = [];
-  candidates.forEach((candidate) => {
-    const leftRoot = findRoot(candidate.a);
-    const rightRoot = findRoot(candidate.b);
-    if (leftRoot !== rightRoot) {
-      parents.set(leftRoot, rightRoot);
-      roads.push(candidate);
-    } else {
-      remaining.push(candidate);
-    }
-  });
-  shuffleWithRng(remaining, rng);
-  roads.push(...remaining.slice(0, 7 + rng.nextInt(5)));
-
   return {
     regions,
-    roads: roads.map((road, index) => {
-      const left = regions[road.a];
-      const right = regions[road.b];
-      const dx = right.centerX - left.centerX;
-      const dy = right.centerY - left.centerY;
-      const length = Math.max(1, Math.sqrt(dx * dx + dy * dy));
-      const offset = (rng.next() - 0.5) * 7;
-      return {
-        id: `road-${index}-${road.a}-${road.b}`,
-        a: road.a,
-        b: road.b,
-        bendX: roundMapCoordinate((left.centerX + right.centerX) / 2 - dy / length * offset),
-        bendY: roundMapCoordinate((left.centerY + right.centerY) / 2 + dx / length * offset)
-      };
-    })
+    roads
   };
 }
 
@@ -1028,29 +1043,7 @@ function roundMapCoordinate(value) {
   return Math.round(value * 100) / 100;
 }
 
-function shuffleWithRng(values, rng) {
-  for (let index = values.length - 1; index > 0; index -= 1) {
-    const swapIndex = rng.nextInt(index + 1);
-    [values[index], values[swapIndex]] = [values[swapIndex], values[index]];
-  }
-  return values;
-}
-
-function normalizeMapBlueprint(source, seedValue) {
-  const generated = generateMapBlueprint(seedValue);
-  const sourceLayout = source?.layout && typeof source.layout === "object" ? source.layout : null;
-  const hasCompleteLayout = sourceLayout && MAP_REGIONS.every((region) => {
-    const record = sourceLayout[region.id];
-    return Array.isArray(record?.points) && record.points.length >= 4;
-  });
-  const roads = Array.isArray(source?.roads)
-    ? source.roads.filter((road) => mapRegionById(road?.a) && mapRegionById(road?.b))
-    : [];
-  return {
-    layout: hasCompleteLayout ? sourceLayout : generated.regions,
-    roads: roads.length >= MAP_REGIONS.length - 1 ? roads : generated.roads
-  };
-}
+const FIXED_MAP_BLUEPRINT = generateMapBlueprint(STRATEGIC_MAP_DATA.geometryRevision);
 
 function createInitialMapState(source = {}, options = {}) {
   const safe = source && typeof source === "object" ? source : {};
@@ -1058,20 +1051,18 @@ function createInitialMapState(source = {}, options = {}) {
   const difficulty = normalizeDifficulty(options.difficulty || safe.difficulty || "normal");
   const config = difficultyConfig(difficulty);
   const realmName = options.realmName || safe.realmName || DEFAULT_REALM_NAME;
-  const startingRegionId = normalizeStartingRegionId(options.startingRegionId || safe.startingRegionId || "capital");
+  const startingRegionId = normalizeStartingRegionId(options.startingRegionId || safe.startingRegionId || DEFAULT_STARTING_PROVINCE_ID);
   const entities = createPoliticalEntities(safe.entities, realmName, seed);
-  const blueprint = normalizeMapBlueprint(safe, seed);
   const initialControllers = generateInitialRegionControllers(seed, startingRegionId);
   const sourceRegions = Array.isArray(safe.regions) ? safe.regions : [];
-  const regionLookup = new Map(sourceRegions.map((region) => [region.id, region]));
+  const hasCurrentStrategicState = hasCurrentStrategicMapState(safe);
+  const regionLookup = new Map((hasCurrentStrategicState ? sourceRegions : []).map((region) => [region.id, region]));
 
   return {
     seed,
     difficulty,
     startingRegionId,
     entities,
-    layout: blueprint.layout,
-    roads: blueprint.roads,
     lastEvent: safe.lastEvent && typeof safe.lastEvent === "object"
       ? {
           title: String(safe.lastEvent.title || "边境静默"),
@@ -1082,8 +1073,8 @@ function createInitialMapState(source = {}, options = {}) {
       : { title: "边境静默", text: MAP_EVENT_NONE, type: "none" },
     regions: MAP_REGIONS.map((region) => {
       const stored = regionLookup.get(region.id) || {};
-      const fallbackController = initialControllers[region.id] || initialControllerForRegion(region.id);
-      const fallbackOwner = initialMapOwner(region.id);
+      const fallbackController = initialControllers[region.id] || NEUTRAL_ENTITY_ID;
+      const fallbackOwner = initialMapOwner(fallbackController);
       const storedController = entities[stored.controllerId] ? stored.controllerId : null;
       const owner = storedController
         ? entities[storedController].owner
@@ -1123,7 +1114,7 @@ function createInitialArmies(current = {}, difficulty = "normal") {
       id: PLAYER_ARMY_ID,
       name: "第一军团",
       entityId: PLAYER_ENTITY_ID,
-      regionId: "capital",
+      regionId: DEFAULT_STARTING_PROVINCE_ID,
       force: Math.round(rawPlayerForce * config.playerForce),
       attackBonus: 4,
       defenseBonus: 6
@@ -1132,7 +1123,7 @@ function createInitialArmies(current = {}, difficulty = "normal") {
       id: "neutral-iron-host",
       name: "铁山卫队",
       entityId: NEUTRAL_ENTITY_ID,
-      regionId: "ironHills",
+      regionId: "ih03",
       force: Math.round(4300 * config.neutralPower),
       attackBonus: 1,
       defenseBonus: 5
@@ -1141,7 +1132,7 @@ function createInitialArmies(current = {}, difficulty = "normal") {
       id: "neutral-east-host",
       name: "东部城防军",
       entityId: NEUTRAL_COAST_ENTITY_ID,
-      regionId: "easternBasin",
+      regionId: "nb01",
       force: Math.round(5100 * config.neutralPower),
       attackBonus: 2,
       defenseBonus: 7
@@ -1150,7 +1141,7 @@ function createInitialArmies(current = {}, difficulty = "normal") {
       id: "rival-north-host",
       name: "北境军团",
       entityId: RIVAL_ENTITY_ID,
-      regionId: "northReach",
+      regionId: "cc03",
       force: Math.round(5600 * config.rivalPower),
       attackBonus: 4,
       defenseBonus: 3
@@ -1159,7 +1150,7 @@ function createInitialArmies(current = {}, difficulty = "normal") {
       id: "rival-river-host",
       name: "灰河军团",
       entityId: RIVAL_ASH_ENTITY_ID,
-      regionId: "ashRiver",
+      regionId: "sc05",
       force: Math.round(4900 * config.rivalPower),
       attackBonus: 3,
       defenseBonus: 4
@@ -1180,7 +1171,7 @@ function createInitialArmies(current = {}, difficulty = "normal") {
       id: String(army.id || `field-army-${index}`),
       name: String(army.name || "野战军团"),
       entityId: army.entityId,
-      regionId: mapRegionById(army.regionId)?.id || "capital",
+      regionId: normalizeStartingRegionId(army.regionId),
       force: finiteOr(army.force, 0),
       attackBonus: finiteOr(army.attackBonus, 0),
       defenseBonus: finiteOr(army.defenseBonus, 0)
@@ -1260,6 +1251,11 @@ function normalizeMapOwner(owner) {
 
 function mapRegionById(regionId) {
   return MAP_REGIONS.find((region) => region.id === regionId) || null;
+}
+
+function localizedMapRegionName(region, fallback = "未知地区") {
+  if (!region) return fallback;
+  return I18N.isEnglish() ? region.nameEn || region.name || fallback : region.name || fallback;
 }
 
 function politicalEntityById(entityId, mapState = state?.map) {
@@ -1376,11 +1372,13 @@ function canObserveMilitaryAt(regionId) {
 }
 
 function activeMapRoads(mapState = state?.map) {
-  return Array.isArray(mapState?.roads) ? mapState.roads : [];
+  void mapState;
+  return FIXED_MAP_BLUEPRINT.roads;
 }
 
 function mapLayoutRegion(regionId, mapState = state?.map) {
-  return mapState?.layout?.[regionId] || null;
+  void mapState;
+  return FIXED_MAP_BLUEPRINT.regions[regionId] || null;
 }
 
 function armies() {
@@ -1565,8 +1563,18 @@ function applyMilitaryPolicy(decision) {
   }
 }
 
+function equivalentTerritoryCount(count) {
+  return Math.max(0, finiteOr(count, 0)) * LEGACY_MAP_REGION_COUNT / MAP_REGIONS.length;
+}
+
+function initialTerritoryTarget(entityId = PLAYER_ENTITY_ID) {
+  const index = Math.max(0, POLITICAL_ENTITY_IDS.indexOf(entityId));
+  const baseTarget = Math.floor(MAP_REGIONS.length / POLITICAL_ENTITY_IDS.length);
+  return baseTarget + (index < MAP_REGIONS.length % POLITICAL_ENTITY_IDS.length ? 1 : 0);
+}
+
 function maximumSustainableLevy() {
-  const territoryCount = Math.max(1, entityRegions(PLAYER_ENTITY_ID).length);
+  const territoryCount = equivalentTerritoryCount(entityRegions(PLAYER_ENTITY_ID).length);
   return clamp(
     Math.round(state.pop * 0.34 + Math.sqrt(Math.max(0, state.eco)) * 14 + territoryCount * 420),
     4200,
@@ -1733,6 +1741,35 @@ function cacheDom() {
   dom.mapExpansionToggle = document.querySelector("#mapExpansionToggle");
   dom.mapExpansionSections = Array.from(document.querySelectorAll("[data-map-expansion]"));
   dom.worldMap = document.querySelector("#worldMap");
+  dom.strategicMapSvg = document.querySelector("#strategicMapSvg");
+  dom.strategicMapDefs = document.querySelector("#strategicMapDefs");
+  dom.strategicMapModeButtons = Array.from(document.querySelectorAll(".strategic-map-modes button[data-strategic-map-mode]"));
+  dom.mapReliefToggle = document.querySelector("#mapReliefToggle");
+  dom.mapZoomReadout = document.querySelector("#mapZoomReadout");
+  dom.mapZoomOut = document.querySelector("#mapZoomOut");
+  dom.mapZoomIn = document.querySelector("#mapZoomIn");
+  dom.mapCameraReset = document.querySelector("#mapCameraReset");
+  dom.strategicMapHint = document.querySelector(".strategic-map-hint");
+  dom.strategicMapTooltip = document.querySelector("#strategicMapTooltip");
+  dom.strategicMapLiveRegion = document.querySelector("#strategicMapLiveRegion");
+  dom.formalLandClipPath = document.querySelector("#formalLandClipPath");
+  dom.strategicOceanDetailLayer = document.querySelector("#strategicOceanDetailLayer");
+  dom.strategicWorldLayer = document.querySelector("#strategicWorldLayer");
+  dom.strategicLandDepth = document.querySelector("#strategicLandDepth");
+  dom.strategicLandBase = document.querySelector("#strategicLandBase");
+  dom.strategicProvinceReliefLayer = document.querySelector("#strategicProvinceReliefLayer");
+  dom.strategicProvinceLayer = document.querySelector("#strategicProvinceLayer");
+  dom.strategicTerrainTextureLayer = document.querySelector("#strategicTerrainTextureLayer");
+  dom.strategicRouteLayer = document.querySelector("#strategicRouteLayer");
+  dom.strategicRiverLayer = document.querySelector("#strategicRiverLayer");
+  dom.strategicRegionBorderLayer = document.querySelector("#strategicRegionBorderLayer");
+  dom.strategicRealmBorderLayer = document.querySelector("#strategicRealmBorderLayer");
+  dom.strategicCoastLine = document.querySelector("#strategicCoastLine");
+  dom.strategicCapitalLayer = document.querySelector("#strategicCapitalLayer");
+  dom.strategicRealmLabelLayer = document.querySelector("#strategicRealmLabelLayer");
+  dom.strategicRegionLabelLayer = document.querySelector("#strategicRegionLabelLayer");
+  dom.strategicProvinceLabelLayer = document.querySelector("#strategicProvinceLabelLayer");
+  dom.strategicArmyLayer = document.querySelector("#strategicArmyLayer");
   dom.mapStatus = document.querySelector("#mapStatus");
   dom.mapFeed = document.querySelector("#mapFeed");
   dom.militaryForceValue = document.querySelector("#militaryForceValue");
@@ -1857,6 +1894,19 @@ function bindEvents() {
   dom.startRegionMap?.addEventListener("keydown", handleStartRegionKeyboardInteraction);
   dom.worldMap?.addEventListener("click", handleMapInteraction);
   dom.worldMap?.addEventListener("keydown", handleMapKeyboardInteraction);
+  dom.strategicMapModeButtons.forEach((button) => {
+    button.addEventListener("click", () => setStrategicMapViewMode(button.dataset.strategicMapMode));
+  });
+  dom.mapReliefToggle?.addEventListener("click", toggleStrategicMapRelief);
+  dom.mapZoomOut?.addEventListener("click", () => zoomStrategicMapBy(0.8));
+  dom.mapZoomIn?.addEventListener("click", () => zoomStrategicMapBy(1.25));
+  dom.mapCameraReset?.addEventListener("click", resetStrategicMapCamera);
+  dom.strategicMapSvg?.addEventListener("pointerdown", handleStrategicMapPointerDown);
+  dom.strategicMapSvg?.addEventListener("pointermove", handleStrategicMapPointerMove);
+  dom.strategicMapSvg?.addEventListener("pointerup", finishStrategicMapPointer);
+  dom.strategicMapSvg?.addEventListener("pointercancel", finishStrategicMapPointer);
+  dom.strategicMapSvg?.addEventListener("pointerleave", handleStrategicMapPointerLeave);
+  dom.strategicMapSvg?.addEventListener("wheel", handleStrategicMapWheel, { passive: false });
   dom.entityCards?.addEventListener("click", handleEntityCardClick);
   dom.entityStrategySelect?.addEventListener("change", changeSelectedEntityStrategy);
   dom.deployArmyButton?.addEventListener("click", deployArmyToSelectedRegion);
@@ -1874,6 +1924,7 @@ function bindEvents() {
   });
 
   window.addEventListener("keydown", handleShortcut);
+  window.addEventListener("resize", scheduleStrategicMapCameraRefresh);
 }
 
 function syncLocalizationContext() {
@@ -2797,7 +2848,8 @@ function resolveAbstractStrategicYear(rand) {
   }).filter(({ source, target }) => {
     const attacker = politicalEntityById(source.controllerId);
     const defender = politicalEntityById(target.controllerId);
-    return attacker && defender && !attacker.eliminated && !defender.eliminated && entityRegions(defender.id).length > 4;
+    return attacker && defender && !attacker.eliminated && !defender.eliminated &&
+      equivalentTerritoryCount(entityRegions(defender.id).length) > 4;
   });
   if (!frontiers.length) return updateMapEvent("后台形势", "边界暂时稳定，没有政治实体能够改变疆域。", "none");
 
@@ -2849,8 +2901,9 @@ function ensureMilitaryMapState() {
 function resolvePoliticalDevelopmentYear(rand) {
   const current = snapshot();
   politicalEntities().forEach((entity, index) => {
-    const territoryCount = entityRegions(entity.id).length;
-    if (entity.eliminated || territoryCount <= 0) return;
+    const rawTerritoryCount = entityRegions(entity.id).length;
+    const territoryCount = equivalentTerritoryCount(rawTerritoryCount);
+    if (entity.eliminated || rawTerritoryCount <= 0) return;
 
     if (entity.id === PLAYER_ENTITY_ID) {
       const developmentTarget = clamp(Math.round(
@@ -2885,7 +2938,7 @@ function resolvePoliticalDevelopmentYear(rand) {
 }
 
 function chooseAiPoliticalStrategy(entity, rand, index) {
-  const territoryCount = entityRegions(entity.id).length;
+  const territoryCount = equivalentTerritoryCount(entityRegions(entity.id).length);
   if (territoryCount <= 1) return "fortress";
   if (entity.owner === MAP_OWNER_NEUTRAL && entity.relation !== "hostile") {
     const peaceful = ["trade", "science", "faith", "balanced"];
@@ -2900,7 +2953,9 @@ function chooseAiPoliticalStrategy(entity, rand, index) {
 function recoverMilitaryForce() {
   const current = snapshot();
   const counts = mapOwnerCounts();
-  const baseRecruitment = Math.round(current.pop * 0.0018 + Math.sqrt(Math.max(0, current.eco)) * 0.9 + counts.player * 120);
+  const baseRecruitment = Math.round(
+    current.pop * 0.0018 + Math.sqrt(Math.max(0, current.eco)) * 0.9 + equivalentTerritoryCount(counts.player) * 120
+  );
   const orderFactor = 0.7 + current.stability / 180;
   const playerStrategy = politicalStrategyConfig(politicalEntityById(PLAYER_ENTITY_ID)?.strategy);
   const strategyRecruitment = playerStrategy === POLITICAL_STRATEGIES.expansion
@@ -2930,7 +2985,7 @@ function recoverMilitaryForce() {
     const strategyScale = entity.strategy === "expansion" ? 1.32 : entity.strategy === "fortress" ? 1.12 : 1;
     const recruitment = (
       70 +
-        entityRegions(entity.id).length * 42 +
+        equivalentTerritoryCount(entityRegions(entity.id).length) * 42 +
         entity.development * 1.65 +
         entity.technology * 1.15
     ) * recoveryScale * strategyScale;
@@ -2948,7 +3003,7 @@ function recoverMilitaryForce() {
       ...identity,
       entityId: entity.id,
       regionId: territories[(state.turn + index) % territories.length].id,
-      force: clamp(Math.round((2200 + territories.length * 460 + entity.development * 24) * scale), 2200, 18000),
+      force: clamp(Math.round((2200 + equivalentTerritoryCount(territories.length) * 460 + entity.development * 24) * scale), 2200, 18000),
       attackBonus: entity.owner === MAP_OWNER_RIVAL ? 4 : 2,
       defenseBonus: entity.owner === MAP_OWNER_RIVAL ? 3 : 5,
       posture: "defense",
@@ -2982,7 +3037,7 @@ function militaryStats(current = snapshot(), region = null, armyOverride = null)
   const economyIndex = current.eco <= 0 ? 0 : clamp(Math.log10(current.eco + 10) / 6, 0, 1);
   const beliefIndex = clamp(current.be / CAP, 0, 1);
   const orderIndex = clamp(current.stability, 0, 100) / 100;
-  const territorySupport = counts.player * 1.35;
+  const territorySupport = equivalentTerritoryCount(counts.player) * 1.35;
   const technologyBonus = militaryTechnologyBonus(army);
   const attack = Math.round(
     force / 430 +
@@ -3002,7 +3057,7 @@ function militaryStats(current = snapshot(), region = null, armyOverride = null)
       technologyBonus * 0.46 +
       orderIndex * 16 +
       economyIndex * 7 +
-      counts.player * 1.8 +
+      equivalentTerritoryCount(counts.player) * 1.8 +
       (state.eerfLevel || 0) * 1.5 +
       strategy.defense +
       finiteOr(governor.defense, 0) +
@@ -3242,13 +3297,10 @@ function nextStrategicRand(maximum = 10000) {
 }
 
 function handleMapInteraction(event) {
+  if (strategicMapView.suppressClick) return;
   const armyButton = event.target.closest("[data-army]");
   if (armyButton) {
-    state.selectedArmyId = armyButton.dataset.army;
-    state.selectedRegionId = armyById(state.selectedArmyId)?.regionId || state.selectedRegionId;
-    saveState();
-    renderMap();
-    renderActionButtons();
+    selectMapArmy(armyButton.dataset.army);
     return;
   }
 
@@ -3259,10 +3311,28 @@ function handleMapInteraction(event) {
 
 function handleMapKeyboardInteraction(event) {
   if (!["Enter", " "].includes(event.key)) return;
+  const armyButton = event.target.closest?.("[data-army]");
+  if (armyButton) {
+    event.preventDefault();
+    if (!event.repeat) selectMapArmy(armyButton.dataset.army);
+    return;
+  }
   const regionButton = event.target.closest?.("[data-region]");
   if (!regionButton) return;
   event.preventDefault();
-  selectMapRegion(regionButton.dataset.region);
+  if (!event.repeat) selectMapRegion(regionButton.dataset.region);
+}
+
+function selectMapArmy(armyId) {
+  const army = armyById(armyId);
+  if (!army) return false;
+  state.selectedArmyId = army.id;
+  state.selectedRegionId = army.regionId || state.selectedRegionId;
+  saveState();
+  renderMap();
+  renderActionButtons();
+  announceStrategicMap(`${I18N.translate(army.name)}，${localizedMapRegionName(mapRegionById(army.regionId), army.regionId)}`);
+  return true;
 }
 
 function selectMapRegion(regionId) {
@@ -3271,6 +3341,8 @@ function selectMapRegion(regionId) {
   saveState();
   renderMap();
   renderActionButtons();
+  const definition = mapRegionById(regionId);
+  announceStrategicMap(`${localizedMapRegionName(definition, regionId)}，${I18N.translate(mapOwnerLabel(mapStateRegion(regionId)))}`);
   return true;
 }
 
@@ -3507,7 +3579,6 @@ function updateMapEvent(title, text, type, regionId = null) {
 
 function collapseMapState(cause) {
   const seed = normalizeSeed(state?.seed || state?.map?.seed || 1);
-  const blueprint = normalizeMapBlueprint(state?.map, seed);
   const entities = createPoliticalEntities(state?.map?.entities, state?.realmName || DEFAULT_REALM_NAME, seed);
   Object.values(entities).forEach((entity) => {
     entity.eliminated = true;
@@ -3517,8 +3588,6 @@ function collapseMapState(cause) {
     seed,
     difficulty: normalizeDifficulty(state?.difficulty),
     entities,
-    layout: blueprint.layout,
-    roads: blueprint.roads,
     lastEvent: {
       title: "文明毁灭",
       text: `${cause} 之后，旧地图失效。`,
@@ -3680,7 +3749,8 @@ function civilizationCarryingCapacity(current) {
 }
 
 function territoryDevelopmentEffects(mapState = state?.map) {
-  const territoryCount = entityRegions(PLAYER_ENTITY_ID, mapState).length || 5;
+  const rawTerritoryCount = entityRegions(PLAYER_ENTITY_ID, mapState).length || initialTerritoryTarget();
+  const territoryCount = equivalentTerritoryCount(rawTerritoryCount);
   return BALANCE_MODEL?.territoryDevelopmentEffects(territoryCount) || {
     carryingCapacity: 0,
     outputMultiplier: 1,
@@ -4676,11 +4746,6 @@ function createTerritoryInheritanceSnapshot() {
     difficulty: state.map.difficulty || state.difficulty,
     startingRegionId: state.map.startingRegionId || state.startingRegionId,
     entities: Object.fromEntries(politicalEntities().map((entity) => [entity.id, { ...entity }])),
-    layout: Object.fromEntries(Object.entries(state.map.layout || {}).map(([regionId, layout]) => [regionId, {
-      ...layout,
-      points: Array.isArray(layout.points) ? layout.points.map((point) => ({ ...point })) : []
-    }])),
-    roads: activeMapRoads().map((road) => ({ ...road })),
     regions: state.map.regions.map((region) => ({
       id: region.id,
       owner: region.owner,
@@ -4980,7 +5045,7 @@ function updateEnding() {
     state.ending = "全图征服已经完成，万王之王等待加冕。";
   } else if (state.mapUiExpanded !== false && isMapConquered()) {
     state.ending = `全图征服已经完成，军力达到 ${formatNumber(ENDING_THRESHOLDS.conquestForce)} 后方可加冕。`;
-  } else if (state.mapUiExpanded !== false && mapOwnerCounts().player <= 1) {
+  } else if (state.mapUiExpanded !== false && equivalentTerritoryCount(mapOwnerCounts().player) <= 1) {
     state.ending = "国土濒临灭亡，末代皇帝的阴影逼近。";
   } else if (isEconomicCrisis()) {
     state.ending = "经济危机：科学与神学的正向发展冻结";
@@ -5268,6 +5333,7 @@ function finishGame(endingId, context = {}) {
     difficulty: normalizeDifficulty(state.difficulty),
     aiAggression: normalizeAiAggression(state.aiAggression),
     mapUiExpanded: state.mapUiExpanded !== false,
+    language: I18N.isEnglish() ? "en" : "zh",
     seed: state.seed,
     civilization: state.count,
     turn: state.turn,
@@ -5357,8 +5423,6 @@ function buildMapArchive() {
     difficulty: normalizeDifficulty(state.difficulty),
     aiAggression: normalizeAiAggression(state.aiAggression),
     lastEvent: state.map?.lastEvent || null,
-    layout: state.map?.layout || {},
-    roads: activeMapRoads().map((road) => ({ ...road })),
     entities: politicalEntities().map((entity) => ({
       ...entity,
       territories: entityRegions(entity.id).length,
@@ -5414,7 +5478,7 @@ function clearSavedRun() {
 function goToEndingPage(endingId) {
   const url = new URL(ENDING_PAGE, window.location.href);
   url.searchParams.set("ending", endingId);
-  if (I18N.isEnglish()) url.searchParams.set("lang", "en");
+  url.searchParams.set("lang", I18N.isEnglish() ? "en" : "zh");
   window.location.href = url.href;
 }
 
@@ -5620,10 +5684,13 @@ function renderStartingRegionPicker() {
   const selectedId = normalizeStartingRegionId(state.startingRegionId);
   const selectedDefinition = mapRegionById(selectedId);
   const selectedState = mapStateRegion(selectedId);
-  if (dom.startRegionName) dom.startRegionName.textContent = selectedDefinition?.name || "中央盆地";
+  if (dom.startRegionName) dom.startRegionName.textContent = localizedMapRegionName(selectedDefinition, "中央盆地");
   if (dom.startRegionDescription) {
     const terrain = BALANCE_MODEL?.terrainProfile(selectedDefinition?.terrain || "plain", state.governorId);
-    dom.startRegionDescription.textContent = `${terrain?.label || terrainLabel(selectedDefinition?.terrain)}｜攻 ${formatSignedNumber(terrain?.attack || 0)}｜防 ${formatSignedNumber(terrain?.defense || 0)}｜基础工事 ${formatNumber(selectedState?.fortification || selectedDefinition?.strength || 0)}｜将生成五块连通初始疆域`;
+    const territoryCount = initialTerritoryTarget();
+    dom.startRegionDescription.textContent = I18N.isEnglish()
+      ? `${I18N.translate(terrain?.label || terrainLabel(selectedDefinition?.terrain))} | ATK ${formatSignedNumber(terrain?.attack || 0)} | DEF ${formatSignedNumber(terrain?.defense || 0)} | Base fortification ${formatNumber(selectedState?.fortification || selectedDefinition?.strength || 0)} | Generates ${formatNumber(territoryCount)} connected starting provinces around this capital`
+      : `${terrain?.label || terrainLabel(selectedDefinition?.terrain)}｜攻 ${formatSignedNumber(terrain?.attack || 0)}｜防 ${formatSignedNumber(terrain?.defense || 0)}｜基础工事 ${formatNumber(selectedState?.fortification || selectedDefinition?.strength || 0)}｜将围绕首都生成 ${formatNumber(territoryCount)} 块连通初始疆域`;
   }
 
   dom.startRegionMap.innerHTML = "";
@@ -5639,13 +5706,13 @@ function renderStartingRegionPicker() {
     group.setAttribute("data-start-region", definition.id);
     group.setAttribute("role", "button");
     group.setAttribute("tabindex", "0");
-    group.setAttribute("aria-label", `${definition.name}，${terrainLabel(definition.terrain)}`);
+    group.setAttribute("aria-label", `${localizedMapRegionName(definition)}，${terrainLabel(definition.terrain)}`);
     const polygon = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
     polygon.setAttribute("points", layout.points.map((point) => `${point.x},${point.y}`).join(" "));
     const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
     label.setAttribute("x", layout.centerX);
     label.setAttribute("y", layout.centerY + 0.8);
-    label.textContent = definition.name;
+    label.textContent = localizedMapRegionName(definition);
     group.append(polygon, label);
     svg.append(group);
   });
@@ -5731,6 +5798,878 @@ function renderMetricTrend(key, value, valueNode, stageNode) {
   if (stageNode) stageNode.textContent = metricTrendStageFor(key, trend);
 }
 
+function strategicMapCopy(zh, en) {
+  return I18N.isEnglish() ? en : zh;
+}
+
+function strategicSvgElement(tag, attributes = {}) {
+  const node = document.createElementNS(STRATEGIC_MAP_SVG_NS, tag);
+  Object.entries(attributes).forEach(([name, value]) => node.setAttribute(name, String(value)));
+  return node;
+}
+
+function strategicPointsPath(points) {
+  if (!points?.length) return "";
+  return `${points.map((point, index) => `${index ? "L" : "M"} ${point.x} ${point.y}`).join(" ")} Z`;
+}
+
+function strategicSignedPolygonArea(points) {
+  return points.reduce((area, point, index) => {
+    const next = points[(index + 1) % points.length];
+    return area + point.x * next.y - next.x * point.y;
+  }, 0) / 2;
+}
+
+function strategicReliefFacingEdges(points) {
+  if (!points?.length) return [];
+  const clockwiseOnScreen = strategicSignedPolygonArea(points) >= 0;
+  return points.map((start, index) => {
+    const end = points[(index + 1) % points.length];
+    const edgeX = end.x - start.x;
+    const edgeY = end.y - start.y;
+    const outwardX = clockwiseOnScreen ? edgeY : -edgeY;
+    const outwardY = clockwiseOnScreen ? -edgeX : edgeX;
+    if (outwardX * STRATEGIC_MAP_RELIEF_PROJECTION.x + outwardY * STRATEGIC_MAP_RELIEF_PROJECTION.y <= 0) return null;
+    return { start, end, face: outwardY >= Math.abs(outwardX) * 0.45 ? "front" : "side" };
+  }).filter(Boolean);
+}
+
+function strategicReliefWallPath(points, depth, face) {
+  if (!points?.length || depth <= 0) return "";
+  const projection = {
+    x: depth * STRATEGIC_MAP_RELIEF_PROJECTION.x,
+    y: depth * STRATEGIC_MAP_RELIEF_PROJECTION.y
+  };
+  return strategicReliefFacingEdges(points)
+    .filter((edge) => edge.face === face)
+    .map(({ start, end }) => {
+      return `M ${start.x} ${start.y} L ${end.x} ${end.y} L ${end.x + projection.x} ${end.y + projection.y} L ${start.x + projection.x} ${start.y + projection.y} Z`;
+    })
+    .join(" ");
+}
+
+function strategicReliefRimPath(points) {
+  return strategicReliefFacingEdges(points)
+    .map(({ start, end }) => `M ${start.x} ${start.y} L ${end.x} ${end.y}`)
+    .join(" ");
+}
+
+function strategicDarkenHex(color, factor) {
+  const value = String(color || "").replace("#", "");
+  if (!/^[0-9a-f]{6}$/iu.test(value)) return "#18201e";
+  const channels = [0, 2, 4].map((offset) => {
+    return Math.round(Number.parseInt(value.slice(offset, offset + 2), 16) * factor);
+  });
+  return `#${channels.map((channel) => channel.toString(16).padStart(2, "0")).join("")}`;
+}
+
+function strategicMapEntityColor(entityId) {
+  return STRATEGIC_MAP_ENTITY_COLORS[entityId] || "#596b68";
+}
+
+function localizedPoliticalEntityName(entity, fallback = "未知阵营") {
+  return entity?.name ? I18N.translate(entity.name) : strategicMapCopy(fallback, "Unknown realm");
+}
+
+function strategicTerrainName(terrainId) {
+  const terrain = STRATEGIC_MAP_DATA.terrainTypes[terrainId];
+  if (!terrain) return strategicMapCopy("未知地形", "Unknown terrain");
+  return I18N.isEnglish() ? terrain.nameEn : terrain.nameZh;
+}
+
+function loadStrategicMapPreferences() {
+  if (strategicMapView.preferencesLoaded) return;
+  strategicMapView.preferencesLoaded = true;
+  try {
+    const storedRelief = localStorage.getItem(STRATEGIC_MAP_RELIEF_KEY);
+    if (["2d", "3d"].includes(storedRelief)) strategicMapView.relief = storedRelief;
+  } catch {
+    // View preferences are optional; the formal save remains untouched.
+  }
+}
+
+function syncStrategicMapControls() {
+  if (!dom.worldMap) return;
+  dom.worldMap.dataset.strategicMapMode = strategicMapView.mode;
+  dom.worldMap.dataset.relief = strategicMapView.relief;
+  const modeCopy = {
+    political: ["政治", "Political"],
+    terrain: ["地形", "Terrain"],
+    military: ["军事", "Military"]
+  };
+  dom.strategicMapModeButtons.forEach((button) => {
+    const mode = button.dataset.strategicMapMode;
+    button.setAttribute("aria-pressed", mode === strategicMapView.mode ? "true" : "false");
+    const label = button.querySelector("strong");
+    if (label && modeCopy[mode]) label.textContent = strategicMapCopy(...modeCopy[mode]);
+  });
+  if (dom.mapReliefToggle) {
+    const enabled = strategicMapView.relief === "3d";
+    dom.mapReliefToggle.textContent = enabled ? "3D" : "2D";
+    dom.mapReliefToggle.setAttribute("aria-pressed", enabled ? "true" : "false");
+    dom.mapReliefToggle.setAttribute("aria-label", enabled
+      ? strategicMapCopy("切换到平面地图", "Switch to flat map")
+      : strategicMapCopy("开启立体地形", "Enable relief map"));
+  }
+  if (dom.strategicMapSvg) {
+    dom.strategicMapSvg.setAttribute("aria-label", strategicMapCopy("三体世界战略地图", "Trisolaran strategic map"));
+  }
+  if (dom.strategicMapHint) {
+    dom.strategicMapHint.textContent = strategicMapCopy(
+      "拖动平移 · Ctrl/⌘ + 滚轮或双指缩放 · 普通滚轮滚动页面 · 选择军队与相邻地块后在右侧下令",
+      "Drag to pan · Ctrl/⌘ + wheel or pinch to zoom · use the wheel normally to scroll the page · select an army and adjacent province, then issue the order on the right"
+    );
+  }
+}
+
+function setStrategicMapViewMode(nextMode) {
+  if (!STRATEGIC_MAP_VIEW_MODES.has(nextMode) || strategicMapView.mode === nextMode) return;
+  strategicMapView.mode = nextMode;
+  syncStrategicMapControls();
+  renderMap();
+  announceStrategicMap(strategicMapCopy(
+    `${{ political: "政治", terrain: "地形", military: "军事" }[nextMode]}图层已开启`,
+    `${{ political: "Political", terrain: "Terrain", military: "Military" }[nextMode]} layer enabled`
+  ));
+}
+
+function toggleStrategicMapRelief() {
+  strategicMapView.relief = strategicMapView.relief === "3d" ? "2d" : "3d";
+  try {
+    localStorage.setItem(STRATEGIC_MAP_RELIEF_KEY, strategicMapView.relief);
+  } catch {
+    // View preferences are optional; the formal save remains untouched.
+  }
+  syncStrategicMapControls();
+  applyStrategicMapReliefProjection();
+  announceStrategicMap(strategicMapView.relief === "3d"
+    ? strategicMapCopy("轻量立体地形已开启", "Lightweight relief enabled")
+    : strategicMapCopy("平面地图已开启", "Flat map enabled"));
+}
+
+function strategicReliefProfile() {
+  const compact = typeof window.matchMedia === "function" &&
+    window.matchMedia("(max-width: 820px), (max-height: 620px) and (orientation: landscape)").matches;
+  const profile = compact
+    ? { skewX: -0.05, scaleY: 0.94, landY: 9 }
+    : { skewX: -0.075, scaleY: 0.9, landY: 11 };
+  return { ...profile, landX: profile.landY * STRATEGIC_MAP_RELIEF_PROJECTION.x };
+}
+
+function strategicReliefWorldTransform() {
+  const { skewX, scaleY } = strategicReliefProfile();
+  const centerY = STRATEGIC_MAP_DATA.viewBox.y + STRATEGIC_MAP_DATA.viewBox.height / 2;
+  return `matrix(1 0 ${skewX} ${scaleY} ${-skewX * centerY} ${(1 - scaleY) * centerY})`;
+}
+
+function applyStrategicMapReliefProjection() {
+  if (!strategicMapView.built) return;
+  const profile = strategicReliefProfile();
+  dom.strategicLandDepth?.setAttribute("transform", `translate(${profile.landX} ${profile.landY})`);
+  if (strategicMapView.relief === "3d") {
+    dom.strategicWorldLayer?.setAttribute("transform", strategicReliefWorldTransform());
+  } else {
+    dom.strategicWorldLayer?.removeAttribute("transform");
+  }
+}
+
+function ensureStrategicMapView() {
+  if (strategicMapView.built) return true;
+  const required = [
+    dom.worldMap,
+    dom.strategicMapSvg,
+    dom.strategicMapDefs,
+    dom.formalLandClipPath,
+    dom.strategicLandDepth,
+    dom.strategicLandBase,
+    dom.strategicProvinceReliefLayer,
+    dom.strategicProvinceLayer,
+    dom.strategicTerrainTextureLayer,
+    dom.strategicRouteLayer,
+    dom.strategicRiverLayer,
+    dom.strategicRegionBorderLayer,
+    dom.strategicRealmBorderLayer,
+    dom.strategicCoastLine,
+    dom.strategicCapitalLayer,
+    dom.strategicRealmLabelLayer,
+    dom.strategicRegionLabelLayer,
+    dom.strategicProvinceLabelLayer,
+    dom.strategicArmyLayer
+  ];
+  if (required.some((node) => !node)) return false;
+
+  loadStrategicMapPreferences();
+  const landPath = STRATEGIC_MAP_DATA.landPath;
+  dom.formalLandClipPath.setAttribute("d", landPath);
+  dom.strategicLandDepth.setAttribute("d", landPath);
+  dom.strategicLandBase.setAttribute("d", landPath);
+  dom.strategicCoastLine.setAttribute("d", landPath);
+
+  [
+    "M -70 184 C 180 91 365 89 568 157 C 782 228 982 200 1272 84",
+    "M -89 322 C 163 249 365 261 554 328 C 787 410 1005 368 1282 240",
+    "M -35 520 C 194 456 389 475 607 548 C 831 621 1029 592 1280 461",
+    "M 85 700 C 297 617 497 626 700 694 C 879 754 1039 740 1188 671"
+  ].forEach((pathData) => {
+    dom.strategicOceanDetailLayer?.append(strategicSvgElement("path", {
+      class: "strategic-ocean-current",
+      d: pathData
+    }));
+  });
+
+  const reliefCells = STRATEGIC_GEOGRAPHY.cells
+    .map((cell) => {
+      const province = STRATEGIC_GEOGRAPHY.provinceById[cell.provinceId];
+      return { cell, province, depth: STRATEGIC_MAP_RELIEF_DEPTHS[province.terrain] || 3 };
+    })
+    .sort((left, right) => left.province.center[1] + left.depth - right.province.center[1] - right.depth);
+  reliefCells.forEach(({ cell, province, depth }) => {
+    const reliefCell = strategicSvgElement("g", {
+      class: `strategic-relief-cell relief-terrain-${province.terrain}`,
+      "data-region": province.id
+    });
+    reliefCell.append(
+      strategicSvgElement("path", {
+        class: "strategic-relief-wall strategic-relief-side",
+        d: strategicReliefWallPath(cell.points, depth, "side")
+      }),
+      strategicSvgElement("path", {
+        class: "strategic-relief-wall strategic-relief-front",
+        d: strategicReliefWallPath(cell.points, depth, "front")
+      }),
+      strategicSvgElement("path", {
+        class: "strategic-relief-rim",
+        d: strategicReliefRimPath(cell.points)
+      })
+    );
+    strategicMapView.reliefNodes.set(province.id, reliefCell);
+    dom.strategicProvinceReliefLayer.append(reliefCell);
+  });
+
+  STRATEGIC_GEOGRAPHY.cells.forEach((cell) => {
+    const province = STRATEGIC_GEOGRAPHY.provinceById[cell.provinceId];
+    const path = strategicSvgElement("path", {
+      class: "strategic-province",
+      d: strategicPointsPath(cell.points),
+      role: "button",
+      tabindex: "0",
+      "data-region": province.id
+    });
+    strategicMapView.provinceNodes.set(province.id, path);
+    dom.strategicProvinceLayer.append(path);
+
+    const texture = strategicSvgElement("path", {
+      class: `strategic-terrain-texture terrain-${province.terrain}`,
+      d: strategicPointsPath(cell.points)
+    });
+    dom.strategicTerrainTextureLayer.append(texture);
+    if (["mountain", "canyon"].includes(province.terrain)) {
+      dom.strategicTerrainTextureLayer.append(strategicSvgElement("use", {
+        class: "strategic-terrain-mountain",
+        href: "#formalMountainSymbol",
+        x: province.center[0] - 15,
+        y: province.center[1] - 10,
+        width: 30,
+        height: 20
+      }));
+    }
+
+    const label = strategicSvgElement("text", {
+      class: "strategic-province-label",
+      x: province.label[0],
+      y: province.label[1] - 2
+    });
+    const nameLine = strategicSvgElement("tspan", { x: province.label[0] });
+    const metaLine = strategicSvgElement("tspan", {
+      class: "strategic-province-meta",
+      x: province.label[0],
+      dy: 12
+    });
+    label.append(nameLine, metaLine);
+    strategicMapView.provinceLabelNodes.set(province.id, { label, nameLine, metaLine });
+    dom.strategicProvinceLabelLayer.append(label);
+  });
+
+  activeMapRoads().forEach((road) => {
+    const left = STRATEGIC_GEOGRAPHY.provinceById[road.a];
+    const right = STRATEGIC_GEOGRAPHY.provinceById[road.b];
+    if (!left || !right) return;
+    const path = strategicSvgElement("path", {
+      class: "strategic-map-road",
+      d: `M ${left.center[0]} ${left.center[1]} L ${right.center[0]} ${right.center[1]}`
+    });
+    strategicMapView.roadNodes.push({ node: path, road });
+    dom.strategicRouteLayer.append(path);
+  });
+
+  STRATEGIC_MAP_DATA.rivers.forEach((river) => {
+    dom.strategicRiverLayer.append(strategicSvgElement("path", {
+      class: `strategic-map-river${river.major ? " major" : ""}`,
+      d: river.path
+    }));
+  });
+
+  STRATEGIC_GEOGRAPHY.sharedEdges.forEach((edge) => {
+    const pathData = `M ${edge.start.x} ${edge.start.y} L ${edge.end.x} ${edge.end.y}`;
+    if (edge.strategicBoundary) {
+      dom.strategicRegionBorderLayer.append(strategicSvgElement("path", {
+        class: "strategic-region-border",
+        d: pathData
+      }));
+    }
+    const realmBorder = strategicSvgElement("path", {
+      class: "strategic-realm-border",
+      d: pathData
+    });
+    strategicMapView.realmBorderNodes.push({ node: realmBorder, edge });
+    dom.strategicRealmBorderLayer.append(realmBorder);
+  });
+
+  STRATEGIC_MAP_DATA.strategicRegions.forEach((region) => {
+    const label = strategicSvgElement("text", {
+      class: "strategic-region-label",
+      x: region.label[0],
+      y: region.label[1],
+      "data-strategic-region": region.id
+    });
+    dom.strategicRegionLabelLayer.append(label);
+  });
+
+  POLITICAL_ENTITY_IDS.forEach((entityId) => {
+    const clip = strategicSvgElement("clipPath", { id: `formal-entity-clip-${entityId}` });
+    strategicMapView.realmClipNodes.set(entityId, clip);
+    dom.strategicMapDefs.append(clip);
+    const label = strategicSvgElement("text", {
+      class: "strategic-realm-label",
+      "data-entity-label": entityId,
+      "clip-path": `url(#formal-entity-clip-${entityId})`
+    });
+    strategicMapView.realmLabelNodes.set(entityId, label);
+    dom.strategicRealmLabelLayer.append(label);
+  });
+
+  const capital = strategicSvgElement("g", { class: "strategic-capital-node" });
+  capital.append(strategicSvgElement("use", {
+    class: "strategic-capital-marker",
+    href: "#formalCapitalSymbol",
+    x: -11,
+    y: -11,
+    width: 22,
+    height: 22
+  }));
+  strategicMapView.capitalNodes.set(PLAYER_ENTITY_ID, capital);
+  dom.strategicCapitalLayer.append(capital);
+
+  strategicMapView.built = true;
+  syncStrategicMapControls();
+  applyStrategicMapReliefProjection();
+  resetStrategicMapCamera(false);
+  return true;
+}
+
+function strategicEntityRelationToPlayer(entityId) {
+  if (entityId === PLAYER_ENTITY_ID) return "player";
+  const entity = politicalEntityById(entityId);
+  if (!entity) return "hostile";
+  if (entity.owner === MAP_OWNER_RIVAL || entity.relation === "hostile") return "hostile";
+  return "neutral";
+}
+
+function updateStrategicMapView(activeArmy, availableRegionIds, visibleRegions) {
+  syncStrategicMapControls();
+  const activeArmyRegionId = activeArmy?.regionId || null;
+  const occupiedRegionIds = new Set(
+    armies()
+      .filter((army) => army.force > 0 && (army.entityId === PLAYER_ENTITY_ID || visibleRegions.has(army.regionId)))
+      .map((army) => army.regionId)
+  );
+
+  MAP_REGIONS.forEach((definition) => {
+    const province = STRATEGIC_GEOGRAPHY.provinceById[definition.id];
+    const region = mapStateRegion(definition.id);
+    const node = strategicMapView.provinceNodes.get(definition.id);
+    const relief = strategicMapView.reliefNodes.get(definition.id);
+    const label = strategicMapView.provinceLabelNodes.get(definition.id);
+    if (!province || !region || !node || !relief || !label) return;
+    const entity = politicalEntityById(region.controllerId);
+    const owner = mapRegionOwner(region);
+    const entityColor = owner === MAP_OWNER_RUINS ? "#7d3539" : strategicMapEntityColor(region.controllerId);
+    const terrainColor = STRATEGIC_MAP_DATA.terrainTypes[definition.terrain]?.color || "#777463";
+    node.style.setProperty("--map-realm-color", entityColor);
+    node.style.setProperty("--map-terrain-color", terrainColor);
+    node.dataset.entity = region.controllerId || "ruins";
+    node.dataset.owner = owner;
+    relief.style.setProperty("--map-relief-realm-front", strategicDarkenHex(entityColor, 0.54));
+    relief.style.setProperty("--map-relief-realm-side", strategicDarkenHex(entityColor, 0.4));
+    relief.style.setProperty("--map-relief-terrain-front", strategicDarkenHex(terrainColor, 0.58));
+    relief.style.setProperty("--map-relief-terrain-side", strategicDarkenHex(terrainColor, 0.42));
+
+    const isAvailable = availableRegionIds.has(definition.id);
+    node.classList.toggle("is-selected", state.selectedRegionId === definition.id);
+    node.classList.toggle("is-army-region", occupiedRegionIds.has(definition.id));
+    node.classList.toggle("is-hovered", strategicMapView.hoveredRegionId === definition.id);
+    node.classList.toggle("is-move-target", isAvailable && owner === MAP_OWNER_PLAYER);
+    node.classList.toggle("is-neutral-target", isAvailable && owner === MAP_OWNER_NEUTRAL && entity?.relation !== "hostile");
+    node.classList.toggle("is-attack-target", isAvailable && (owner === MAP_OWNER_RIVAL || entity?.relation === "hostile"));
+
+    const provinceName = localizedMapRegionName(definition, definition.id);
+    const terrainName = strategicTerrainName(definition.terrain);
+    const entityName = entity
+      ? localizedPoliticalEntityName(entity)
+      : owner === MAP_OWNER_RUINS
+        ? strategicMapCopy("文明废墟", "Civilization ruins")
+        : strategicMapCopy("无主地", "Unclaimed land");
+    node.setAttribute("aria-label", I18N.isEnglish()
+      ? `${provinceName}, ${terrainName}, ${entityName}, fortification ${formatNumber(region.fortification)}`
+      : `${provinceName}，${terrainName}，${entityName}，工事 ${formatNumber(region.fortification)}`);
+    label.nameLine.textContent = provinceName;
+    if (strategicMapView.mode === "terrain") label.metaLine.textContent = terrainName;
+    else label.metaLine.textContent = I18N.isEnglish()
+      ? `FORT ${formatNumber(region.fortification)}`
+      : `工事 ${formatNumber(region.fortification)}`;
+  });
+
+  strategicMapView.roadNodes.forEach(({ node, road }) => {
+    const available = activeArmy?.entityId === PLAYER_ENTITY_ID && (
+      activeArmyRegionId === road.a && availableRegionIds.has(road.b) ||
+      activeArmyRegionId === road.b && availableRegionIds.has(road.a)
+    );
+    node.classList.toggle("is-available", available);
+  });
+
+  strategicMapView.realmBorderNodes.forEach(({ node, edge }) => {
+    const left = mapStateRegion(edge.a)?.controllerId || null;
+    const right = mapStateRegion(edge.b)?.controllerId || null;
+    const visible = left !== right;
+    node.style.display = visible ? "" : "none";
+    const other = left === PLAYER_ENTITY_ID ? right : right === PLAYER_ENTITY_ID ? left : null;
+    const relation = other ? strategicEntityRelationToPlayer(other) : "foreign";
+    node.classList.toggle("frontline", visible && relation === "hostile");
+    node.classList.toggle("neutral-frontier", visible && relation === "neutral");
+  });
+
+  dom.strategicRegionLabelLayer?.querySelectorAll("[data-strategic-region]").forEach((label) => {
+    const region = STRATEGIC_GEOGRAPHY.strategicRegionById[label.dataset.strategicRegion];
+    if (region) label.textContent = I18N.isEnglish() ? region.nameEn : region.nameZh;
+  });
+
+  politicalEntities().forEach((entity) => {
+    const label = strategicMapView.realmLabelNodes.get(entity.id);
+    const clip = strategicMapView.realmClipNodes.get(entity.id);
+    if (!label) return;
+    const controlledRegions = entityRegions(entity.id);
+    const controlled = controlledRegions
+      .map((region) => STRATEGIC_GEOGRAPHY.provinceById[region.id])
+      .filter(Boolean);
+    if (clip) {
+      clip.replaceChildren(...controlledRegions.map((region) => {
+        const cell = STRATEGIC_GEOGRAPHY.cellByProvinceId[region.id];
+        return strategicSvgElement("path", { d: strategicPointsPath(cell?.points || []) });
+      }));
+    }
+    if (!controlled.length || entity.eliminated) {
+      label.style.display = "none";
+      return;
+    }
+    const totalWeight = controlled.reduce((sum, province) => sum + Math.max(1, province.base.development), 0);
+    const x = controlled.reduce((sum, province) => sum + province.center[0] * Math.max(1, province.base.development), 0) / totalWeight;
+    const y = controlled.reduce((sum, province) => sum + province.center[1] * Math.max(1, province.base.development), 0) / totalWeight;
+    label.style.display = "";
+    label.setAttribute("x", String(x));
+    label.setAttribute("y", String(y));
+    label.textContent = localizedPoliticalEntityName(entity);
+  });
+
+  const playerCapital = strategicMapView.capitalNodes.get(PLAYER_ENTITY_ID);
+  const capitalProvince = STRATEGIC_GEOGRAPHY.provinceById[state.startingRegionId];
+  const capitalRegion = mapStateRegion(state.startingRegionId);
+  const capitalVisible = Boolean(capitalProvince && capitalRegion?.controllerId === PLAYER_ENTITY_ID);
+  if (playerCapital) {
+    playerCapital.style.display = capitalVisible ? "" : "none";
+    if (capitalVisible) {
+      playerCapital.dataset.x = String(capitalProvince.center[0]);
+      playerCapital.dataset.y = String(capitalProvince.center[1]);
+    }
+  }
+
+  rebuildStrategicArmyNodes(activeArmy, visibleRegions);
+  applyStrategicMapCamera();
+}
+
+function rebuildStrategicArmyNodes(activeArmy, visibleRegions) {
+  if (!dom.strategicArmyLayer) return;
+  dom.strategicArmyLayer.replaceChildren();
+  strategicMapView.armyNodes.clear();
+  const visibleArmies = armies().filter((army) => {
+    return army.force > 0 && (army.entityId === PLAYER_ENTITY_ID || visibleRegions.has(army.regionId));
+  });
+  const stacks = new Map();
+  visibleArmies.forEach((army) => {
+    if (!stacks.has(army.regionId)) stacks.set(army.regionId, []);
+    stacks.get(army.regionId).push(army);
+  });
+
+  visibleArmies.forEach((army) => {
+    const province = STRATEGIC_GEOGRAPHY.provinceById[army.regionId];
+    if (!province) return;
+    const stackIndex = stacks.get(army.regionId)?.findIndex((candidate) => candidate.id === army.id) || 0;
+    const entity = politicalEntityById(army.entityId);
+    const owner = armyOwner(army);
+    const hostileNeutral = owner === MAP_OWNER_NEUTRAL && entity?.relation === "hostile";
+    const stats = armyCombatStats(army);
+    const power = militaryPowerSummary(stats);
+    const classes = [
+      "strategic-army-marker",
+      `army-${owner}`,
+      hostileNeutral ? "army-hostile-neutral" : "",
+      stackIndex > 0 ? "secondary-army" : "",
+      army.id === activeArmy?.id ? "is-selected" : ""
+    ].filter(Boolean);
+    const entityName = localizedPoliticalEntityName(entity);
+    const provinceName = localizedMapRegionName(mapRegionById(army.regionId), army.regionId);
+    const armyName = I18N.translate(army.name);
+    const accessibleName = I18N.isEnglish()
+      ? `${armyName}; ${entityName}; ${formatNumber(army.force)} troops; combat tier ${power.tier}; stationed at ${provinceName}`
+      : `${armyName}；${entityName}；兵力 ${formatNumber(army.force)}；战斗力 ${power.tier}；驻扎于${provinceName}`;
+    const marker = strategicSvgElement("g", {
+      class: classes.join(" "),
+      role: "button",
+      tabindex: "0",
+      "data-army": army.id,
+      "aria-label": accessibleName,
+      "aria-pressed": army.id === activeArmy?.id ? "true" : "false"
+    });
+    marker.dataset.x = String(province.center[0]);
+    marker.dataset.y = String(province.center[1]);
+    marker.dataset.stackIndex = String(stackIndex);
+    marker.append(
+      strategicSvgElement("title")
+    );
+    marker.firstChild.textContent = accessibleName;
+    marker.append(
+      strategicSvgElement("path", {
+        class: "strategic-army-shield",
+        d: "M -15 -14 L 15 -14 L 13 7 L 0 16 L -13 7 Z"
+      }),
+      strategicSvgElement("text", { class: "strategic-army-tier", x: 0, y: -2 }),
+      strategicSvgElement("text", { class: "strategic-army-force", x: 0, y: 8 })
+    );
+    marker.querySelector(".strategic-army-tier").textContent = power.tier;
+    marker.querySelector(".strategic-army-force").textContent = compactArmyForce(army.force);
+    marker.style.setProperty("--map-army-color", strategicMapEntityColor(army.entityId));
+    strategicMapView.armyNodes.set(army.id, marker);
+    dom.strategicArmyLayer.append(marker);
+  });
+}
+
+function strategicMapAspect() {
+  const rect = dom.strategicMapSvg?.getBoundingClientRect?.();
+  if (rect?.width > 0 && rect?.height > 0) return rect.width / rect.height;
+  return STRATEGIC_MAP_DATA.viewBox.width / STRATEGIC_MAP_DATA.viewBox.height;
+}
+
+function strategicMapViewportMetrics(view = STRATEGIC_MAP_MODEL.cameraView(
+  strategicMapView.camera,
+  STRATEGIC_MAP_DATA.viewBox,
+  strategicMapAspect()
+)) {
+  const rect = dom.strategicMapSvg?.getBoundingClientRect?.() || { left: 0, top: 0, width: 1, height: 1 };
+  const scale = Math.max(1e-7, Math.min(rect.width / view.width, rect.height / view.height));
+  const width = view.width * scale;
+  const height = view.height * scale;
+  return {
+    left: rect.left + (rect.width - width) / 2,
+    top: rect.top + (rect.height - height) / 2,
+    width,
+    height
+  };
+}
+
+function applyStrategicMapCamera() {
+  if (!strategicMapView.built || !dom.strategicMapSvg) return;
+  const viewportAspect = strategicMapAspect();
+  strategicMapView.camera = STRATEGIC_MAP_MODEL.clampCamera(
+    strategicMapView.camera,
+    STRATEGIC_MAP_DATA.viewBox,
+    viewportAspect
+  );
+  const view = STRATEGIC_MAP_MODEL.cameraView(
+    strategicMapView.camera,
+    STRATEGIC_MAP_DATA.viewBox,
+    viewportAspect
+  );
+  dom.strategicMapSvg.setAttribute("viewBox", `${view.x} ${view.y} ${view.width} ${view.height}`);
+  if (dom.mapZoomReadout) dom.mapZoomReadout.textContent = `${strategicMapView.camera.zoom.toFixed(2)}×`;
+  const mobileOffset = typeof window.matchMedia === "function" && window.matchMedia("(max-width: 720px)").matches ? 0.65 : 0;
+  dom.worldMap.dataset.zoomBand = strategicMapView.camera.zoom < 1.25 + mobileOffset
+    ? "far"
+    : strategicMapView.camera.zoom < 2.2 + mobileOffset ? "mid" : "near";
+
+  const inverseScale = 1 / strategicMapView.camera.zoom;
+  strategicMapView.capitalNodes.forEach((node) => {
+    if (!node.dataset.x || !node.dataset.y) return;
+    node.setAttribute("transform", `translate(${node.dataset.x} ${node.dataset.y}) scale(${inverseScale})`);
+  });
+  const offsets = [[-10, 17], [12, 17], [-22, -10], [22, -10], [0, -24], [-30, 16], [30, 16]];
+  strategicMapView.armyNodes.forEach((node) => {
+    const stackIndex = Math.max(0, Math.round(finiteOr(node.dataset.stackIndex, 0)));
+    const fallback = [((stackIndex % 5) - 2) * 18, 17 - Math.floor(stackIndex / 5) * 28];
+    const [offsetX, offsetY] = offsets[stackIndex] || fallback;
+    const x = finiteOr(node.dataset.x, 0) + offsetX * inverseScale;
+    const y = finiteOr(node.dataset.y, 0) + offsetY * inverseScale;
+    node.setAttribute("transform", `translate(${x} ${y}) scale(${inverseScale})`);
+  });
+}
+
+function zoomStrategicMapBy(factor, pointer = { x: 0.5, y: 0.5 }) {
+  if (!strategicMapView.built) return;
+  strategicMapView.camera = STRATEGIC_MAP_MODEL.zoomCameraAt(
+    strategicMapView.camera,
+    strategicMapView.camera.zoom * factor,
+    pointer,
+    STRATEGIC_MAP_DATA.viewBox,
+    strategicMapAspect()
+  );
+  applyStrategicMapCamera();
+}
+
+function defaultStrategicMapZoom() {
+  const worldAspect = STRATEGIC_MAP_DATA.viewBox.width / STRATEGIC_MAP_DATA.viewBox.height;
+  return Math.min(
+    STRATEGIC_MAP_MODEL.MAX_ZOOM,
+    Math.max(1, worldAspect / strategicMapAspect() * 0.84)
+  );
+}
+
+function resetStrategicMapCamera(shouldAnnounce = true) {
+  strategicMapView.camera = STRATEGIC_MAP_MODEL.clampCamera({
+    cx: STRATEGIC_MAP_DATA.viewBox.x + STRATEGIC_MAP_DATA.viewBox.width / 2,
+    cy: STRATEGIC_MAP_DATA.viewBox.y + STRATEGIC_MAP_DATA.viewBox.height / 2,
+    zoom: defaultStrategicMapZoom()
+  }, STRATEGIC_MAP_DATA.viewBox, strategicMapAspect());
+  applyStrategicMapCamera();
+  if (shouldAnnounce) announceStrategicMap(strategicMapCopy("镜头已重置", "Camera reset"));
+}
+
+function strategicMapPointerRatio(event) {
+  const metrics = strategicMapViewportMetrics();
+  return {
+    x: clamp((event.clientX - metrics.left) / Math.max(1, metrics.width), 0, 1),
+    y: clamp((event.clientY - metrics.top) / Math.max(1, metrics.height), 0, 1)
+  };
+}
+
+function beginStrategicMapPinch() {
+  const values = Array.from(strategicMapView.pointers.values());
+  if (values.length < 2) return;
+  const [left, right] = values;
+  const metrics = strategicMapViewportMetrics();
+  const midpoint = { x: (left.x + right.x) / 2, y: (left.y + right.y) / 2 };
+  strategicMapView.pinchState = {
+    distance: Math.hypot(left.x - right.x, left.y - right.y),
+    camera: { ...strategicMapView.camera },
+    ratio: {
+      x: clamp((midpoint.x - metrics.left) / Math.max(1, metrics.width), 0, 1),
+      y: clamp((midpoint.y - metrics.top) / Math.max(1, metrics.height), 0, 1)
+    },
+    midpoint
+  };
+  strategicMapView.dragState = null;
+}
+
+function handleStrategicMapPointerDown(event) {
+  if (event.pointerType === "mouse" && event.button !== 0) return;
+  const armyNode = event.target.closest?.("[data-army]");
+  const provinceNode = event.target.closest?.("[data-region]");
+  strategicMapView.pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+  try {
+    dom.strategicMapSvg.setPointerCapture(event.pointerId);
+  } catch {
+    // Pointer capture is an enhancement; dragging still works while the pointer remains over the SVG.
+  }
+  dom.strategicMapSvg.classList.add("is-dragging");
+  hideStrategicMapTooltip();
+  if (strategicMapView.pointers.size >= 2) {
+    beginStrategicMapPinch();
+    return;
+  }
+  strategicMapView.dragState = {
+    x: event.clientX,
+    y: event.clientY,
+    total: 0,
+    armyId: armyNode?.dataset.army || null,
+    regionId: provinceNode?.dataset.region || null
+  };
+}
+
+function handleStrategicMapPointerMove(event) {
+  if (!strategicMapView.pointers.has(event.pointerId)) {
+    updateStrategicMapHover(event);
+    return;
+  }
+  event.preventDefault();
+  strategicMapView.pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+  if (strategicMapView.pointers.size >= 2) {
+    if (!strategicMapView.pinchState) beginStrategicMapPinch();
+    const values = Array.from(strategicMapView.pointers.values());
+    const [left, right] = values;
+    const pinch = strategicMapView.pinchState;
+    if (!pinch) return;
+    const distance = Math.max(1, Math.hypot(left.x - right.x, left.y - right.y));
+    const midpoint = { x: (left.x + right.x) / 2, y: (left.y + right.y) / 2 };
+    const nextZoom = pinch.camera.zoom * distance / Math.max(1, pinch.distance);
+    const viewportAspect = strategicMapAspect();
+    let nextCamera = STRATEGIC_MAP_MODEL.zoomCameraAt(
+      pinch.camera,
+      nextZoom,
+      pinch.ratio,
+      STRATEGIC_MAP_DATA.viewBox,
+      viewportAspect
+    );
+    const view = STRATEGIC_MAP_MODEL.cameraView(nextCamera, STRATEGIC_MAP_DATA.viewBox, viewportAspect);
+    const metrics = strategicMapViewportMetrics(view);
+    nextCamera.cx -= (midpoint.x - pinch.midpoint.x) / Math.max(1, metrics.width) * view.width;
+    nextCamera.cy -= (midpoint.y - pinch.midpoint.y) / Math.max(1, metrics.height) * view.height;
+    strategicMapView.camera = STRATEGIC_MAP_MODEL.clampCamera(nextCamera, STRATEGIC_MAP_DATA.viewBox, viewportAspect);
+    strategicMapView.suppressClick = true;
+    applyStrategicMapCamera();
+    return;
+  }
+
+  const drag = strategicMapView.dragState;
+  if (!drag) return;
+  const dx = event.clientX - drag.x;
+  const dy = event.clientY - drag.y;
+  const viewportAspect = strategicMapAspect();
+  const view = STRATEGIC_MAP_MODEL.cameraView(strategicMapView.camera, STRATEGIC_MAP_DATA.viewBox, viewportAspect);
+  const metrics = strategicMapViewportMetrics(view);
+  strategicMapView.camera = STRATEGIC_MAP_MODEL.clampCamera({
+    cx: strategicMapView.camera.cx - dx / Math.max(1, metrics.width) * view.width,
+    cy: strategicMapView.camera.cy - dy / Math.max(1, metrics.height) * view.height,
+    zoom: strategicMapView.camera.zoom
+  }, STRATEGIC_MAP_DATA.viewBox, viewportAspect);
+  drag.x = event.clientX;
+  drag.y = event.clientY;
+  drag.total += Math.hypot(dx, dy);
+  if (drag.total > 5) strategicMapView.suppressClick = true;
+  applyStrategicMapCamera();
+}
+
+function finishStrategicMapPointer(event) {
+  const tapTarget = event.type === "pointerup" &&
+    strategicMapView.pointers.size === 1 &&
+    !strategicMapView.pinchState &&
+    strategicMapView.dragState?.total <= 5
+    ? {
+        armyId: strategicMapView.dragState.armyId,
+        regionId: strategicMapView.dragState.regionId
+      }
+    : null;
+  const wasGesture = Boolean(strategicMapView.pinchState || strategicMapView.dragState?.total > 5);
+  strategicMapView.pointers.delete(event.pointerId);
+  if (strategicMapView.pointers.size === 1) {
+    const remaining = Array.from(strategicMapView.pointers.values())[0];
+    strategicMapView.dragState = { x: remaining.x, y: remaining.y, total: 6 };
+    strategicMapView.pinchState = null;
+    strategicMapView.suppressClick = true;
+    return;
+  }
+  if (strategicMapView.pointers.size) return;
+  strategicMapView.dragState = null;
+  strategicMapView.pinchState = null;
+  dom.strategicMapSvg?.classList.remove("is-dragging");
+  if (tapTarget?.armyId || tapTarget?.regionId) {
+    strategicMapView.suppressClick = true;
+    if (tapTarget.armyId) selectMapArmy(tapTarget.armyId);
+    else selectMapRegion(tapTarget.regionId);
+  } else if (wasGesture) {
+    strategicMapView.suppressClick = true;
+  }
+  window.setTimeout(() => {
+    strategicMapView.suppressClick = false;
+  }, 0);
+}
+
+function handleStrategicMapPointerLeave(event) {
+  if (!strategicMapView.pointers.has(event.pointerId)) setStrategicMapHoveredRegion(null);
+}
+
+function handleStrategicMapWheel(event) {
+  if (!event.ctrlKey && !event.metaKey) return;
+  event.preventDefault();
+  zoomStrategicMapBy(Math.exp(-event.deltaY * 0.0014), strategicMapPointerRatio(event));
+}
+
+function updateStrategicMapHover(event) {
+  const armyNode = event.target.closest?.("[data-army]");
+  const army = armyNode ? armyById(armyNode.dataset.army) : null;
+  const provinceNode = event.target.closest?.("[data-region]");
+  const regionId = army?.regionId || provinceNode?.dataset.region || null;
+  setStrategicMapHoveredRegion(regionId);
+  if (armyNode) {
+    showStrategicMapTooltip(armyNode.getAttribute("aria-label") || I18N.translate(army?.name || "军队"), event);
+    return;
+  }
+  if (!regionId) {
+    hideStrategicMapTooltip();
+    return;
+  }
+  const definition = mapRegionById(regionId);
+  const region = mapStateRegion(regionId);
+  const entity = politicalEntityById(region?.controllerId);
+  const text = I18N.isEnglish()
+    ? `${localizedMapRegionName(definition, regionId)} · ${strategicTerrainName(definition?.terrain)} · ${localizedPoliticalEntityName(entity)} · FORT ${formatNumber(region?.fortification)}`
+    : `${localizedMapRegionName(definition, regionId)} · ${strategicTerrainName(definition?.terrain)} · ${localizedPoliticalEntityName(entity)} · 工事 ${formatNumber(region?.fortification)}`;
+  showStrategicMapTooltip(text, event);
+}
+
+function setStrategicMapHoveredRegion(regionId) {
+  if (strategicMapView.hoveredRegionId === regionId) {
+    if (!regionId) hideStrategicMapTooltip();
+    return;
+  }
+  const previous = strategicMapView.provinceNodes.get(strategicMapView.hoveredRegionId);
+  previous?.classList.remove("is-hovered");
+  strategicMapView.hoveredRegionId = regionId;
+  strategicMapView.provinceNodes.get(regionId)?.classList.add("is-hovered");
+  if (!regionId) hideStrategicMapTooltip();
+}
+
+function showStrategicMapTooltip(text, event) {
+  if (!dom.strategicMapTooltip || !dom.worldMap) return;
+  const mapRect = dom.worldMap.getBoundingClientRect();
+  dom.strategicMapTooltip.textContent = text;
+  dom.strategicMapTooltip.hidden = false;
+  const tooltipWidth = dom.strategicMapTooltip.offsetWidth || 220;
+  const tooltipHeight = dom.strategicMapTooltip.offsetHeight || 36;
+  const left = clamp(event.clientX - mapRect.left + 14, 8, Math.max(8, mapRect.width - tooltipWidth - 8));
+  const top = clamp(event.clientY - mapRect.top + 14, 8, Math.max(8, mapRect.height - tooltipHeight - 8));
+  dom.strategicMapTooltip.style.left = `${left}px`;
+  dom.strategicMapTooltip.style.top = `${top}px`;
+}
+
+function hideStrategicMapTooltip() {
+  if (dom.strategicMapTooltip) dom.strategicMapTooltip.hidden = true;
+}
+
+function announceStrategicMap(message) {
+  if (!dom.strategicMapLiveRegion) return;
+  dom.strategicMapLiveRegion.textContent = "";
+  window.requestAnimationFrame(() => {
+    dom.strategicMapLiveRegion.textContent = message;
+  });
+}
+
+function scheduleStrategicMapCameraRefresh() {
+  if (!strategicMapView.built) return;
+  if (strategicMapView.resizeFrame) window.cancelAnimationFrame(strategicMapView.resizeFrame);
+  strategicMapView.resizeFrame = window.requestAnimationFrame(() => {
+    strategicMapView.resizeFrame = 0;
+    applyStrategicMapReliefProjection();
+    applyStrategicMapCamera();
+  });
+}
+
 function renderMap() {
   if (!dom.worldMap || state.mapUiExpanded === false) return;
   ensureMilitaryMapState();
@@ -5745,145 +6684,10 @@ function renderMap() {
   const availableRegionIds = activeArmy?.entityId === PLAYER_ENTITY_ID && activeArmy.lastMovedTurn < state.turn
     ? new Set(roadNeighbors(activeArmy.regionId))
     : new Set();
-  dom.worldMap.innerHTML = "";
-  const fragment = document.createDocumentFragment();
 
-  const mapSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-  mapSvg.setAttribute("class", "world-map-svg");
-  mapSvg.setAttribute("viewBox", "0 0 100 100");
-  mapSvg.setAttribute("preserveAspectRatio", "none");
-
-  const definitions = document.createElementNS("http://www.w3.org/2000/svg", "defs");
-  politicalEntities().forEach((entity) => {
-    const clip = document.createElementNS("http://www.w3.org/2000/svg", "clipPath");
-    clip.setAttribute("id", `entity-clip-${entity.id}`);
-    entityRegions(entity.id).forEach((regionState) => {
-      const layout = mapLayoutRegion(regionState.id);
-      if (!layout) return;
-      const polygon = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
-      polygon.setAttribute("points", layout.points.map((point) => `${point.x},${point.y}`).join(" "));
-      clip.append(polygon);
-    });
-    definitions.append(clip);
-  });
-  mapSvg.append(definitions);
-
-  MAP_REGIONS.forEach((definition) => {
-    const regionState = mapStateRegion(definition.id) || {
-      owner: MAP_OWNER_NEUTRAL,
-      controllerId: NEUTRAL_ENTITY_ID,
-      fortification: definition.strength
-    };
-    const owner = mapRegionOwner(regionState);
-    const entity = politicalEntityById(regionState.controllerId);
-    const isHostileNeutral = owner === MAP_OWNER_NEUTRAL && entity?.relation === "hostile";
-    const layout = mapLayoutRegion(definition.id);
-    if (!layout) return;
-    const region = document.createElementNS("http://www.w3.org/2000/svg", "g");
-    const classes = [
-      "map-region",
-      `owner-${owner}`,
-      `entity-${regionState.controllerId}`,
-      `terrain-${definition.terrain}`
-    ];
-    if (isHostileNeutral) classes.push("owner-hostile-neutral");
-    if (availableRegionIds.has(definition.id)) classes.push("available-target");
-    if (state.selectedRegionId === definition.id) classes.push("selected-region");
-    if (activeArmy?.regionId === definition.id) classes.push("army-region");
-    region.setAttribute("class", classes.join(" "));
-    region.setAttribute("role", "button");
-    region.setAttribute("tabindex", "0");
-    region.setAttribute("data-region", definition.id);
-    region.setAttribute("aria-label", `${definition.name}，${mapOwnerLabel(regionState)}，地块防御 ${formatNumber(regionState.fortification)}`);
-    const polygon = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
-    polygon.setAttribute("class", "map-territory");
-    polygon.setAttribute("points", layout.points.map((point) => `${point.x},${point.y}`).join(" "));
-    region.append(polygon);
-    mapSvg.append(region);
-  });
-
-  activeMapRoads().forEach((road) => {
-    const left = mapLayoutRegion(road.a);
-    const right = mapLayoutRegion(road.b);
-    if (!left || !right) return;
-    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-    const available = activeArmy?.entityId === PLAYER_ENTITY_ID &&
-      (activeArmy.regionId === road.a && availableRegionIds.has(road.b) ||
-        activeArmy.regionId === road.b && availableRegionIds.has(road.a));
-    path.setAttribute("class", available ? "map-road available" : "map-road");
-    path.setAttribute(
-      "d",
-      `M ${left.centerX} ${left.centerY} Q ${road.bendX} ${road.bendY} ${right.centerX} ${right.centerY}`
-    );
-    mapSvg.append(path);
-  });
-
-  politicalEntities().forEach((entity) => {
-    if (entity.eliminated) return;
-    const geometry = entityMapLabelGeometry(entity.id);
-    if (!geometry) return;
-    const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
-    label.setAttribute("class", `map-entity-name map-entity-name-${entity.owner}`);
-    label.setAttribute("x", geometry.x);
-    label.setAttribute("y", geometry.y);
-    label.setAttribute("textLength", geometry.width);
-    label.setAttribute("lengthAdjust", "spacingAndGlyphs");
-    label.setAttribute("clip-path", `url(#entity-clip-${entity.id})`);
-    label.textContent = entity.name;
-    mapSvg.append(label);
-  });
-
-  MAP_REGIONS.forEach((definition) => {
-    const layout = mapLayoutRegion(definition.id);
-    const regionState = mapStateRegion(definition.id);
-    if (!layout || !regionState) return;
-    const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
-    label.setAttribute("class", "map-region-label");
-    label.setAttribute("x", layout.centerX);
-    label.setAttribute("y", layout.centerY - 0.6);
-    const nameLine = document.createElementNS("http://www.w3.org/2000/svg", "tspan");
-    nameLine.setAttribute("x", layout.centerX);
-    nameLine.textContent = definition.name;
-    const metaLine = document.createElementNS("http://www.w3.org/2000/svg", "tspan");
-    metaLine.setAttribute("class", "map-region-meta");
-    metaLine.setAttribute("x", layout.centerX);
-    metaLine.setAttribute("dy", "2.8");
-    metaLine.textContent = `${terrainLabel(definition.terrain)} · 防 ${formatNumber(regionState.fortification)}`;
-    label.append(nameLine, metaLine);
-    mapSvg.append(label);
-  });
-  fragment.append(mapSvg);
-
-  const regionArmyCounts = new Map();
-  armies().forEach((army) => {
-    if (army.force <= 0) return;
-    if (army.entityId !== PLAYER_ENTITY_ID && !visibleRegions.has(army.regionId)) return;
-    const layout = mapLayoutRegion(army.regionId);
-    if (!layout) return;
-    const offsetIndex = regionArmyCounts.get(army.regionId) || 0;
-    regionArmyCounts.set(army.regionId, offsetIndex + 1);
-    const entity = politicalEntityById(army.entityId);
-    const owner = armyOwner(army);
-    const token = document.createElement("button");
-    token.type = "button";
-    token.className = `army-token army-${owner}${owner === MAP_OWNER_NEUTRAL && entity?.relation === "hostile" ? " army-hostile-neutral" : ""}`;
-    token.style.left = `${layout.centerX + 5 + offsetIndex * 3.5}%`;
-    token.style.top = `${layout.centerY + 5}%`;
-    token.dataset.army = army.id;
-    const stats = armyCombatStats(army);
-    const power = militaryPowerSummary(stats);
-    const tier = document.createElement("strong");
-    tier.textContent = power.tier;
-    const force = document.createElement("small");
-    force.textContent = compactArmyForce(army.force);
-    token.append(tier, force);
-    token.title = `${army.name}｜${entity?.name || "未知阵营"}｜兵力 ${formatNumber(army.force)}｜战斗力 ${power.tier}（${formatNumber(power.score)}）`;
-    token.setAttribute("aria-label", token.title);
-    token.setAttribute("aria-pressed", army.id === activeArmy?.id ? "true" : "false");
-    fragment.append(token);
-  });
-
-  dom.worldMap.append(fragment);
+  if (ensureStrategicMapView()) {
+    updateStrategicMapView(activeArmy, availableRegionIds, visibleRegions);
+  }
   if (dom.mapStatus) {
     const intel = hasFullMilitaryIntel() ? "全域监听" : `可见 ${formatNumber(visibleRegions.size)}/${formatNumber(MAP_REGIONS.length)}`;
     dom.mapStatus.textContent = `Seed ${state.seed}｜${difficultyConfig().label}｜AI ${aiAggressionConfig().label}｜${intel}｜本国 ${formatNumber(counts.player)}｜中立 ${formatNumber(counts.neutral)}｜敌国 ${formatNumber(counts.rival)}｜${mapStrategicStatus(counts)}`;
@@ -5892,7 +6696,7 @@ function renderMap() {
   const activeRegion = mapRegionById(activeArmy?.regionId);
   if (dom.selectedArmyName) dom.selectedArmyName.textContent = activeArmy?.name || "未选择";
   if (dom.selectedArmyOwner) dom.selectedArmyOwner.textContent = activeEntity?.name || "未知";
-  if (dom.selectedArmyRegion) dom.selectedArmyRegion.textContent = activeRegion?.name || "无驻地";
+  if (dom.selectedArmyRegion) dom.selectedArmyRegion.textContent = localizedMapRegionName(activeRegion, "无驻地");
   if (dom.militaryForceValue) dom.militaryForceValue.textContent = formatNumber(activeArmyStats.force);
   if (dom.militaryAttackValue) dom.militaryAttackValue.textContent = formatNumber(activeArmyStats.attack);
   if (dom.militaryDefenseValue) dom.militaryDefenseValue.textContent = formatNumber(activeArmyStats.defense);
@@ -5902,9 +6706,7 @@ function renderMap() {
     dom.militaryPowerValue.textContent = `${power.tier} / ${formatNumber(power.score)}`;
   }
   if (dom.frontierValue) dom.frontierValue.textContent = `${formatNumber(counts.player)}/${formatNumber(counts.neutral)}/${formatNumber(counts.rival)}`;
-  if (dom.deploymentHint) {
-    dom.deploymentHint.textContent = deploymentHintFor(activeArmy);
-  }
+  if (dom.deploymentHint) dom.deploymentHint.textContent = deploymentHintFor(activeArmy);
   if (dom.mapFeed) {
     const event = state.map?.lastEvent || state.military?.lastBattle;
     const eventVisible = !event?.regionId || canObserveMilitaryAt(event.regionId);
@@ -5914,23 +6716,6 @@ function renderMap() {
   }
   renderRegionIntel();
   renderPoliticalEntityPanel();
-}
-
-function entityMapLabelGeometry(entityId) {
-  const layouts = entityRegions(entityId)
-    .map((region) => mapLayoutRegion(region.id))
-    .filter(Boolean);
-  if (!layouts.length) return null;
-  const points = layouts.flatMap((layout) => layout.points || []);
-  const minX = Math.min(...points.map((point) => point.x));
-  const maxX = Math.max(...points.map((point) => point.x));
-  const minY = Math.min(...points.map((point) => point.y));
-  const maxY = Math.max(...points.map((point) => point.y));
-  return {
-    x: roundMapCoordinate((minX + maxX) / 2),
-    y: roundMapCoordinate((minY + maxY) / 2),
-    width: roundMapCoordinate(clamp((maxX - minX) * 0.78, 10, 62))
-  };
 }
 
 function terrainLabel(terrain) {
@@ -5978,7 +6763,7 @@ function renderRegionIntel() {
   const definition = mapRegionById(selected.id);
   const stationed = armiesAtRegion(selected.id);
   const militaryVisible = selected.controllerId === PLAYER_ENTITY_ID || canObserveMilitaryAt(selected.id);
-  if (dom.selectedRegionName) dom.selectedRegionName.textContent = definition?.name || selected.id;
+  if (dom.selectedRegionName) dom.selectedRegionName.textContent = localizedMapRegionName(definition, selected.id);
   if (dom.selectedRegionTerrain) dom.selectedRegionTerrain.textContent = terrainCombatText(selected, primaryPlayerArmy());
   if (dom.selectedRegionController) dom.selectedRegionController.textContent = politicalEntityById(selected.controllerId)?.name || "无主地";
   if (dom.selectedRegionDefense) dom.selectedRegionDefense.textContent = formatNumber(selected.fortification);
@@ -5995,7 +6780,7 @@ function renderRegionIntel() {
     const reason = deploymentDisabledReason(army, selected);
     dom.deployArmyButton.disabled = Boolean(reason);
     dom.deployArmyButton.textContent = mapRegionOwner(selected) === MAP_OWNER_PLAYER ? "部署防御" : "发起进攻";
-    dom.deployArmyButton.title = reason || `将${army?.name || "选中军队"}部署至${definition?.name || selected.id}`;
+    dom.deployArmyButton.title = reason || `将${army?.name || "选中军队"}部署至${localizedMapRegionName(definition, selected.id)}`;
   }
 }
 
@@ -6082,7 +6867,7 @@ function mapOwnerLabel(regionOrOwner) {
 function mapStrategicStatus(counts = mapOwnerCounts()) {
   if (counts.player <= 0) return "国家灭亡";
   if (counts.player >= MAP_REGIONS.length) return "全图征服";
-  if (counts.player <= 1) return "危急存亡";
+  if (equivalentTerritoryCount(counts.player) <= 1) return "危急存亡";
   if (counts.rival <= 0) return "征服在望";
   return "边境拉锯";
 }
@@ -6588,6 +7373,8 @@ function loadState() {
     if (!raw) return null;
     const parsed = JSON.parse(raw);
     if (!parsed || typeof parsed !== "object") return null;
+    const requiresStrategicMapUpgrade = finiteOr(parsed.saveVersion, 0) < SAVE_VERSION ||
+      !hasCurrentStrategicMapState(parsed.map);
     const migrated = {
       ...createNewState(),
       ...parsed,
@@ -6596,6 +7383,15 @@ function loadState() {
       rngState: normalizeSeed(parsed.rngState || parsed.seed),
       log: Array.isArray(parsed.log) ? parsed.log : []
     };
+    if (requiresStrategicMapUpgrade && !migrated.log.some((entry) => entry?.title === "战略地图升级")) {
+      migrated.log.unshift({
+        type: "progress",
+        title: "战略地图升级",
+        text: "旧战略层已迁移到固定的 64 省大陆。文明数值、EERF 与文明编年史全部保留；旧 25 格疆域和驻军按当前种子重新生成。",
+        delta: {}
+      });
+      migrated.log = migrated.log.slice(0, 80);
+    }
     migrated.lastSavedAt = typeof parsed.lastSavedAt === "string" ? parsed.lastSavedAt : null;
     migrated.loadedFromSave = true;
     migrated.setupComplete = typeof parsed.setupComplete === "boolean" ? parsed.setupComplete : true;
@@ -6664,13 +7460,23 @@ function loadState() {
     migrated.metricSamples = Array.isArray(migrated.metricSamples) && migrated.metricSamples.length
       ? migrated.metricSamples.slice(-METRIC_SAMPLE_LIMIT).map((sample) => normalizeMetricSample(sample))
       : [createMetricSample(migrated.turn, migrated.count, migrated)];
-    migrated.map = createInitialMapState(migrated.map, {
+    migrated.map = createInitialMapState(requiresStrategicMapUpgrade ? {} : migrated.map, {
       seed: migrated.seed,
       realmName: migrated.realmName,
       difficulty: migrated.difficulty,
       startingRegionId: migrated.startingRegionId
     });
-    migrated.military = normalizeMilitaryState(migrated.military, migrated);
+    const previousMilitary = migrated.military && typeof migrated.military === "object" ? migrated.military : {};
+    const militarySource = requiresStrategicMapUpgrade
+      ? {
+          force: finiteOr(previousMilitary.force, 6200) / difficultyConfig(migrated.difficulty).playerForce,
+          attackModifier: finiteOr(previousMilitary.attackModifier, 0),
+          defenseModifier: finiteOr(previousMilitary.defenseModifier, 0),
+          warWeariness: finiteOr(previousMilitary.warWeariness, 0),
+          campaigns: finiteOr(previousMilitary.campaigns, 0)
+        }
+      : previousMilitary;
+    migrated.military = normalizeMilitaryState(militarySource, migrated);
     migrated.selectedArmyId = armyByIdForState(migrated, migrated.selectedArmyId)?.id || PLAYER_ARMY_ID;
     migrated.selectedEntityId = politicalEntityByIdForState(migrated, migrated.selectedEntityId)?.id || PLAYER_ENTITY_ID;
     migrated.selectedRegionId = mapRegionById(migrated.selectedRegionId)?.id ||

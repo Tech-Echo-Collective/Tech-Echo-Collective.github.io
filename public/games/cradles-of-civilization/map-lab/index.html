@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="author" content="Noah Walker">
+    <meta name="copyright" content="Original concept by Noah Walker">
+    <meta name="theme-color" content="#111a1d">
+    <title>文明摇篮：地图实验室</title>
+    <link rel="stylesheet" href="map-lab.css?v=20260904-j">
+  </head>
+  <body data-mode="political" data-relief="3d" data-zoom-band="far">
+    <div class="map-lab-shell">
+      <header class="command-bar">
+        <div class="map-brand">
+          <span class="map-brand-kicker" data-zh="文明摇篮" data-en="CRADLES OF CIVILIZATION">文明摇篮</span>
+          <h1 data-zh="三体世界地图实验室" data-en="TRISOLARAN WORLD MAP LAB">三体世界地图实验室</h1>
+        </div>
+
+        <nav class="map-modes" aria-label="地图模式" data-zh-label="地图模式" data-en-label="Map modes">
+          <button type="button" data-map-mode="political" aria-pressed="true">
+            <span>1</span><strong data-zh="政治" data-en="Political">政治</strong>
+          </button>
+          <button type="button" data-map-mode="terrain" aria-pressed="false">
+            <span>2</span><strong data-zh="地形" data-en="Terrain">地形</strong>
+          </button>
+          <button type="button" data-map-mode="military" aria-pressed="false">
+            <span>3</span><strong data-zh="军事" data-en="Military">军事</strong>
+          </button>
+        </nav>
+
+        <div class="command-tools">
+          <form class="seed-control" id="seedForm" autocomplete="off">
+            <label for="seedInput" data-zh="局势种子" data-en="SCENARIO SEED">局势种子</label>
+            <input id="seedInput" name="seed" inputmode="numeric" pattern="[0-9]*" value="1058" aria-label="局势种子" data-zh-label="局势种子" data-en-label="Scenario seed">
+            <button type="submit" aria-label="重排局势" data-zh="重排局势" data-en="RESHUFFLE" data-zh-label="重排局势" data-en-label="Reshuffle scenario">重排局势</button>
+          </form>
+          <button class="utility-button" id="reliefToggle" type="button" aria-pressed="true" aria-label="切换到平面地图">3D</button>
+          <button class="utility-button" id="languageToggle" type="button" aria-label="切换到英文">EN</button>
+          <a class="utility-button return-link" id="returnLink" href="../index.html" data-zh="返回正式游戏" data-en="RETURN TO GAME">返回正式游戏</a>
+        </div>
+      </header>
+
+      <main class="map-stage" id="mapStage">
+        <div class="three-suns" aria-hidden="true">
+          <span></span><span></span><span></span>
+        </div>
+
+        <svg id="mapSvg" class="map-surface" viewBox="0 0 1200 760" role="application" aria-label="三体世界战略地图" data-zh-label="三体世界战略地图" data-en-label="Trisolaran strategic map">
+          <defs>
+            <linearGradient id="oceanGradient" x1="0" y1="0" x2="0.8" y2="1">
+              <stop offset="0" stop-color="#182b32"></stop>
+              <stop offset="0.48" stop-color="#102127"></stop>
+              <stop offset="1" stop-color="#091417"></stop>
+            </linearGradient>
+            <radialGradient id="landGradient" cx="0.48" cy="0.42" r="0.75">
+              <stop offset="0" stop-color="#918a69"></stop>
+              <stop offset="0.62" stop-color="#686955"></stop>
+              <stop offset="1" stop-color="#454c43"></stop>
+            </radialGradient>
+            <pattern id="tundraHatch" width="17" height="17" patternUnits="userSpaceOnUse" patternTransform="rotate(24)">
+              <line x1="0" y1="0" x2="0" y2="17" stroke="#e6f4f4" stroke-opacity="0.16" stroke-width="4"></line>
+            </pattern>
+            <pattern id="wasteHatch" width="22" height="22" patternUnits="userSpaceOnUse">
+              <circle cx="5" cy="7" r="1.7" fill="#f0c89d" fill-opacity="0.16"></circle>
+              <circle cx="16" cy="15" r="1.1" fill="#2d211d" fill-opacity="0.2"></circle>
+            </pattern>
+            <clipPath id="landClip"><path id="landClipPath"></path></clipPath>
+            <symbol id="capitalSymbol" viewBox="-12 -12 24 24">
+              <path d="M 0 -10 L 2.8 -3.4 L 9.6 -3.1 L 4.2 1.2 L 5.9 8.2 L 0 4.4 L -5.9 8.2 L -4.2 1.2 L -9.6 -3.1 L -2.8 -3.4 Z"></path>
+            </symbol>
+            <symbol id="mountainSymbol" viewBox="-18 -12 36 24">
+              <path d="M -17 10 L -6 -8 L 0 1 L 6 -11 L 17 10 Z"></path>
+              <path d="M -8 -4 L -6 -8 L -2 -2 M 3 -5 L 6 -11 L 10 -4"></path>
+            </symbol>
+          </defs>
+          <rect class="ocean-plane" x="-300" y="-220" width="1800" height="1200"></rect>
+          <g id="oceanDetailLayer" class="ocean-detail-layer"></g>
+          <g id="worldLayer" class="world-layer">
+            <path id="landDepth" class="land-depth" transform="translate(3.74 11)"></path>
+            <path id="landBase" class="land-base"></path>
+            <g id="provinceLayer" class="province-layer" clip-path="url(#landClip)"></g>
+            <g id="provinceReliefLayer" class="province-relief-layer" clip-path="url(#landClip)" aria-hidden="true"></g>
+            <g id="terrainTextureLayer" class="terrain-texture-layer" clip-path="url(#landClip)"></g>
+            <g id="routeLayer" class="route-layer" clip-path="url(#landClip)"></g>
+            <g id="riverLayer" class="river-layer" clip-path="url(#landClip)"></g>
+            <g id="strategicBorderLayer" class="strategic-border-layer" clip-path="url(#landClip)"></g>
+            <g id="realmBorderLayer" class="realm-border-layer" clip-path="url(#landClip)"></g>
+            <path id="coastLine" class="coast-line"></path>
+            <g id="capitalLayer" class="capital-layer" clip-path="url(#landClip)"></g>
+            <g id="realmLabelLayer" class="realm-label-layer" clip-path="url(#landClip)"></g>
+            <g id="strategicLabelLayer" class="strategic-label-layer" clip-path="url(#landClip)"></g>
+            <g id="provinceLabelLayer" class="province-label-layer" clip-path="url(#landClip)"></g>
+            <g id="armyLayer" class="army-layer" clip-path="url(#landClip)"></g>
+          </g>
+        </svg>
+
+        <aside class="map-legend" aria-label="地图图例" data-zh-label="地图图例" data-en-label="Map legend">
+          <div class="legend-heading">
+            <span data-zh="图层" data-en="LAYER">图层</span>
+            <strong id="legendModeName">政治地图</strong>
+          </div>
+          <div id="legendItems" class="legend-items"></div>
+        </aside>
+
+        <div class="map-readout" aria-live="polite">
+          <span><b data-zh="固定地理" data-en="FIXED GEOGRAPHY">固定地理</b> <strong id="geographyReadout">64 / 10</strong></span>
+          <span><b data-zh="局势" data-en="SCENARIO">局势</b> <strong id="scenarioReadout">1058</strong></span>
+          <span><b data-zh="镜头" data-en="CAMERA">镜头</b> <strong id="zoomReadout">1.00×</strong></span>
+        </div>
+
+        <div class="map-control-cluster">
+          <div class="phase-control">
+            <span id="phaseStatus">第 1 回合 · 玩家阶段</span>
+            <button id="endPhaseButton" type="button" aria-label="结束第 1 回合玩家阶段" aria-keyshortcuts="E">
+              <span aria-hidden="true">▶</span><b id="turnBadge" aria-hidden="true">1</b>
+            </button>
+          </div>
+          <div class="zoom-controls" aria-label="地图缩放" data-zh-label="地图缩放" data-en-label="Map zoom">
+            <button id="zoomInButton" type="button" aria-label="放大" data-zh-label="放大" data-en-label="Zoom in">+</button>
+            <button id="zoomOutButton" type="button" aria-label="缩小" data-zh-label="缩小" data-en-label="Zoom out">−</button>
+            <button id="zoomResetButton" type="button" aria-label="重置镜头" data-zh-label="重置镜头" data-en-label="Reset camera">0</button>
+          </div>
+        </div>
+
+        <div id="mapTooltip" class="map-tooltip" role="tooltip" hidden></div>
+
+        <aside class="inspector" id="inspector" aria-label="地图情报" data-zh-label="地图情报" data-en-label="Map intelligence">
+          <button class="inspector-handle" id="inspectorToggle" type="button" aria-expanded="true">
+            <span id="inspectorEyebrow" data-zh="省份情报" data-en="PROVINCE INTELLIGENCE">省份情报</span>
+            <span aria-hidden="true">⌄</span>
+          </button>
+          <div class="inspector-content" id="inspectorContent">
+            <header>
+              <span id="provinceCode">CB-05</span>
+              <h2 id="provinceName">中央盆地</h2>
+              <p id="provinceRegion">中央盆地 · 盆地</p>
+            </header>
+            <section class="inspector-recruit" id="recruitPanel" hidden>
+              <div class="recruit-copy">
+                <span data-zh="征兵" data-en="RECRUIT">征兵</span>
+                <strong id="recruitStatus"></strong>
+                <p id="recruitFeedback" hidden></p>
+              </div>
+              <button id="recruitButton" type="button" aria-label="在所选省份征兵" aria-describedby="recruitStatus recruitFeedback" aria-keyshortcuts="V">
+                <span aria-hidden="true">＋</span>
+              </button>
+            </section>
+            <section class="inspector-battle" id="battleReport" role="status" hidden>
+              <span data-zh="最近战报" data-en="LATEST BATTLE">最近战报</span>
+              <strong id="battleReportTitle"></strong>
+              <p id="battleReportText"></p>
+            </section>
+            <section class="inspector-phase" id="phaseReport" hidden>
+              <span data-zh="敌方阶段" data-en="AI PHASE">敌方阶段</span>
+              <strong id="phaseReportTitle"></strong>
+              <ul id="phaseReportActions"></ul>
+            </section>
+            <dl class="province-facts">
+              <div><dt data-zh="控制者" data-en="Controller">控制者</dt><dd id="provinceRealm">长生共同体</dd></div>
+              <div><dt data-zh="发展" data-en="Development">发展</dt><dd id="provinceDevelopment">24</dd></div>
+              <div><dt data-zh="工事" data-en="Fortification">工事</dt><dd id="provinceFortification">62</dd></div>
+              <div><dt data-zh="补给" data-en="Supply">补给</dt><dd id="provinceSupply">96</dd></div>
+              <div><dt data-zh="人口" data-en="Population">人口</dt><dd id="provincePopulation">245k</dd></div>
+              <div><dt data-zh="接壤" data-en="Borders">接壤</dt><dd id="provinceNeighbors">6</dd></div>
+            </dl>
+            <section class="inspector-armies">
+              <h3 data-zh="驻军与军团" data-en="GARRISONS & ARMIES">驻军与军团</h3>
+              <div id="provinceArmies"></div>
+            </section>
+            <p class="inspector-note" id="inspectorNote" data-zh="这是交互原型：选择与镜头状态不会写入正式游戏存档。" data-en="This is an interaction prototype. Selection and camera state never touch the main game save.">这是交互原型：选择与镜头状态不会写入正式游戏存档。</p>
+          </div>
+        </aside>
+
+        <div class="map-hint" data-zh="选本国省份按 V 征兵 · E 结束阶段 · 1/2/3 切换图层" data-en="SELECT OWN PROVINCE + V TO RECRUIT · E END PHASE · 1/2/3 MAP MODES">选本国省份按 V 征兵 · E 结束阶段 · 1/2/3 切换图层</div>
+        <div id="liveRegion" class="visually-hidden" aria-live="polite"></div>
+      </main>
+    </div>
+
+    <script src="../balance-model.js?v=20260904-v040"></script>
+    <script src="map-data.js?v=20260904-g"></script>
+    <script src="map-model.js?v=20260904-h"></script>
+    <script src="map-lab.js?v=20260904-j"></script>
+  </body>
+</html>

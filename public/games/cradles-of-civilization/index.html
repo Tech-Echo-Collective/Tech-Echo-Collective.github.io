@@ -6,7 +6,7 @@
     <meta name="author" content="Noah Walker">
     <meta name="copyright" content="Original concept by Noah Walker">
     <title>文明摇篮：文明文字模拟</title>
-    <link rel="stylesheet" href="styles.css?v=20260904-v040">
+    <link rel="stylesheet" href="styles.css?v=20260905-actions-visible">
   </head>
   <body>
     <div class="site-tools">
@@ -37,7 +37,7 @@
               <input id="seedInput" name="seed" inputmode="numeric" pattern="[0-9]*" placeholder="输入种子，例如 1058">
               <button id="newGameButton" type="button">随机世界</button>
             </div>
-            <p>同一种子会生成相同的地块、道路与随机序列。</p>
+            <p>大陆地理固定；同一种子会重现势力分布与随机序列。</p>
           </div>
         </form>
         <section class="setup-step" id="difficultyStep" hidden>
@@ -269,8 +269,76 @@
               <span class="legend-rival">敌国</span>
             </div>
           </div>
+          <div class="strategic-map-toolbar">
+            <nav class="strategic-map-modes" aria-label="地图图层">
+              <button type="button" data-strategic-map-mode="political" aria-pressed="true"><span aria-hidden="true">◈</span><strong>政治</strong></button>
+              <button type="button" data-strategic-map-mode="terrain" aria-pressed="false"><span aria-hidden="true">▦</span><strong>地形</strong></button>
+              <button type="button" data-strategic-map-mode="military" aria-pressed="false"><span aria-hidden="true">⚔</span><strong>军事</strong></button>
+            </nav>
+            <div class="strategic-map-view-tools" aria-label="地图视角">
+              <button id="mapReliefToggle" type="button" aria-pressed="true" aria-label="切换到平面地图" data-i18n-skip>3D</button>
+              <span id="mapZoomReadout" class="strategic-map-zoom-readout" aria-live="polite">1.00×</span>
+              <div class="strategic-map-zoom-controls" aria-label="地图缩放">
+                <button id="mapZoomOut" type="button" aria-label="缩小地图">−</button>
+                <button id="mapZoomIn" type="button" aria-label="放大地图">+</button>
+                <button id="mapCameraReset" type="button" aria-label="重置地图镜头">0</button>
+              </div>
+            </div>
+          </div>
           <div class="map-layout">
-            <div class="world-map" id="worldMap" aria-label="区域归属图"></div>
+            <div class="world-map" id="worldMap" data-strategic-map-mode="political" data-relief="3d" data-zoom-band="far">
+              <svg id="strategicMapSvg" class="strategic-map-surface" viewBox="0 0 1200 760" preserveAspectRatio="xMidYMid meet" role="application" aria-label="三体世界战略地图">
+                <defs id="strategicMapDefs">
+                  <linearGradient id="formalOceanGradient" x1="0" y1="0" x2="0.8" y2="1">
+                    <stop offset="0" stop-color="#182b32"></stop>
+                    <stop offset="0.48" stop-color="#102127"></stop>
+                    <stop offset="1" stop-color="#091417"></stop>
+                  </linearGradient>
+                  <radialGradient id="formalLandGradient" cx="0.48" cy="0.42" r="0.75">
+                    <stop offset="0" stop-color="#918a69"></stop>
+                    <stop offset="0.62" stop-color="#686955"></stop>
+                    <stop offset="1" stop-color="#454c43"></stop>
+                  </radialGradient>
+                  <pattern id="formalTundraHatch" width="17" height="17" patternUnits="userSpaceOnUse" patternTransform="rotate(24)">
+                    <line x1="0" y1="0" x2="0" y2="17" stroke="#e6f4f4" stroke-opacity="0.16" stroke-width="4"></line>
+                  </pattern>
+                  <pattern id="formalWasteHatch" width="22" height="22" patternUnits="userSpaceOnUse">
+                    <circle cx="5" cy="7" r="1.7" fill="#f0c89d" fill-opacity="0.16"></circle>
+                    <circle cx="16" cy="15" r="1.1" fill="#2d211d" fill-opacity="0.2"></circle>
+                  </pattern>
+                  <clipPath id="formalLandClip"><path id="formalLandClipPath"></path></clipPath>
+                  <symbol id="formalCapitalSymbol" viewBox="-12 -12 24 24">
+                    <path d="M 0 -10 L 2.8 -3.4 L 9.6 -3.1 L 4.2 1.2 L 5.9 8.2 L 0 4.4 L -5.9 8.2 L -4.2 1.2 L -9.6 -3.1 L -2.8 -3.4 Z"></path>
+                  </symbol>
+                  <symbol id="formalMountainSymbol" viewBox="-18 -12 36 24">
+                    <path d="M -17 10 L -6 -8 L 0 1 L 6 -11 L 17 10 Z"></path>
+                    <path d="M -8 -4 L -6 -8 L -2 -2 M 3 -5 L 6 -11 L 10 -4"></path>
+                  </symbol>
+                </defs>
+                <rect class="strategic-ocean-plane" x="-300" y="-220" width="1800" height="1200"></rect>
+                <g id="strategicOceanDetailLayer" class="strategic-ocean-detail-layer"></g>
+                <g id="strategicWorldLayer" class="strategic-world-layer">
+                  <path id="strategicLandDepth" class="strategic-land-depth"></path>
+                  <path id="strategicLandBase" class="strategic-land-base"></path>
+                  <g id="strategicProvinceLayer" class="strategic-province-layer" clip-path="url(#formalLandClip)"></g>
+                  <g id="strategicProvinceReliefLayer" class="strategic-province-relief-layer" clip-path="url(#formalLandClip)" aria-hidden="true"></g>
+                  <g id="strategicTerrainTextureLayer" class="strategic-terrain-texture-layer" clip-path="url(#formalLandClip)"></g>
+                  <g id="strategicRouteLayer" class="strategic-route-layer" clip-path="url(#formalLandClip)"></g>
+                  <g id="strategicRiverLayer" class="strategic-river-layer" clip-path="url(#formalLandClip)"></g>
+                  <g id="strategicRegionBorderLayer" class="strategic-region-border-layer" clip-path="url(#formalLandClip)"></g>
+                  <g id="strategicRealmBorderLayer" class="strategic-realm-border-layer" clip-path="url(#formalLandClip)"></g>
+                  <path id="strategicCoastLine" class="strategic-coast-line"></path>
+                  <g id="strategicCapitalLayer" class="strategic-capital-layer" clip-path="url(#formalLandClip)"></g>
+                  <g id="strategicRealmLabelLayer" class="strategic-realm-label-layer" clip-path="url(#formalLandClip)"></g>
+                  <g id="strategicRegionLabelLayer" class="strategic-region-label-layer" clip-path="url(#formalLandClip)"></g>
+                  <g id="strategicProvinceLabelLayer" class="strategic-province-label-layer" clip-path="url(#formalLandClip)"></g>
+                  <g id="strategicArmyLayer" class="strategic-army-layer" clip-path="url(#formalLandClip)"></g>
+                </g>
+              </svg>
+              <p class="strategic-map-hint">拖动平移 · Ctrl/⌘ + 滚轮或双指缩放 · 普通滚轮滚动页面 · 选择军队与相邻地块后在右侧下令</p>
+              <div id="strategicMapTooltip" class="strategic-map-tooltip" role="tooltip" hidden></div>
+              <div id="strategicMapLiveRegion" class="visually-hidden" aria-live="polite"></div>
+            </div>
             <div class="map-sidebar">
               <section class="region-intel-panel" aria-label="地块情报">
                 <div class="panel-mini-head">
@@ -552,9 +620,11 @@
       </section>
     </main>
 
-    <script src="localization.js?v=20260904-v040"></script>
-    <script src="endings.js?v=20260904-v040"></script>
+    <script src="map-lab/map-data.js?v=20260904-strategy64"></script>
+    <script src="localization.js?v=20260905-ending-polish"></script>
+    <script src="endings.js?v=20260905-ending-polish"></script>
     <script src="balance-model.js?v=20260904-v040"></script>
-    <script src="game.js?v=20260904-v040"></script>
+    <script src="map-lab/map-model.js?v=20260904-strategy64"></script>
+    <script src="game.js?v=20260905-ending-polish"></script>
   </body>
 </html>

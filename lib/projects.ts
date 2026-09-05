@@ -32,9 +32,13 @@ export interface FeaturedProjectContributor {
 }
 
 export interface ProjectDefinition {
-  slug: 'physics-atlas' | 'cradles-of-civilization' | 'illuminatio-physica';
+  slug:
+    | 'physics-atlas'
+    | 'cradles-of-civilization'
+    | 'illuminatio-physica'
+    | 'theatrum-physica';
   classification: ProjectClassification;
-  status: 'active';
+  status: 'active' | 'early_development';
   mark: string;
   repositoryUrl: string;
   websiteUrl?: string;
@@ -100,6 +104,28 @@ export const projects: readonly ProjectDefinition[] = [
       {
         owner: 'Tech-Echo-Collective',
         name: 'physica-illuminatio',
+        label: 'source',
+      },
+    ],
+    featuredContributors: [
+      {
+        githubUserId: '267296498',
+        githubUsername: 'noahwalkerror-hash',
+        role: 'creator_maintainer',
+      },
+    ],
+    featured: true,
+  },
+  {
+    slug: 'theatrum-physica',
+    classification: 'tech_echo_project',
+    status: 'early_development',
+    mark: '/assets/projects/theatrum-physica-mark.svg',
+    repositoryUrl: 'https://github.com/Tech-Echo-Collective/theatrum-physica',
+    repositories: [
+      {
+        owner: 'Tech-Echo-Collective',
+        name: 'theatrum-physica',
         label: 'source',
       },
     ],

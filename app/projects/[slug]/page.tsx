@@ -75,7 +75,7 @@ export default async function ProjectDetailPage({
               <span className="project-type-label">
                 {copy.classifications[project.classification]}
               </span>
-              <span>{copy.common.active}</span>
+              <span>{copy.common[project.status]}</span>
             </div>
             <h1>{projectCopy.name}</h1>
             <p>{projectCopy.description}</p>

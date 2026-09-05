@@ -31,6 +31,7 @@ interface V02Copy {
   };
   common: {
     active: string;
+    early_development: string;
     viewProject: string;
     viewRepository: string;
     visitWebsite: string;
@@ -112,6 +113,7 @@ const en: V02Copy = {
   },
   common: {
     active: 'Active',
+    early_development: 'Early Development',
     viewProject: 'View project',
     viewRepository: 'View repository',
     visitWebsite: 'Visit website',
@@ -127,7 +129,7 @@ const en: V02Copy = {
     title: 'Projects',
     intro:
       'Real work, with ownership and contribution history kept explicit. Project placement never implies a transfer of authorship or authority.',
-    projectCount: 'active projects',
+    projectCount: 'projects',
     principleTitle: 'Ownership before visibility',
     principleText:
       'Tech Echo distinguishes collective projects, independently owned member projects, and collaborations. Every detail page states which model applies.',
@@ -211,6 +213,13 @@ const en: V02Copy = {
         'An interactive 3D knowledge graph for exploring physics concepts, semantic relations, prerequisites, and learning paths.',
       ownership: 'Created and maintained independently by Noah #001.',
     },
+    'theatrum-physica': {
+      name: 'Theatrum Physica',
+      summary: 'Construct. Evolve. Observe.',
+      description:
+        'An interactive physics environment for constructing, evolving, and visualizing dynamical systems from their mathematical definitions.',
+      ownership: 'A Tech Echo Collective project.',
+    },
   },
 };
 
@@ -237,6 +246,7 @@ const zh: V02Copy = {
   },
   common: {
     active: '进行中',
+    early_development: '早期开发',
     viewProject: '查看项目',
     viewRepository: '查看仓库',
     visitWebsite: '访问网站',
@@ -252,7 +262,7 @@ const zh: V02Copy = {
     title: '项目',
     intro:
       '展示真实工作，同时明确归属与贡献记录。项目被收录，并不意味着作者身份或管理权发生转移。',
-    projectCount: '个进行中的项目',
+    projectCount: '个项目',
     principleTitle: '归属先于展示',
     principleText:
       'Tech Echo 区分共同体项目、独立的成员项目与协作项目；每个详情页都会明确适用哪一种模式。',
@@ -328,6 +338,12 @@ const zh: V02Copy = {
         '一个交互式三维物理知识图谱，用于探索物理概念、语义关系、先修依赖与学习路径。',
       ownership: '由 Noah #001 独立创建并维护。',
     },
+    'theatrum-physica': {
+      name: 'Theatrum Physica',
+      summary: '构建。演化。观测。',
+      description: '一个交互式物理环境，用于从数学定义出发构建、演化和可视化动力系统。',
+      ownership: 'Tech Echo Collective 项目。',
+    },
   },
 };
 
@@ -355,6 +371,7 @@ const fr: V02Copy = {
   },
   common: {
     active: 'Actif',
+    early_development: 'Développement initial',
     viewProject: 'Voir le projet',
     viewRepository: 'Voir le dépôt',
     visitWebsite: 'Visiter le site',
@@ -370,7 +387,7 @@ const fr: V02Copy = {
     title: 'Projets',
     intro:
       'Des réalisations concrètes, avec une propriété et un historique des contributions explicites. La présence d’un projet ne transfère ni la qualité d’auteur ni l’autorité.',
-    projectCount: 'projets actifs',
+    projectCount: 'projets',
     principleTitle: 'La propriété avant la visibilité',
     principleText:
       'Tech Echo distingue les projets du collectif, les projets indépendants de membres et les collaborations. Chaque fiche précise le modèle applicable.',
@@ -456,6 +473,13 @@ const fr: V02Copy = {
         'Un graphe de connaissances 3D interactif pour explorer les concepts physiques, leurs relations sémantiques, leurs prérequis et leurs parcours d’apprentissage.',
       ownership: 'Créé et maintenu indépendamment par Noah #001.',
     },
+    'theatrum-physica': {
+      name: 'Theatrum Physica',
+      summary: 'Construire. Évoluer. Observer.',
+      description:
+        'Un environnement physique interactif pour construire, faire évoluer et visualiser des systèmes dynamiques à partir de leurs définitions mathématiques.',
+      ownership: 'Un projet de Tech Echo Collective.',
+    },
   },
 };
 
@@ -483,6 +507,7 @@ const es: V02Copy = {
   },
   common: {
     active: 'Activo',
+    early_development: 'Desarrollo inicial',
     viewProject: 'Ver proyecto',
     viewRepository: 'Ver repositorio',
     visitWebsite: 'Visitar sitio',
@@ -498,7 +523,7 @@ const es: V02Copy = {
     title: 'Proyectos',
     intro:
       'Trabajo real, con propiedad e historial de contribuciones explícitos. Incluir un proyecto no transfiere autoría ni autoridad.',
-    projectCount: 'proyectos activos',
+    projectCount: 'proyectos',
     principleTitle: 'La propiedad antes que la visibilidad',
     principleText:
       'Tech Echo distingue proyectos del colectivo, proyectos independientes de miembros y colaboraciones. Cada ficha indica qué modelo se aplica.',
@@ -582,6 +607,13 @@ const es: V02Copy = {
       description:
         'Un grafo de conocimiento 3D interactivo para explorar conceptos físicos, relaciones semánticas, prerrequisitos y rutas de aprendizaje.',
       ownership: 'Creado y mantenido de forma independiente por Noah #001.',
+    },
+    'theatrum-physica': {
+      name: 'Theatrum Physica',
+      summary: 'Construir. Evolucionar. Observar.',
+      description:
+        'Un entorno de física interactivo para construir, hacer evolucionar y visualizar sistemas dinámicos a partir de sus definiciones matemáticas.',
+      ownership: 'Un proyecto de Tech Echo Collective.',
     },
   },
 };

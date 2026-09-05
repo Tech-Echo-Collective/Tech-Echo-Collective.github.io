@@ -80,7 +80,8 @@ export default async function HomePage() {
                       <img src={project.mark} alt="" />
                       <div>
                         <span className="project-type-label">
-                          {copy.classifications[project.classification]}
+                          {copy.classifications[project.classification]} ·{' '}
+                          {copy.common[project.status]}
                         </span>
                         <h3>
                           <a href={`/projects/${project.slug}`}>{projectCopy.name}</a>

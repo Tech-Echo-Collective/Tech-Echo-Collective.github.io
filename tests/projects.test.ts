@@ -73,6 +73,7 @@ describe('project registry', () => {
       'physics-atlas',
       'cradles-of-civilization',
       'illuminatio-physica',
+      'theatrum-physica',
     ]);
   });
 

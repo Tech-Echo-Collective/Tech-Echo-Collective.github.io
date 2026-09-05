@@ -4,6 +4,10 @@
 
 > **来源范围：**本页的共同体身份与理念源自权威组织 README；项目分类、署名、权限与当前工作则是与该身份相连、由官网维护的政策。
 
+## Tech Echo Physica
+
+Tech Echo Physica 是 Tech Echo Collective 旗下的物理项目系列，通过研究图谱、知识结构与交互式物理系统探索物理。[Atlas Physicus](/projects/atlas-physicus)、[Illuminatio Physica](/projects/illuminatio-physica) 和 [Theatrum Physicum](/projects/theatrum-physicum) 仍是各自独立的项目，保留原有归属与贡献者署名。
+
 ## 关注领域
 
 - **科学与数学**——物理、研究地图、模拟、学习笔记与严谨的问题求解。
@@ -27,7 +31,7 @@ Tech Echo 关注理论与建造之间的空间：从数学到机制、从物理�
 
 ### 成员项目
 
-由 Tech Echo 成员独立创建并维护的项目。Tech Echo 可以托管、展示或支持它，但不会因此取得作者身份、所有权或管理权。**Physics Atlas 与 Illuminatio Physica 均为 Noah #001 独立创建并维护的成员项目。**
+由 Tech Echo 成员独立创建并维护的项目。Tech Echo 可以托管、展示或支持它，但不会因此取得作者身份、所有权或管理权。**Atlas Physicus 与 Illuminatio Physica 均为 Noah #001 独立创建并维护的成员项目。**
 
 ### 协作项目
 
@@ -51,7 +55,7 @@ Tech Echo 使用 GitHub 身份建立账户，并为每位成员分配永久编�
 
 ## 当前工作
 
-- [Physics Atlas](https://atlas.techecho.org/)——由成员独立维护、用于描绘物理研究生态的项目。
+- [Atlas Physicus](https://atlas.techecho.org/)——由成员独立维护、用于描绘物理研究生态的项目。
 - [文明的摇篮](https://github.com/Tech-Echo-Collective/cradles-of-civilization)——作为 Tech Echo 项目开发的原创文字策略游戏。
 - [Illuminatio Physica](https://illuminatio.techecho.org/)——由成员独立维护、用于探索物理概念与学习路径的交互式三维知识地图。
 

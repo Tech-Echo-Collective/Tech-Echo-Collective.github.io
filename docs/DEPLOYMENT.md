@@ -158,12 +158,12 @@ fixed `repository_id`, or expand the GitHub App installation to project repos.
 
 The dynamic Sites deployment serves the account gateway at `https://techecho.org`,
 the member home at `https://techecho.org/home`, and the forum at
-`https://forum.techecho.org`. Physics Atlas remains on GitHub Pages at
+`https://forum.techecho.org`. Atlas Physicus remains on GitHub Pages at
 `https://atlas.techecho.org`.
 
 For a safe production cutover:
 
-1. Publish Physics Atlas with Vite base `/`, set its Pages custom domain to
+1. Publish Atlas Physicus with Vite base `/`, set its Pages custom domain to
    `atlas.techecho.org`, add the DNS CNAME, and verify HTTPS and API CORS.
 2. Add `https://techecho.org/auth/callback` to the GitHub App while retaining the
    currently working callback during verification.

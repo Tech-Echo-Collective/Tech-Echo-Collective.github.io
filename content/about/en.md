@@ -4,6 +4,10 @@
 
 > **Source scope:** the collective identity and philosophy on this page derive from the canonical organization README. Project classification, attribution, permissions, and current-work sections are maintained website policy linked to that identity.
 
+## Tech Echo Physica
+
+Tech Echo Physica is a Tech Echo Collective project family for exploring physics through research mapping, knowledge structures, and interactive physical systems. [Atlas Physicus](/projects/atlas-physicus), [Illuminatio Physica](/projects/illuminatio-physica), and [Theatrum Physicum](/projects/theatrum-physicum) remain distinct projects with their own ownership and attribution.
+
 ## Domains
 
 - **Science and mathematics** — physics, research maps, simulations, learning notes, and careful problem solving.
@@ -27,7 +31,7 @@ A project initiated and stewarded by Tech Echo Collective. Its ownership and pro
 
 ### Member Project
 
-An independently created and maintained project belonging to a Tech Echo member. Tech Echo may host, present, or support it without acquiring authorship, ownership, or management rights. **Physics Atlas and Illuminatio Physica are Member Projects created and maintained by Noah #001.**
+An independently created and maintained project belonging to a Tech Echo member. Tech Echo may host, present, or support it without acquiring authorship, ownership, or management rights. **Atlas Physicus and Illuminatio Physica are Member Projects created and maintained by Noah #001.**
 
 ### Collaboration
 
@@ -51,7 +55,7 @@ Tech Echo uses GitHub identity for accounts and assigns every member a permanent
 
 ## Current work
 
-- [Physics Atlas](https://atlas.techecho.org/) — an independently maintained member project mapping physics research ecosystems.
+- [Atlas Physicus](https://atlas.techecho.org/) — an independently maintained member project mapping physics research ecosystems.
 - [Cradles of Civilization](https://github.com/Tech-Echo-Collective/cradles-of-civilization) — an original text strategy game developed as a Tech Echo project.
 - [Illuminatio Physica](https://illuminatio.techecho.org/) — an independently maintained interactive 3D map of physics concepts and learning paths.
 

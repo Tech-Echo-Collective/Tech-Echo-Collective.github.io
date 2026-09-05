@@ -5,6 +5,16 @@ gateway, a multilingual dashboard with project attribution and member identity,
 and one forum backed by the existing `Tech-Echo-Collective/Tech-Echo-Discussion`
 GitHub Discussions repository.
 
+## Tech Echo Physica
+
+[Tech Echo Physica](https://techecho.org/projects#tech-echo-physica) is a Tech Echo Collective project family for exploring physics through research mapping, knowledge structures, and interactive physical systems.
+
+- [Atlas Physicus](https://github.com/Tech-Echo-Collective/atlas-physicus): research mapping.
+- [Illuminatio Physica](https://github.com/Tech-Echo-Collective/illuminatio-physica): knowledge structures.
+- [Theatrum Physicum](https://github.com/Tech-Echo-Collective/theatrum-physicum): interactive physical systems, in early development.
+
+Each remains a distinct project with its existing ownership and contributor attribution. See the [rename audit](docs/PHYSICA_RENAME.md) for repository and compatibility details.
+
 ## Product flow
 
 ```text

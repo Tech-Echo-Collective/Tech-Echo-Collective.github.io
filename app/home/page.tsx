@@ -7,7 +7,7 @@ import { forumEntryUrl } from '@/lib/config';
 import { listForum, type DiscussionSummary } from '@/lib/github';
 import { formatRelativeTime } from '@/lib/i18n';
 import { formatMemberNumber } from '@/lib/member-number';
-import { projects } from '@/lib/projects';
+import { PHYSICA_FAMILY, projects } from '@/lib/projects';
 import { getV02Copy } from '@/lib/v02-copy';
 
 export const dynamic = 'force-dynamic';
@@ -79,6 +79,14 @@ export default async function HomePage() {
                     <article className="dashboard-project-card" key={project.slug}>
                       <img src={project.mark} alt="" />
                       <div>
+                        {project.family ? (
+                          <a
+                            className="project-family-label"
+                            href={`/projects#${project.family}`}
+                          >
+                            {PHYSICA_FAMILY.name}
+                          </a>
+                        ) : null}
                         <span className="project-type-label">
                           {copy.classifications[project.classification]} ·{' '}
                           {copy.common[project.status]}

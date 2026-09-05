@@ -1,3 +1,8 @@
+export const PHYSICA_FAMILY = {
+  id: 'tech-echo-physica',
+  name: 'Tech Echo Physica',
+} as const;
+
 export const projectClassifications = [
   'tech_echo_project',
   'member_project',
@@ -33,11 +38,12 @@ export interface FeaturedProjectContributor {
 
 export interface ProjectDefinition {
   slug:
-    | 'physics-atlas'
+    | 'atlas-physicus'
     | 'cradles-of-civilization'
     | 'illuminatio-physica'
-    | 'theatrum-physica';
+    | 'theatrum-physicum';
   classification: ProjectClassification;
+  family?: typeof PHYSICA_FAMILY.id;
   status: 'active' | 'early_development';
   mark: string;
   repositoryUrl: string;
@@ -50,14 +56,15 @@ export interface ProjectDefinition {
 
 export const projects: readonly ProjectDefinition[] = [
   {
-    slug: 'physics-atlas',
+    slug: 'atlas-physicus',
+    family: PHYSICA_FAMILY.id,
     classification: 'member_project',
     status: 'active',
-    mark: '/assets/projects/physics-atlas-mark.svg',
-    repositoryUrl: 'https://github.com/Tech-Echo-Collective/Physics-Atlas',
+    mark: '/assets/projects/atlas-physicus-mark.svg',
+    repositoryUrl: 'https://github.com/Tech-Echo-Collective/atlas-physicus',
     websiteUrl: 'https://atlas.techecho.org/',
     repositories: [
-      { owner: 'Tech-Echo-Collective', name: 'Physics-Atlas', label: 'core' },
+      { owner: 'Tech-Echo-Collective', name: 'atlas-physicus', label: 'core' },
       { owner: 'Tech-Echo-Collective', name: 'Physics-Atlas-Web', label: 'web' },
     ],
     featuredContributors: [
@@ -95,15 +102,16 @@ export const projects: readonly ProjectDefinition[] = [
   },
   {
     slug: 'illuminatio-physica',
+    family: PHYSICA_FAMILY.id,
     classification: 'member_project',
     status: 'active',
     mark: '/assets/projects/illuminatio-physica-mark.svg',
-    repositoryUrl: 'https://github.com/Tech-Echo-Collective/physica-illuminatio',
+    repositoryUrl: 'https://github.com/Tech-Echo-Collective/illuminatio-physica',
     websiteUrl: 'https://illuminatio.techecho.org/',
     repositories: [
       {
         owner: 'Tech-Echo-Collective',
-        name: 'physica-illuminatio',
+        name: 'illuminatio-physica',
         label: 'source',
       },
     ],
@@ -117,15 +125,16 @@ export const projects: readonly ProjectDefinition[] = [
     featured: true,
   },
   {
-    slug: 'theatrum-physica',
+    slug: 'theatrum-physicum',
+    family: PHYSICA_FAMILY.id,
     classification: 'tech_echo_project',
     status: 'early_development',
-    mark: '/assets/projects/theatrum-physica-mark.svg',
-    repositoryUrl: 'https://github.com/Tech-Echo-Collective/theatrum-physica',
+    mark: '/assets/projects/theatrum-physicum-mark.svg',
+    repositoryUrl: 'https://github.com/Tech-Echo-Collective/theatrum-physicum',
     repositories: [
       {
         owner: 'Tech-Echo-Collective',
-        name: 'theatrum-physica',
+        name: 'theatrum-physicum',
         label: 'source',
       },
     ],

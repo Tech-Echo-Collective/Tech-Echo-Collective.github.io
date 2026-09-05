@@ -2424,7 +2424,7 @@ a {
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
-.directory-project-card h2 {
+.directory-project-card h3 {
   margin: 18px 0 12px;
   font-size: clamp(1.55rem, 2.7vw, 2.35rem);
   line-height: 1.02;
@@ -2892,4 +2892,30 @@ a {
   .about-page .markdown-body blockquote {
     padding: 20px;
   }
+}
+
+.project-collection + .project-collection {
+  margin-top: 36px;
+}
+.project-collection__header {
+  margin-bottom: 18px;
+}
+.project-collection__header h2 {
+  margin: 0 0 10px;
+  font-size: 1.4rem;
+}
+.project-collection__header p {
+  max-width: 760px;
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.65;
+}
+.project-family-label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--blue-soft);
+  font: 0.75rem/1.4 var(--font-mono);
+}
+.project-family-label:hover {
+  color: var(--cyan);
 }

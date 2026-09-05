@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title desc">
-  <title id="title">Theatrum Physica</title>
+  <title id="title">Theatrum Physicum</title>
   <desc id="desc">A Roman amphitheatre reduced to an oval arena and three open arches.</desc>
   <g fill="none" stroke="#61d7de" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
     <ellipse cx="32" cy="19" rx="24" ry="8"/>

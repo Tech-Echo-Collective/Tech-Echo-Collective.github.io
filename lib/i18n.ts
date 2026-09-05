@@ -109,7 +109,7 @@ const en = {
   'project.cradles': 'Cradles of Civilization',
   'project.cradlesText':
     'A visible game project and testbed for design, tooling, and public development.',
-  'project.physics': 'Physics Atlas',
+  'project.physics': 'Atlas Physicus',
   'project.physicsText':
     'An interactive atlas for exploring the evolution of physics research ecosystems.',
   'project.labs': 'Labs',
@@ -287,7 +287,7 @@ const zh: Dictionary = {
   'domain.forumText': '结构化讨论、项目提案、学习笔记与共享资料。',
   'project.cradles': '文明的摇篮',
   'project.cradlesText': '一个公开的游戏项目，也是设计、工具与公共开发的试验场。',
-  'project.physics': 'Physics Atlas',
+  'project.physics': 'Atlas Physicus',
   'project.physicsText': '用于探索物理研究生态演变的交互式图谱。',
   'project.labs': '实验室',
   'project.labsText': '小型模拟、学习工具、AI 工具与研究相关原型。',

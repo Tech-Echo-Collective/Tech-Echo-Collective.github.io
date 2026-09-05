@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { atlasLegacyDestination } from '@/lib/routing';
+import { atlasLegacyDestination, canonicalPhysicaPath } from '@/lib/routing';
 
 const LEGACY_HOST = 'tech-echo-collective.noahwalkerror.chatgpt.site';
 const ACCOUNT_HOST = 'techecho.org';
@@ -33,6 +33,13 @@ export function proxy(request: NextRequest) {
   }
 
   if (hostname === ACCOUNT_HOST) {
+    const canonicalPath = canonicalPhysicaPath(pathname);
+    if (canonicalPath) {
+      const destination = request.nextUrl.clone();
+      destination.pathname = canonicalPath;
+      return NextResponse.redirect(destination, 308);
+    }
+
     if (pathname === '/googlee054abfb1b2b52cf.html') {
       return new NextResponse('google-site-verification: googlee054abfb1b2b52cf.html\n', {
         status: 200,

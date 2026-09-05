@@ -4,6 +4,10 @@
 
 > **Alcance de la fuente:** la identidad y la filosofía del colectivo derivan del README canónico de la organización. La clasificación, la atribución, los permisos y el trabajo actual son políticas del sitio mantenidas de acuerdo con esa identidad.
 
+## Tech Echo Physica
+
+Tech Echo Physica es una familia de proyectos de Tech Echo Collective para explorar la física mediante mapas de investigación, estructuras de conocimiento y sistemas físicos interactivos. [Atlas Physicus](/projects/atlas-physicus), [Illuminatio Physica](/projects/illuminatio-physica) y [Theatrum Physicum](/projects/theatrum-physicum) siguen siendo proyectos distintos con su propia atribución.
+
 ## Áreas
 
 - **Ciencia y matemáticas** — física, mapas de investigación, simulaciones, notas de estudio y resolución rigurosa de problemas.
@@ -27,7 +31,7 @@ Un proyecto iniciado y coordinado por Tech Echo Collective. Su propiedad y lider
 
 ### Proyecto de miembro
 
-Un proyecto creado y mantenido de forma independiente por un miembro de Tech Echo. El colectivo puede alojarlo, presentarlo o apoyarlo sin adquirir autoría, propiedad ni derechos de gestión. **Physics Atlas e Illuminatio Physica son proyectos de miembro creados y mantenidos por Noah #001.**
+Un proyecto creado y mantenido de forma independiente por un miembro de Tech Echo. El colectivo puede alojarlo, presentarlo o apoyarlo sin adquirir autoría, propiedad ni derechos de gestión. **Atlas Physicus e Illuminatio Physica son proyectos de miembro creados y mantenidos por Noah #001.**
 
 ### Colaboración
 
@@ -51,7 +55,7 @@ Tech Echo usa la identidad de GitHub para las cuentas y asigna a cada miembro un
 
 ## Trabajo actual
 
-- [Physics Atlas](https://atlas.techecho.org/) — un proyecto de miembro mantenido de forma independiente para mapear ecosistemas de investigación en física.
+- [Atlas Physicus](https://atlas.techecho.org/) — un proyecto de miembro mantenido de forma independiente para mapear ecosistemas de investigación en física.
 - [Cradles of Civilization](https://github.com/Tech-Echo-Collective/cradles-of-civilization) — un juego original de estrategia textual desarrollado como proyecto de Tech Echo.
 - [Illuminatio Physica](https://illuminatio.techecho.org/) — un mapa 3D interactivo de conceptos físicos y rutas de aprendizaje, mantenido de forma independiente.
 

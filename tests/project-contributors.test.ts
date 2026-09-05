@@ -22,7 +22,7 @@ const member: Member = {
 
 const sourceResults: RepositoryContributorResult[] = [
   {
-    repository: { owner: 'Tech-Echo-Collective', name: 'Physics-Atlas', label: 'core' },
+    repository: { owner: 'Tech-Echo-Collective', name: 'atlas-physicus', label: 'core' },
     stale: false,
     truncated: false,
     contributors: [

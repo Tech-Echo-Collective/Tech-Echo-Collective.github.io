@@ -4,6 +4,10 @@
 
 > **Périmètre de la source :** l’identité et la philosophie du collectif dérivent du README canonique de l’organisation. La classification, l’attribution, les permissions et les travaux actuels relèvent d’une politique du site maintenue dans le prolongement de cette identité.
 
+## Tech Echo Physica
+
+Tech Echo Physica est une famille de projets de Tech Echo Collective pour explorer la physique par la cartographie de la recherche, les structures de connaissances et les systèmes physiques interactifs. [Atlas Physicus](/projects/atlas-physicus), [Illuminatio Physica](/projects/illuminatio-physica) et [Theatrum Physicum](/projects/theatrum-physicum) restent des projets distincts avec leur propre attribution.
+
 ## Domaines
 
 - **Sciences et mathématiques** — physique, cartographies de la recherche, simulations, notes d’étude et résolution rigoureuse de problèmes.
@@ -27,7 +31,7 @@ Un projet lancé et encadré par Tech Echo Collective. Sa propriété et sa dire
 
 ### Projet de membre
 
-Un projet créé et maintenu indépendamment par un membre de Tech Echo. Le collectif peut l’héberger, le présenter ou le soutenir sans acquérir la qualité d’auteur, la propriété ni la direction du projet. **Physics Atlas et Illuminatio Physica sont des projets de membre créés et maintenus par Noah #001.**
+Un projet créé et maintenu indépendamment par un membre de Tech Echo. Le collectif peut l’héberger, le présenter ou le soutenir sans acquérir la qualité d’auteur, la propriété ni la direction du projet. **Atlas Physicus et Illuminatio Physica sont des projets de membre créés et maintenus par Noah #001.**
 
 ### Collaboration
 
@@ -51,7 +55,7 @@ Tech Echo utilise l’identité GitHub pour les comptes et attribue un numéro p
 
 ## Travaux actuels
 
-- [Physics Atlas](https://atlas.techecho.org/) — un projet de membre maintenu indépendamment, consacré à la cartographie des écosystèmes de recherche en physique.
+- [Atlas Physicus](https://atlas.techecho.org/) — un projet de membre maintenu indépendamment, consacré à la cartographie des écosystèmes de recherche en physique.
 - [Cradles of Civilization](https://github.com/Tech-Echo-Collective/cradles-of-civilization) — un jeu de stratégie textuel original développé comme projet Tech Echo.
 - [Illuminatio Physica](https://illuminatio.techecho.org/) — une carte 3D interactive des concepts physiques et des parcours d’apprentissage, maintenue indépendamment.
 

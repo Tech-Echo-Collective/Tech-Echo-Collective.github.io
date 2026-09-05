@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title desc">
-  <title id="title">Physics Atlas</title>
+  <title id="title">Atlas Physicus</title>
   <desc id="desc">Two open coordinate patches connected by a mapped pair of research nodes.</desc>
   <g fill="none" stroke="#60a5fa" stroke-width="3" stroke-linecap="square" stroke-linejoin="round">
     <path d="M9 29V11H27M27 17V29H17"/>

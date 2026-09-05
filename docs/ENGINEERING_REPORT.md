@@ -30,7 +30,7 @@ two-domain session, and GitHub Discussions architecture intact. It adds:
 - a restrained single-screen authenticated Home dashboard;
 - independent Projects, Project Detail, Members, and About destinations;
 - explicit Tech Echo Project, Member Project, and Collaboration classifications;
-- a clear Physics Atlas attribution to Noah `#001` as an independently created
+- a clear Atlas Physicus attribution to Noah `#001` as an independently created
   and maintained Member Project;
 - separate global community roles and project-specific recognition roles;
 - text-only contributor history loaded from GitHub's public Contributors API;
@@ -266,7 +266,7 @@ failure, input limits, and Markdown script/URL safety.
 - GitHub's Contributors API reports linked GitHub accounts rather than anonymous
   commits. The website caps a repository response at 1,000 accounts and marks a
   result partial when GitHub indicates another page.
-- Physics Atlas is classified as Noah `#001`'s Member Project by explicit project
+- Atlas Physicus is classified as Noah `#001`'s Member Project by explicit project
   direction for this release. Its own README/CITATION metadata should be aligned
   with that attribution so every canonical surface says the same thing.
 - The organization README remains canonical for collective identity and

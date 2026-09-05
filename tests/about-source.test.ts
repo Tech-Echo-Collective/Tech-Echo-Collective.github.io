@@ -16,7 +16,7 @@ describe('README-backed About content', () => {
     const locales: Locale[] = ['en', 'zh', 'fr', 'es'];
     for (const locale of locales) {
       const document = getAboutDocument(locale);
-      expect(document).toContain('Physics Atlas');
+      expect(document).toContain('Atlas Physicus');
       expect(document).toMatch(/^# Tech Echo Collective/m);
       expect(document.match(/^## /gm)?.length).toBeGreaterThanOrEqual(6);
     }

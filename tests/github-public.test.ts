@@ -7,7 +7,7 @@ import type { ProjectRepository } from '../lib/projects';
 
 const repository: ProjectRepository = {
   owner: 'Tech-Echo-Collective',
-  name: 'Physics-Atlas',
+  name: 'atlas-physicus',
   label: 'core',
 };
 
@@ -43,7 +43,7 @@ describe('public GitHub contributor reader', () => {
     const [, init] = fetchMock.mock.calls[0];
     expect(new Headers(init?.headers).has('Authorization')).toBe(false);
     expect(String(fetchMock.mock.calls[0][0])).toContain(
-      '/repos/Tech-Echo-Collective/Physics-Atlas/contributors',
+      '/repos/Tech-Echo-Collective/atlas-physicus/contributors',
     );
   });
 

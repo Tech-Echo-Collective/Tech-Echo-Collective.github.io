@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 480 96" role="img" aria-labelledby="title desc">
-  <title id="title">Physics Atlas</title>
-  <desc id="desc">The Physics Atlas coordinate-map symbol and horizontal wordmark.</desc>
+  <title id="title">Atlas Physicus</title>
+  <desc id="desc">The Atlas Physicus coordinate-map symbol and horizontal wordmark.</desc>
   <rect width="480" height="96" rx="18" fill="#01040a"/>
   <g transform="translate(8 16)">
     <g fill="none" stroke="#60a5fa" stroke-width="3" stroke-linecap="square" stroke-linejoin="round">
@@ -52,21 +52,23 @@
 
 
 
+<g id="atlas-physicus-title-glyph-u"><path d="M4.5703125 -15.6884765625V-5.2734375Q4.5703125 -4.072265625 4.951171875 -3.310546875Q5.654296875 -1.904296875 7.5732421875 -1.904296875Q10.3271484375 -1.904296875 11.3232421875 -4.365234375Q11.865234375 -5.68359375 11.865234375 -7.9833984375V-15.6884765625H14.501953125V0.0H12.01171875L12.041015625 -2.314453125Q11.5283203125 -1.4208984375 10.7666015625 -0.8056640625Q9.2578125 0.4248046875 7.1044921875 0.4248046875Q3.75 0.4248046875 2.5341796875 -1.81640625Q1.875 -3.017578125 1.875 -5.0244140625V-15.6884765625ZM8.1884765625 -16.0693359375Z"/></g>
 </defs>
 <g fill="rgb(90.980392%, 94.901961%, 100%)" fill-opacity="1">
-<use xlink:href="#physics-title-glyph-0-0" x="0" y="23.100586"/>
-<use xlink:href="#physics-title-glyph-0-1" x="20" y="23.100586"/>
-<use xlink:href="#physics-title-glyph-0-2" x="37" y="23.100586"/>
+<use xlink:href="#physics-title-glyph-0-7" x="0" y="23.100586"/>
+<use xlink:href="#physics-title-glyph-0-8" x="20" y="23.100586"/>
+<use xlink:href="#physics-title-glyph-0-9" x="28" y="23.100586"/>
+<use xlink:href="#physics-title-glyph-0-10" x="35" y="23.100586"/>
 <use xlink:href="#physics-title-glyph-0-3" x="52" y="23.100586"/>
-<use xlink:href="#physics-title-glyph-0-4" x="67" y="23.100586"/>
-<use xlink:href="#physics-title-glyph-0-5" x="74" y="23.100586"/>
-<use xlink:href="#physics-title-glyph-0-3" x="89" y="23.100586"/>
-<use xlink:href="#physics-title-glyph-0-6" x="104" y="23.100586"/>
-<use xlink:href="#physics-title-glyph-0-7" x="111" y="23.100586"/>
-<use xlink:href="#physics-title-glyph-0-8" x="131" y="23.100586"/>
-<use xlink:href="#physics-title-glyph-0-9" x="139" y="23.100586"/>
-<use xlink:href="#physics-title-glyph-0-10" x="146" y="23.100586"/>
-<use xlink:href="#physics-title-glyph-0-3" x="163" y="23.100586"/>
+<use xlink:href="#physics-title-glyph-0-6" x="67" y="23.100586"/>
+<use xlink:href="#physics-title-glyph-0-0" x="74" y="23.100586"/>
+<use xlink:href="#physics-title-glyph-0-1" x="94" y="23.100586"/>
+<use xlink:href="#physics-title-glyph-0-2" x="111" y="23.100586"/>
+<use xlink:href="#physics-title-glyph-0-3" x="126" y="23.100586"/>
+<use xlink:href="#physics-title-glyph-0-4" x="141" y="23.100586"/>
+<use xlink:href="#physics-title-glyph-0-5" x="148" y="23.100586"/>
+<use xlink:href="#atlas-physicus-title-glyph-u" x="163" y="23.100586"/>
+<use xlink:href="#physics-title-glyph-0-3" x="180" y="23.100586"/>
 </g>
 
 </g>

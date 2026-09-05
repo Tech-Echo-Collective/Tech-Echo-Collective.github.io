@@ -85,11 +85,11 @@ async function checkForumEntry() {
 
 async function checkAtlas() {
   const response = await request(`${atlasOrigin}/`);
-  requireStatus(response, [200], 'Physics Atlas');
-  requireNoPreviewDomain(response.url, 'Physics Atlas');
+  requireStatus(response, [200], 'Atlas Physicus');
+  requireNoPreviewDomain(response.url, 'Atlas Physicus');
   const body = await response.text();
-  if (!body.includes('Physics Atlas')) {
-    throw new Error('Physics Atlas did not return the expected site.');
+  if (!body.includes('Atlas Physicus')) {
+    throw new Error('Atlas Physicus did not return the expected site.');
   }
 }
 

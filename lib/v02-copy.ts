@@ -50,6 +50,10 @@ interface V02Copy {
     principleTitle: string;
     principleText: string;
   };
+  projectFamily: {
+    description: string;
+    otherProjects: string;
+  };
   projectDetail: {
     back: string;
     ownership: string;
@@ -134,6 +138,11 @@ const en: V02Copy = {
     principleText:
       'Tech Echo distinguishes collective projects, independently owned member projects, and collaborations. Every detail page states which model applies.',
   },
+  projectFamily: {
+    description:
+      'A Tech Echo Collective project family for exploring physics through research mapping, knowledge structures, and interactive physical systems.',
+    otherProjects: 'Other projects',
+  },
   projectDetail: {
     back: 'Back to projects',
     ownership: 'Ownership',
@@ -192,8 +201,8 @@ const en: V02Copy = {
     featured_contributor: 'Featured Contributor',
   },
   projects: {
-    'physics-atlas': {
-      name: 'Physics Atlas',
+    'atlas-physicus': {
+      name: 'Atlas Physicus',
       summary: 'A living map of physics research ecosystems.',
       description:
         'An open, interactive atlas for exploring the structure and evolution of physics research through scientific knowledge graphs.',
@@ -213,8 +222,8 @@ const en: V02Copy = {
         'An interactive 3D knowledge graph for exploring physics concepts, semantic relations, prerequisites, and learning paths.',
       ownership: 'Created and maintained independently by Noah #001.',
     },
-    'theatrum-physica': {
-      name: 'Theatrum Physica',
+    'theatrum-physicum': {
+      name: 'Theatrum Physicum',
       summary: 'Construct. Evolve. Observe.',
       description:
         'An interactive physics environment for constructing, evolving, and visualizing dynamical systems from their mathematical definitions.',
@@ -267,6 +276,11 @@ const zh: V02Copy = {
     principleText:
       'Tech Echo 区分共同体项目、独立的成员项目与协作项目；每个详情页都会明确适用哪一种模式。',
   },
+  projectFamily: {
+    description:
+      'Tech Echo Collective 旗下的物理项目系列，通过研究图谱、知识结构与交互式物理系统探索物理。',
+    otherProjects: '其他项目',
+  },
   projectDetail: {
     back: '返回项目列表',
     ownership: '项目归属',
@@ -318,8 +332,8 @@ const zh: V02Copy = {
     featured_contributor: '主要贡献者',
   },
   projects: {
-    'physics-atlas': {
-      name: 'Physics Atlas',
+    'atlas-physicus': {
+      name: 'Atlas Physicus',
       summary: '一幅持续生长的物理研究生态地图。',
       description: '一个开放的交互式图谱，通过科学知识图谱探索物理研究结构与演化。',
       ownership: '由 Noah #001 独立创建并维护。',
@@ -338,8 +352,8 @@ const zh: V02Copy = {
         '一个交互式三维物理知识图谱，用于探索物理概念、语义关系、先修依赖与学习路径。',
       ownership: '由 Noah #001 独立创建并维护。',
     },
-    'theatrum-physica': {
-      name: 'Theatrum Physica',
+    'theatrum-physicum': {
+      name: 'Theatrum Physicum',
       summary: '构建。演化。观测。',
       description: '一个交互式物理环境，用于从数学定义出发构建、演化和可视化动力系统。',
       ownership: 'Tech Echo Collective 项目。',
@@ -391,6 +405,11 @@ const fr: V02Copy = {
     principleTitle: 'La propriété avant la visibilité',
     principleText:
       'Tech Echo distingue les projets du collectif, les projets indépendants de membres et les collaborations. Chaque fiche précise le modèle applicable.',
+  },
+  projectFamily: {
+    description:
+      'Une famille de projets de Tech Echo Collective pour explorer la physique par la cartographie de la recherche, les structures de connaissances et les systèmes physiques interactifs.',
+    otherProjects: 'Autres projets',
   },
   projectDetail: {
     back: 'Retour aux projets',
@@ -451,8 +470,8 @@ const fr: V02Copy = {
     featured_contributor: 'Contributeur principal',
   },
   projects: {
-    'physics-atlas': {
-      name: 'Physics Atlas',
+    'atlas-physicus': {
+      name: 'Atlas Physicus',
       summary: 'Une cartographie vivante des écosystèmes de recherche en physique.',
       description:
         'Un atlas ouvert et interactif pour explorer la structure et l’évolution de la recherche en physique grâce aux graphes de connaissances scientifiques.',
@@ -473,8 +492,8 @@ const fr: V02Copy = {
         'Un graphe de connaissances 3D interactif pour explorer les concepts physiques, leurs relations sémantiques, leurs prérequis et leurs parcours d’apprentissage.',
       ownership: 'Créé et maintenu indépendamment par Noah #001.',
     },
-    'theatrum-physica': {
-      name: 'Theatrum Physica',
+    'theatrum-physicum': {
+      name: 'Theatrum Physicum',
       summary: 'Construire. Évoluer. Observer.',
       description:
         'Un environnement physique interactif pour construire, faire évoluer et visualiser des systèmes dynamiques à partir de leurs définitions mathématiques.',
@@ -527,6 +546,11 @@ const es: V02Copy = {
     principleTitle: 'La propiedad antes que la visibilidad',
     principleText:
       'Tech Echo distingue proyectos del colectivo, proyectos independientes de miembros y colaboraciones. Cada ficha indica qué modelo se aplica.',
+  },
+  projectFamily: {
+    description:
+      'Una familia de proyectos de Tech Echo Collective para explorar la física mediante mapas de investigación, estructuras de conocimiento y sistemas físicos interactivos.',
+    otherProjects: 'Otros proyectos',
   },
   projectDetail: {
     back: 'Volver a proyectos',
@@ -587,8 +611,8 @@ const es: V02Copy = {
     featured_contributor: 'Colaborador destacado',
   },
   projects: {
-    'physics-atlas': {
-      name: 'Physics Atlas',
+    'atlas-physicus': {
+      name: 'Atlas Physicus',
       summary: 'Un mapa vivo de los ecosistemas de investigación en física.',
       description:
         'Un atlas abierto e interactivo para explorar la estructura y evolución de la investigación en física mediante grafos de conocimiento científico.',
@@ -608,8 +632,8 @@ const es: V02Copy = {
         'Un grafo de conocimiento 3D interactivo para explorar conceptos físicos, relaciones semánticas, prerrequisitos y rutas de aprendizaje.',
       ownership: 'Creado y mantenido de forma independiente por Noah #001.',
     },
-    'theatrum-physica': {
-      name: 'Theatrum Physica',
+    'theatrum-physicum': {
+      name: 'Theatrum Physicum',
       summary: 'Construir. Evolucionar. Observar.',
       description:
         'Un entorno de física interactivo para construir, hacer evolucionar y visualizar sistemas dinámicos a partir de sus definiciones matemáticas.',

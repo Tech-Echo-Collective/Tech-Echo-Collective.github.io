@@ -21,8 +21,8 @@ describe('project registry', () => {
     ).toBe(true);
   });
 
-  it('keeps Physics Atlas as Noah #001’s independently maintained member project', () => {
-    const physicsAtlas = getProject('physics-atlas');
+  it('keeps Atlas Physicus as Noah #001’s independently maintained member project', () => {
+    const physicsAtlas = getProject('atlas-physicus');
     expect(physicsAtlas).toMatchObject({
       classification: 'member_project',
       websiteUrl: 'https://atlas.techecho.org/',
@@ -35,7 +35,7 @@ describe('project registry', () => {
       ],
     });
     expect(physicsAtlas?.repositories.map((repository) => repository.name)).toEqual([
-      'Physics-Atlas',
+      'atlas-physicus',
       'Physics-Atlas-Web',
     ]);
   });
@@ -56,7 +56,7 @@ describe('project registry', () => {
       repositories: [
         {
           owner: 'Tech-Echo-Collective',
-          name: 'physica-illuminatio',
+          name: 'illuminatio-physica',
           label: 'source',
         },
       ],
@@ -70,10 +70,10 @@ describe('project registry', () => {
       featured: true,
     });
     expect(projects.map((project) => project.slug)).toEqual([
-      'physics-atlas',
+      'atlas-physicus',
       'cradles-of-civilization',
       'illuminatio-physica',
-      'theatrum-physica',
+      'theatrum-physicum',
     ]);
   });
 

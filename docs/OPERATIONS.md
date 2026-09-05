@@ -17,7 +17,7 @@ The scheduled `Production smoke` GitHub workflow checks every 30 minutes:
 - the D1 health endpoint and permanent `#001` binding;
 - the canonical `www` redirect;
 - the unauthenticated forum-to-account handoff without following an OAuth flow;
-- Physics Atlas availability;
+- Atlas Physicus availability;
 - the absence of preview domains in production redirects.
 
 GitHub Actions timing is best-effort. A future external alerting provider can use

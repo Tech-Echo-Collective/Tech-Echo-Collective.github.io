@@ -9,7 +9,7 @@ import {
   type ProjectContributor,
 } from '@/lib/github-public';
 import { formatMemberNumber } from '@/lib/member-number';
-import { getProject } from '@/lib/projects';
+import { getProject, PHYSICA_FAMILY } from '@/lib/projects';
 import { getV02Copy } from '@/lib/v02-copy';
 
 export const dynamic = 'force-dynamic';
@@ -71,6 +71,11 @@ export default async function ProjectDetailPage({
             <img src={project.mark} alt="" />
           </div>
           <div>
+            {project.family ? (
+              <a className="project-family-label" href={`/projects#${project.family}`}>
+                {PHYSICA_FAMILY.name}
+              </a>
+            ) : null}
             <div className="project-detail-hero__labels">
               <span className="project-type-label">
                 {copy.classifications[project.classification]}

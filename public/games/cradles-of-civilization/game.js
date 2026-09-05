@@ -2428,7 +2428,14 @@ function advanceRound(actionId) {
 
   const actionDelta = typeof action.delta === "function" ? action.delta(state) : action.delta;
   const actionResult = prepareActionDelta(action, actionDelta, crisisAtRoundStart);
-  applyDelta(actionResult.delta, { freezeKnowledge: crisisAtRoundStart });
+  // Emergency working capital arrives after annual costs; its other tradeoffs still apply now.
+  const deferredRecoveryEconomy = action === ACTIONS.recovery && !actionResult.locked
+    ? Number(actionResult.delta.eco || 0)
+    : 0;
+  applyDelta(
+    deferredRecoveryEconomy > 0 ? { ...actionResult.delta, eco: 0 } : actionResult.delta,
+    { freezeKnowledge: crisisAtRoundStart }
+  );
   if (!actionResult.locked && typeof action.effect === "function") {
     action.effect();
   }
@@ -2452,6 +2459,9 @@ function advanceRound(actionId) {
     return;
   }
   const militaryReport = resolveMilitaryYear(action, rand);
+  if (deferredRecoveryEconomy > 0) {
+    applyDelta({ eco: deferredRecoveryEconomy });
+  }
   if (maybeFinishGame({ kind: "military", trigger: militaryReport.title, rand })) return;
   updateEnding();
 
@@ -4556,7 +4566,9 @@ function applyEconomicCrisisRules(delta = {}, options = {}) {
 
 function prepareActionDelta(action, rawDelta, crisisAtRoundStart = false) {
   const crisisNow = isEconomicCrisis();
-  if ((crisisAtRoundStart || crisisNow) && !action.crisisOnly) {
+  // A treasury emptied by this year's events must not cancel an already chosen income action.
+  const restoresEconomy = Number(rawDelta?.eco || 0) > 0;
+  if ((crisisAtRoundStart || (crisisNow && !restoresEconomy)) && !action.crisisOnly) {
     return {
       locked: true,
       delta: {},

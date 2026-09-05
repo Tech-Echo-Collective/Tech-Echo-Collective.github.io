@@ -93,6 +93,7 @@ describe('Cradles of Civilization public build', () => {
     );
     expect(game).toContain('url.searchParams.set("lang", I18N.isEnglish() ? "en" : "zh")');
     expect(index).toContain('20260905-ending-polish');
+    expect(index).toContain('src="game.js?v=20260905-economic-recovery"');
     expect(ending).toContain('20260905-ending-polish');
     expect(index).not.toContain('← Tech Echo');
     expect(ending).not.toContain('← Tech Echo');
